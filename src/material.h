@@ -7,15 +7,13 @@
 #include "mesh.h"
 #include "extra/hdre.h"
 
+//#include "scenenode.h"
+
 class Material {
 public:
 
 	Shader* shader = NULL;
-	Texture* texture = NULL; //color 
-
-	vec3 specular;
-	vec3 diffuse;
-
+	Texture* texture = NULL; 
 	vec4 color;
 
 	virtual void setUniforms(Camera* camera, Matrix44 model) = 0;
@@ -42,5 +40,22 @@ public:
 
 	void render(Mesh* mesh, Matrix44 model, Camera * camera);
 };
+
+
+class LightMaterial : public StandardMaterial {
+public:
+	vec3 specular;
+	vec3 diffuse;
+	float shininess;
+	//Light* light = NULL; -> no funciona hay que arreglar esto !
+
+	LightMaterial();
+	~LightMaterial();
+
+	void setUniforms(Camera* camera, Matrix44 model) ;
+	void render(Mesh* mesh, Matrix44 model, Camera* camera);
+
+};
+
 
 #endif

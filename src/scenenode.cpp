@@ -67,7 +67,7 @@ void SceneNode::renderInMenu()
 }
 
 
-Light::Light(vec3 position, vec3 color)
+Light::Light(vec3 position, vec3 color )
 {
 	this->color = color;
 	this->position = position;

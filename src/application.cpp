@@ -50,9 +50,21 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		node->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
 		//node->model.scale(5, 5, 5);
 		mat->texture = Texture::Get("data/models/ball/albedo.png");
+		
+
 		node->material = mat;
-		mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/texture.fs");
+		mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/light.fs");
 		node_list.push_back(node);
+
+		vec3 position = vec3(3.0f, 1.0f, 3.0f);
+		vec3 color = vec3(255, 255, 255);
+
+		Light* light = new Light(position, color);
+
+		mat->shader->setUniform("u_light_pos", position);
+		mat->shader->setUniform("u_light_color", color);
+		
+
 	}
 	
 	//hide the cursor

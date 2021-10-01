@@ -7,6 +7,9 @@ StandardMaterial::StandardMaterial()
 {
 	color = vec4(1.f, 1.f, 1.f, 1.f);
 	shader = Shader::Get("data/shaders/basic.vs", "data/shaders/flat.fs");
+	
+	diffuse.set(1.0f, 1.0f, 1.0f);
+	specular.set(1.0f, 1.0f, 1.0f);
 }
 
 StandardMaterial::~StandardMaterial()
@@ -26,8 +29,12 @@ void StandardMaterial::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_color", color);
 	shader->setUniform("u_exposure", Application::instance->scene_exposure);
 
+	shader->setUniform("u_diffuse", diffuse);
+	shader->setUniform("u_specular", specular);
+
 	if (texture)
-		shader->setUniform("u_texture", texture);
+		shader->setTexture("u_texture", texture);
+	
 }
 
 void StandardMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)

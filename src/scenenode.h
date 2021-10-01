@@ -8,7 +8,7 @@
 #include "camera.h"
 #include "material.h"
 
-class Light;
+
 
 class SceneNode {
 public:
@@ -30,4 +30,15 @@ public:
 	virtual void renderInMenu();
 };
 
+
+class Light : public SceneNode {
+public:
+
+	vec3 position;
+	vec3 color;
+
+
+	Light(vec3 position, vec3 color);
+	~Light();
+};
 #endif

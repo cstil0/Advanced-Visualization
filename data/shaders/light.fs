@@ -25,8 +25,8 @@ void main()
 	vec3 N = normalize(v_normal); // also we can use normal texture in the future
 	vec3 L = normalize(v_world_position - u_light_pos); 
 	vec3 V = normalize(v_world_position - u_camera_pos); 
-	vec3 R = reflect(-L,N);
-	vec3 H = normalize(V + L);
+	vec3 R = reflect(L,N);
+	//vec3 H = normalize(V + L);
 	
 	vec3 light_intensity = vec3(0,0,0);
 
@@ -36,5 +36,5 @@ void main()
 	light_intensity = ambient_light + diffuse_light + specular_light;
 
 	vec3 test = vec3(0.0, 0.0, 1.0);
-	gl_FragColor = vec4( test, 1.0);
+	gl_FragColor = vec4( light_intensity, 1.0);
 }

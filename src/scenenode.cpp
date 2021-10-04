@@ -81,18 +81,14 @@ Light::Light()
 {
 	
 	this->name = std::string("Light" + std::to_string(lastNameId++));
-	this->ambient_intensity.set(1.0, 1.0, 1.0);
-	this->diffuse_intensity.set(1.0, 1.0, 1.0);
-	this->specular_intensity.set(1.0, 1.0, 1.0);
+
 }
 
 Light::Light(const char* name)
 {
-	this->ambient_intensity.set(1.0, 1.0, 1.0);
-	this->diffuse_intensity.set(1.0, 1.0, 1.0);
-	this->specular_intensity.set(1.0, 1.0, 1.0);
-
 	this->name = name;
+
+	
 }
 
 
@@ -112,9 +108,8 @@ void Light::renderInMenu()
 	
 	SceneNode::renderInMenu();
 
-	#ifndef SKIP_IMGUI
-
-	#endif
+	
+	
 	
 }
 

@@ -50,45 +50,45 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		
 		// we create just 1 light
 	
-		//LightMaterial* model_mat = new LightMaterial();
-		//model_mat->texture = Texture::Get("data/models/ball/albedo.png");
-		//model_mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/light.fs");
-		////
-		//SceneNode* node = new SceneNode("Visible node");
-		//node->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
-		//node->material = model_mat;
+		LightMaterial* model_mat = new LightMaterial();
+		model_mat->texture = Texture::Get("data/models/ball/albedo.png");
+		model_mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/light.fs");
+		
+		SceneNode* node = new SceneNode("Node");
+		node->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
+		node->material = model_mat;
 		//node->model.scale(5, 5, 5);
 
-		//Light* light = new Light();
-		//light->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
-		//light->model.setTranslation(3,1,3);
+		Light* light = new Light();
+		light->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
+		light->model.setTranslation(3,1,3);
 
-		//StandardMaterial* lm = new StandardMaterial();
-		//lm->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/light.fs");
-		//
-		//light->material = lm;
-		//light->model.scale(0.05, 0.05, 0.05);
-		//model_mat->light = light;
+		StandardMaterial* lm = new StandardMaterial();
+		lm->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/flat.fs");
+		
+		light->material = lm;
+		light->model.scale(0.05, 0.05, 0.05);
+		model_mat->light = light;
+		node->material = model_mat;
 
 
-
-		//
-		////node_list.push_back(light);
-		//node_list.push_back(node);
+		node_list.push_back(light);
+		node_list.push_back(node);
 
 		//---Skybox
-		Skybox* skybox = new Skybox();
-		Texture* cubemap = new Texture();
-		cubemap->cubemapFromImages("data/environments/city");
-		Mesh* cube_mesh = new Mesh();
-		cube_mesh->createCube();
-		skybox->mesh = cube_mesh;
-		skybox->model.setTranslation(camera->eye.x, camera->eye.y, camera->eye.z);
-		SkyboxMaterial* sky_mat = new SkyboxMaterial();
-		sky_mat->texture = cubemap;
-		sky_mat->shader->Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
-		skybox->material = sky_mat;
-		node_list.push_back(skybox);
+		//Skybox* skybox = new Skybox();
+		//Texture* cubemap = new Texture();
+		//cubemap->cubemapFromImages("data/environments/city"); //why texture id 2
+		//Mesh* cube_mesh = new Mesh();
+		//cube_mesh->createCube();
+		//skybox->mesh = cube_mesh;
+		//skybox->model.setTranslation(camera->eye.x, camera->eye.y, camera->eye.z);
+
+		//SkyboxMaterial* sky_mat = new SkyboxMaterial();
+		//sky_mat->texture = cubemap;
+		//sky_mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
+		//skybox->material = sky_mat;
+		//node_list.push_back(skybox);
 	}
 	
 	//hide the cursor
@@ -116,8 +116,6 @@ void Application::render(void)
 
 		if(render_wireframe)
 			node_list[i]->renderWireframe(camera);
-		
-		
 	}
 
 	//Draw the floor grid

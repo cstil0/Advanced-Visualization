@@ -30,9 +30,9 @@ public:
 	StandardMaterial();
 	~StandardMaterial();
 
-	void setUniforms(Camera* camera, Matrix44 model);
-	void render(Mesh* mesh, Matrix44 model, Camera * camera);
-	void renderInMenu();
+	virtual void setUniforms(Camera* camera, Matrix44 model);
+	virtual void render(Mesh* mesh, Matrix44 model, Camera * camera);
+	virtual void renderInMenu();
 };
 
 //subclass-2----------------------------------------------
@@ -48,27 +48,28 @@ public:
 
 //subclass-3----------------------------------------------
 
-class LightMaterial : public StandardMaterial {
+class LightMaterial : public Material {
 public:
+
+	Light* light = NULL ; 
+
+	vec3 ambient_intensity;
+	vec3 diffuse_intensity;
+	vec3 specular_intensity;
 
 	vec3 specular;
 	vec3 diffuse;
 	float shininess;
 
-	Light* light = NULL; 
-
 	LightMaterial();
 	~LightMaterial();
-
-	//void setUniforms(Camera* camera, Matrix44 model, Light* light) ;
-	//void render(Mesh* mesh, Matrix44 model, Camera* camera, Light* light);
 
 	void setUniforms(Camera* camera, Matrix44 model) ;
 	void render(Mesh* mesh, Matrix44 model, Camera* camera);
 	void renderInMenu();
 };
 
-class SkyboxMaterial : public StandardMaterial {
+class SkyboxMaterial : public Material {
 public:
 
 	SkyboxMaterial();

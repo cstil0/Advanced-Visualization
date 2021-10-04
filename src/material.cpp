@@ -94,10 +94,14 @@ LightMaterial::LightMaterial() { //calculate with phong ecuation
 	
 	color = vec4(1.f, 1.f, 1.f, 1.f); //color of the light
 	shader = Shader::Get("data/shaders/basic.vs", "data/shaders/light.fs"); 
-	
-	diffuse.set(1.0f, 1.0f, 1.0f);
-	specular.set(1.0f, 1.0f, 1.0f);
-	shininess = 0.5;
+	this->ambient_intensity.set(1.0, 1.0, 1.0);
+	this->diffuse_intensity.set(1.0, 1.0, 1.0);
+	this->specular_intensity.set(1.0, 1.0, 1.0);
+
+	this->diffuse.set(1.0f, 1.0f, 1.0f);
+	this->specular.set(1.0f, 1.0f, 1.0f);
+	this->shininess = 0.5;
+
 }
 
 LightMaterial::~LightMaterial()
@@ -108,7 +112,7 @@ LightMaterial::~LightMaterial()
 void LightMaterial::setUniforms(Camera* camera, Matrix44 model)
 {
 	//upload node uniforms
-
+	//shader->enable();
 	shader->setUniform("u_viewprojection", camera->viewprojection_matrix); // error
 	shader->setUniform("u_camera_position", camera->eye);
 	shader->setUniform("u_model", model);
@@ -118,15 +122,15 @@ void LightMaterial::setUniforms(Camera* camera, Matrix44 model)
 	//shader->setUniform("u_color", color);
 	//shader->setUniform("u_exposure", Application::instance->scene_exposure);
 
-	shader->setUniform("u_diffuse", diffuse);
-	shader->setUniform("u_specular", specular);
-	shader->setUniform("u_shininess", shininess);
+	shader->setUniform("u_diffuse", this->diffuse);
+	shader->setUniform("u_specular", this->specular);
+	shader->setUniform("u_shininess", this->shininess);
 
 	//shader->setUniform("u_light_pos", model.getTranslation());
-	shader->setUniform("u_light_pos", vec3(3, 1, 3));
-	shader->setUniform("u_Ia", light->ambient_intensity);
-	shader->setUniform("u_Id", light->diffuse_intensity);
-	shader->setUniform("u_Is", light->specular_intensity);
+	shader->setUniform("u_light_pos", light->model.getTranslation());
+	shader->setUniform("u_Ia", this->ambient_intensity);
+	shader->setUniform("u_Id", this->diffuse_intensity);
+	shader->setUniform("u_Is", this->specular_intensity);
 
 	if (texture)
 		shader->setTexture("u_texture", texture);
@@ -137,9 +141,9 @@ void LightMaterial::setUniforms(Camera* camera, Matrix44 model)
 
 void LightMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 {
-	if ( !mesh && !shader && !light )
-		return
-
+	if (!mesh && !shader && !light) {
+		return;
+	}
 	//enable shader
 	shader->enable();
 
@@ -158,6 +162,7 @@ void LightMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 void LightMaterial::renderInMenu() 
 {
 	ImGui::ColorEdit3("Material Color", (float*)&this->color);
+
 	ImGui::ColorEdit3("Specular", (float*)&this->specular);
 	ImGui::ColorEdit3("Diffuse", (float*)&this->diffuse);
 	ImGui::SliderFloat("Shininess", (float*)&this->shininess, 0, 50);
@@ -166,7 +171,7 @@ void LightMaterial::renderInMenu()
 
 SkyboxMaterial::SkyboxMaterial()
 {
-	shader->Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
+	shader = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
 }
 
 SkyboxMaterial::~SkyboxMaterial()
@@ -191,7 +196,6 @@ void SkyboxMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 
 	//enable shader
 	shader->enable();
-
 
 	//upload uniforms
 	setUniforms(camera, model);

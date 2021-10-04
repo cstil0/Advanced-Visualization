@@ -10,7 +10,6 @@
 #include "material.h"
 
 
-
 class SceneNode {
 public:
 
@@ -35,12 +34,7 @@ public:
 class Light : public SceneNode {
 public:
 
-	//vec3 position;
-	vec3 ambient_intensity;
-	vec3 diffuse_intensity;
-	vec3 specular_intensity;
-
-	//Light(vec3 position, vec3 color);
+	
 	Light();
 	Light(const char* name);
 	~Light();

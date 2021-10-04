@@ -66,28 +66,26 @@ void SceneNode::renderInMenu()
 	}
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-/*
-=======
-
->>>>>>> parent of 0686b2d (skybox)
-Light::Light(vec3 position, vec3 color )
-=======
-
-Light::Light(vec3 position, vec3 color)
->>>>>>> parent of 473844d (light_Material)
-=======
-
-Light::Light(vec3 position, vec3 color)
->>>>>>> parent of 473844d (light_Material)
+Light::Light()
 {
-	this->color = color;
-	this->position = position;
+}
 
+Light::Light(const char* name)
+{
 }
 
 Light::~Light()
+{
+}
+
+void Light::render(Camera* camera)
+{
+}
+
+void Light::renderWireframe(Camera* camera)
+{
+}
+
+void Light::renderInMenu()
 {
 }

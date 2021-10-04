@@ -7,9 +7,6 @@ StandardMaterial::StandardMaterial()
 {
 	color = vec4(1.f, 1.f, 1.f, 1.f);
 	shader = Shader::Get("data/shaders/basic.vs", "data/shaders/flat.fs");
-	
-	diffuse.set(1.0f, 1.0f, 1.0f);
-	specular.set(1.0f, 1.0f, 1.0f);
 }
 
 StandardMaterial::~StandardMaterial()
@@ -29,12 +26,8 @@ void StandardMaterial::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_color", color);
 	shader->setUniform("u_exposure", Application::instance->scene_exposure);
 
-	shader->setUniform("u_diffuse", diffuse);
-	shader->setUniform("u_specular", specular);
-
 	if (texture)
-		shader->setTexture("u_texture", texture);
-	
+		shader->setUniform("u_texture", texture);
 }
 
 void StandardMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
@@ -88,18 +81,13 @@ void WireframeMaterial::render(Mesh* mesh, Matrix44 model, Camera * camera)
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
-<<<<<<< HEAD
-<<<<<<< HEAD
 }
 
-LightMaterial::LightMaterial() {
-	
-	color = vec4(1.f, 1.f, 1.f, 1.f);
-	shader = Shader::Get("data/shaders/basic.vs", "data/shaders/light.fs");
-
-	diffuse.set(1.0f, 1.0f, 1.0f);
-	specular.set(1.0f, 1.0f, 1.0f);
-	shininess = 0.5;
+LightMaterial::LightMaterial()
+{
+	specular = vec3(1.0,1.0,1.0);
+	diffuse = vec3(1.0, 1.0, 1.0);
+	shininess = 50;
 }
 
 LightMaterial::~LightMaterial()
@@ -108,27 +96,26 @@ LightMaterial::~LightMaterial()
 
 void LightMaterial::setUniforms(Camera* camera, Matrix44 model)
 {
-	//upload node uniforms
 	shader->setUniform("u_viewprojection", camera->viewprojection_matrix);
 	shader->setUniform("u_camera_position", camera->eye);
 	shader->setUniform("u_model", model);
-	//shader->setUniform("u_time", Application::instance->time);
-	//shader->setUniform("u_output", Application::instance->output);
+	shader->setUniform("u_time", Application::instance->time);
+	shader->setUniform("u_output", Application::instance->output);
 
 	shader->setUniform("u_color", color);
 	shader->setUniform("u_exposure", Application::instance->scene_exposure);
+	shader->setUniform("u_Ia", vec3(1.0,1.0,1.0));
+	shader->setUniform("u_Id", vec3(1.0, 1.0, 1.0));
+	shader->setUniform("u_Is", vec3(1.0, 1.0, 1.0));
+	shader->setUniform("u_light_pos", vec3(3,1,3));
 
-	shader->setUniform("u_diffuse", diffuse);
 	shader->setUniform("u_specular", specular);
+	shader->setUniform("u_diffuse", diffuse);
 	shader->setUniform("u_shininess", shininess);
 
 
-	shader->setUniform("u_light_pos", light->position);
-	shader->setUniform("u_light_color", light->color);
-
 	if (texture)
-		shader->setTexture("u_texture", texture);
-
+		shader->setUniform("u_texture", texture);
 }
 
 void LightMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
@@ -148,9 +135,48 @@ void LightMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 		shader->disable();
 	}
 }
-=======
+
+void LightMaterial::renderInMenu()
+{
 }
->>>>>>> parent of 473844d (light_Material)
-=======
+
+SkyboxMaterial::SkyboxMaterial()
+{
 }
->>>>>>> parent of 473844d (light_Material)
+
+SkyboxMaterial::~SkyboxMaterial()
+{
+}
+
+void SkyboxMaterial::setUniforms(Camera* camera, Matrix44 model)
+{
+	shader->setUniform("u_viewprojection", camera->viewprojection_matrix);
+	shader->setUniform("u_camera_position", camera->eye);
+	shader->setUniform("u_model", model);
+	shader->setUniform("u_time", Application::instance->time);
+	shader->setUniform("u_output", Application::instance->output);
+
+	shader->setUniform("u_color", color);
+	shader->setUniform("u_exposure", Application::instance->scene_exposure);
+
+	if (texture)
+		shader->setUniform("u_texture", texture);
+}
+
+void SkyboxMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
+{
+	if (mesh && shader)
+	{
+		//enable shader
+		shader->enable();
+
+		//upload uniforms
+		setUniforms(camera, model);
+		//DISABLE AND ENABLE
+		//do the draw call
+		mesh->render(GL_TRIANGLES);
+
+		//disable shader
+		shader->disable();
+	}
+}

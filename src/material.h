@@ -7,28 +7,13 @@
 #include "mesh.h"
 #include "extra/hdre.h"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-//Forward declaration
-class Light;
-=======
-//#include "scenenode.h"
->>>>>>> parent of 0686b2d (skybox)
+//class Light;
 
-=======
->>>>>>> parent of 473844d (light_Material)
-=======
->>>>>>> parent of 473844d (light_Material)
 class Material {
 public:
 
 	Shader* shader = NULL;
-	Texture* texture = NULL; //color 
-
-	vec3 specular;
-	vec3 diffuse;
-
+	Texture* texture = NULL;
 	vec4 color;
 
 	virtual void setUniforms(Camera* camera, Matrix44 model) = 0;
@@ -56,34 +41,31 @@ public:
 	void render(Mesh* mesh, Matrix44 model, Camera * camera);
 };
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-//subclass-3----------------------------------------------
-=======
->>>>>>> parent of 0686b2d (skybox)
-
-class LightMaterial : public StandardMaterial {
+class LightMaterial : public Material {
 public:
+
 	vec3 specular;
 	vec3 diffuse;
 	float shininess;
-	//Light* light = NULL; -> no funciona hay que arreglar esto !
+
+	//Light* light;
 
 	LightMaterial();
 	~LightMaterial();
 
-	void setUniforms(Camera* camera, Matrix44 model) ;
+	void setUniforms(Camera* camera, Matrix44 model);
 	void render(Mesh* mesh, Matrix44 model, Camera* camera);
-
+	void renderInMenu();
 };
 
-<<<<<<< HEAD
-=======
->>>>>>> parent of 473844d (light_Material)
-=======
->>>>>>> parent of 473844d (light_Material)
-=======
+class SkyboxMaterial : public Material {
+public:
 
->>>>>>> parent of 0686b2d (skybox)
+	SkyboxMaterial();
+	~SkyboxMaterial();
+
+	void setUniforms(Camera* camera, Matrix44 model);
+	void render(Mesh* mesh, Matrix44 model, Camera* camera);
+};
+
 #endif

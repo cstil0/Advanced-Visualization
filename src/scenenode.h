@@ -8,7 +8,7 @@
 #include "camera.h"
 #include "material.h"
 
-
+class Light;
 
 class SceneNode {
 public:
@@ -30,15 +30,20 @@ public:
 	virtual void renderInMenu();
 };
 
-
 class Light : public SceneNode {
 public:
 
-	vec3 position;
-	vec3 color;
+	vec3 ambient_intensity;
+	vec3 diffuse_intensity;
+	vec3 specular_intensity;
 
-
-	Light(vec3 position, vec3 color);
+	Light();
+	Light(const char* name);
 	~Light();
+
+	virtual void render(Camera* camera);
+	virtual void renderWireframe(Camera* camera);
+	virtual void renderInMenu();
 };
+
 #endif

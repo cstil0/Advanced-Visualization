@@ -9,8 +9,6 @@
 
 #include "material.h"
 
-
-
 class SceneNode {
 public:
 
@@ -48,12 +46,10 @@ public:
 class Skybox :public SceneNode {
 public:
 
-	vec3 position;
-
-
 	Skybox();
 	~Skybox();
 
-
+	void render(Camera* camera);
+	void renderInMenu();
 };
 #endif

@@ -3,6 +3,12 @@
 #include "application.h"
 #include "extra/hdre.h"
 
+enum class TextureType {
+	Material,
+	CUBEMAP
+};
+
+
 //subclass-1----------------------------------------------
 
 StandardMaterial::StandardMaterial()
@@ -29,7 +35,7 @@ void StandardMaterial::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_exposure", Application::instance->scene_exposure);
 
 	if (texture)
-		shader->setTexture("u_texture", texture);
+		shader->setTexture("u_texture", texture, ALBEDO);
 	
 }
 
@@ -90,7 +96,7 @@ void WireframeMaterial::render(Mesh* mesh, Matrix44 model, Camera * camera)
 
 //subclass-3----------------------------------------------
 
-LightMaterial::LightMaterial() { //calculate with phong ecuation
+PhongMaterial::PhongMaterial() { //calculate with phong ecuation
 	
 	this->color = vec4(1.f, 1.f, 1.f, 1.f); //color of the light
 	this->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/light.fs");
@@ -103,16 +109,16 @@ LightMaterial::LightMaterial() { //calculate with phong ecuation
 	this->specular_intensity.set(1.0, 1.0, 1.0);
 }
 
-LightMaterial::~LightMaterial()
+PhongMaterial::~PhongMaterial()
 {
 }
 
 
-void LightMaterial::setUniforms(Camera* camera, Matrix44 model)
+void PhongMaterial::setUniforms(Camera* camera, Matrix44 model)
 {
 	//upload node uniforms
 
-	shader->setUniform("u_viewprojection", camera->viewprojection_matrix); // error
+	shader->setUniform("u_viewprojection", camera->viewprojection_matrix); 
 	shader->setUniform("u_camera_position", camera->eye);
 	shader->setUniform("u_model", model);
 	//shader->setUniform("u_time", Application::instance->time);
@@ -125,20 +131,20 @@ void LightMaterial::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_specular", this->specular);
 	shader->setUniform("u_shininess", this->shininess);
 
-	//shader->setUniform("u_light_pos", model.getTranslation());
+	
 	shader->setUniform("u_light_pos", light->model.getTranslation());
 	shader->setUniform("u_Ia", this->ambient_intensity);
 	shader->setUniform("u_Id", this->diffuse_intensity);
 	shader->setUniform("u_Is", this->specular_intensity);
 
 	if (texture)
-		shader->setTexture("u_texture", texture);
+		shader->setTexture("u_texture", texture, ALBEDO);
 
 
 }
 
 
-void LightMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
+void PhongMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 {
 	if (!mesh && !shader && !light)
 		return;
@@ -146,18 +152,22 @@ void LightMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 	//enable shader
 	shader->enable();
 
+	
 	//upload uniforms
 	setUniforms(camera, model);
 
-	//do the draw call
-	mesh->render(GL_TRIANGLES);
 
+	//do the draw call
+	//glFrontFace(GL_CCW);
+	mesh->render(GL_TRIANGLES);
+	
+	
 	//disable shader
 	shader->disable();
 	
 }
 
-void LightMaterial::renderInMenu() 
+void PhongMaterial::renderInMenu() 
 {
 	ImGui::ColorEdit3("Material Color", (float*)&this->color);
 	ImGui::ColorEdit3("Specular", (float*)&this->specular);
@@ -169,6 +179,7 @@ void LightMaterial::renderInMenu()
 SkyboxMaterial::SkyboxMaterial()
 {
 	shader = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
+
 }
 
 SkyboxMaterial::~SkyboxMaterial()
@@ -179,10 +190,14 @@ void SkyboxMaterial::setUniforms(Camera* camera, Matrix44 model)
 {
 	shader->setUniform("u_viewprojection", camera->viewprojection_matrix);
 	shader->setUniform("u_camera_position", camera->eye);
+	//shader->setUniform("u_model", model);
+	// in case to update every time that the camera moves...
+	model.translate(camera->eye.x, camera->eye.y, camera->eye.z);
 	shader->setUniform("u_model", model);
-
+	//model.scale(1, 1, 1);
 	if (texture)
-		shader->setTexture("u_texture_cube", texture);
+		shader->setTexture("u_texture_cube", texture, int(TextureType::CUBEMAP)); // poner el slot de textura!!!
+	
 
 }
 
@@ -197,11 +212,16 @@ void SkyboxMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 	//upload uniforms
 	setUniforms(camera, model);
 
+	
 	glDisable(GL_DEPTH_TEST);
 	//do the draw call
+	//glFrontFace(GL_CCW);
+	//glDisable(GL_BLEND);
+	//glDisable(GL_CULL_FACE);
 	mesh->render(GL_TRIANGLES);
-	glEnable(GL_DEPTH_TEST);
 
+	glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_CULL_FACE);
 	//disable shader
 	shader->disable();
 

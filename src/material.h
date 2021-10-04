@@ -9,6 +9,7 @@
 
 //Forward declaration
 class Light;
+//class Skybox;
 
 class Material {
 public:
@@ -48,7 +49,7 @@ public:
 
 //subclass-3----------------------------------------------
 
-class LightMaterial : public StandardMaterial {
+class PhongMaterial : public StandardMaterial {
 public:
 
 	vec3 ambient_intensity;
@@ -61,8 +62,8 @@ public:
 	
 	Light* light = NULL; 
 
-	LightMaterial();
-	~LightMaterial();
+	PhongMaterial();
+	~PhongMaterial();
 
 	void setUniforms(Camera* camera, Matrix44 model) ;
 	void render(Mesh* mesh, Matrix44 model, Camera* camera);
@@ -72,6 +73,8 @@ public:
 
 class SkyboxMaterial : public StandardMaterial {
 public:
+
+	//Skybox* skybox = NULL;
 
 	SkyboxMaterial();
 	~SkyboxMaterial();

@@ -69,13 +69,6 @@ void SceneNode::renderInMenu()
 	}
 }
 
-/*
-Light::Light(vec3 position, vec3 color )
-{
-	this->color = color;
-	this->position = position;
-
-}*/
 
 Light::Light()
 {
@@ -86,8 +79,6 @@ Light::Light(const char* name)
 {
 	this->name = name;
 }
-
-
 
 Light::~Light()
 {
@@ -110,8 +101,28 @@ void Light::renderInMenu()
 	
 }
 
+//------------------Skybox---------------------------------------------
 Skybox :: Skybox() {
+}
 
+Skybox::~Skybox()
+{
+}
+
+void Skybox::render(Camera* camera)
+{
+	if (material)
+		material->render(mesh, model, camera);
+
+}
+void Skybox::renderInMenu()
+{
+
+	SceneNode::renderInMenu();
+
+	#ifndef SKIP_IMGUI
+
+	#endif
 
 }
 

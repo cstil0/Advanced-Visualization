@@ -50,8 +50,8 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		
 		// we create just 1 light
 	
-		LightMaterial* model_mat = new LightMaterial();
-		model_mat->texture = Texture::Get("data/models/ball/albedo.png");
+		PhongMaterial* model_mat = new PhongMaterial();
+		model_mat->texture = Texture::Get("data/models/bench/albedo.png");
 		model_mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/light.fs");
 		//
 		SceneNode* node = new SceneNode("Visible node");
@@ -72,27 +72,37 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		model_mat->light = light;
 
 
+		////---Skybox
+		Skybox* skybox = new Skybox();
+		//cube_mesh->getCube();
+		skybox->mesh = Mesh::getCube();
+		//we translade the model skybox in the center position of the camera
+		//skybox->model.translate(camera->eye.x, camera->eye.y, camera->eye.z);
+		// better model.translate than getTranslation
+		SkyboxMaterial* sky_mat = new SkyboxMaterial();
+		
+		Texture* cubemap = new Texture();
+		cubemap->cubemapFromImages("data/environments/snow"); //why texture id 2 ???
+		//Mesh* cube_mesh = new Mesh();
+		sky_mat->texture = cubemap;
+		sky_mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
+		
+		skybox->material = sky_mat;
+		node_list.push_back(skybox);
+		//we first render the skybox, with the zbuffer desable, hence this will be the "fondo"
 		node_list.push_back(light);
 		node_list.push_back(node);
 
-		////---Skybox
-		Skybox* skybox = new Skybox();
-		Texture* cubemap = new Texture();
-		cubemap->cubemapFromImages("data/environments/city"); //why texture id 2 ???
-		Mesh* cube_mesh = new Mesh();
-		cube_mesh->createCube();
-		skybox->mesh = cube_mesh;
-		skybox->model.setTranslation(camera->eye.x, camera->eye.y, camera->eye.z);
-		SkyboxMaterial* sky_mat = new SkyboxMaterial();
-		sky_mat->texture = cubemap;
-		sky_mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
-		skybox->material = sky_mat;
-		//node_list.push_back(skybox);
+
 	}
 	
 	//hide the cursor
 	SDL_ShowCursor(!mouse_locked); //hide or show the mouse
 }
+
+
+
+
 
 //what to do when the image has to be draw
 void Application::render(void)

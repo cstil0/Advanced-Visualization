@@ -46,11 +46,14 @@ public:
 <<<<<<< HEAD
 	// ESTO NO TIENE MUY BIENA PINTA
 	Light* light;
+<<<<<<< HEAD
 
 =======
 >>>>>>> parent of 473844d (light_Material)
 =======
 >>>>>>> parent of 473844d (light_Material)
+=======
+>>>>>>> parent of 0686b2d (skybox)
 	bool mouse_locked; //tells if the mouse is locked (not seen)
 
 	Application( int window_width, int window_height, SDL_Window* window );

@@ -9,8 +9,12 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 //Forward declaration
 class Light;
+=======
+//#include "scenenode.h"
+>>>>>>> parent of 0686b2d (skybox)
 
 =======
 >>>>>>> parent of 473844d (light_Material)
@@ -32,8 +36,6 @@ public:
 	virtual void renderInMenu() = 0;
 };
 
-//subclass-1----------------------------------------------
-
 class StandardMaterial : public Material {
 public:
 
@@ -44,8 +46,6 @@ public:
 	void render(Mesh* mesh, Matrix44 model, Camera * camera);
 	void renderInMenu();
 };
-
-//subclass-2----------------------------------------------
 
 class WireframeMaterial : public StandardMaterial {
 public:
@@ -58,40 +58,32 @@ public:
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 //subclass-3----------------------------------------------
+=======
+>>>>>>> parent of 0686b2d (skybox)
 
 class LightMaterial : public StandardMaterial {
 public:
-
 	vec3 specular;
 	vec3 diffuse;
 	float shininess;
-
-	Light* light = NULL; 
+	//Light* light = NULL; -> no funciona hay que arreglar esto !
 
 	LightMaterial();
 	~LightMaterial();
 
-	//void setUniforms(Camera* camera, Matrix44 model, Light* light) ;
-	//void render(Mesh* mesh, Matrix44 model, Camera* camera, Light* light);
-
 	void setUniforms(Camera* camera, Matrix44 model) ;
 	void render(Mesh* mesh, Matrix44 model, Camera* camera);
-	void renderInMenu();
+
 };
 
-class SkyboxMaterial : public StandardMaterial {
-public:
-
-	SkyboxMaterial();
-	~SkyboxMaterial();
-
-	void setUniforms(Camera* camera, Matrix44 model);
-	void render(Mesh* mesh, Matrix44 model, Camera* camera);
-};
-
+<<<<<<< HEAD
 =======
 >>>>>>> parent of 473844d (light_Material)
 =======
 >>>>>>> parent of 473844d (light_Material)
+=======
+
+>>>>>>> parent of 0686b2d (skybox)
 #endif

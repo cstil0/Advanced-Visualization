@@ -8,7 +8,7 @@ unsigned int mesh_selected = 0;
 
 SceneNode::SceneNode()
 {
-	this->name = std::string("Node" + std::to_string(lastNameId++)); // also there change the names if we don't give the name
+	this->name = std::string("Node" + std::to_string(lastNameId++));
 }
 
 
@@ -26,7 +26,6 @@ void SceneNode::render(Camera* camera)
 {
 	if (material)
 		material->render(mesh, model, camera);
-	
 }
 
 void SceneNode::renderWireframe(Camera* camera)
@@ -34,8 +33,6 @@ void SceneNode::renderWireframe(Camera* camera)
 	WireframeMaterial mat = WireframeMaterial();
 	mat.render(mesh, model, camera);
 }
-
-
 
 void SceneNode::renderInMenu()
 {
@@ -71,7 +68,11 @@ void SceneNode::renderInMenu()
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /*
+=======
+
+>>>>>>> parent of 0686b2d (skybox)
 Light::Light(vec3 position, vec3 color )
 =======
 
@@ -85,52 +86,8 @@ Light::Light(vec3 position, vec3 color)
 	this->color = color;
 	this->position = position;
 
-}*/
-
-Light::Light()
-{
-	
-	this->name = std::string("Light" + std::to_string(lastNameId++));
-	this->ambient_intensity.set(1.0, 1.0, 1.0);
-	this->diffuse_intensity.set(1.0, 1.0, 1.0);
-	this->specular_intensity.set(1.0, 1.0, 1.0);
 }
-
-Light::Light(const char* name)
-{
-	this->ambient_intensity.set(1.0, 1.0, 1.0);
-	this->diffuse_intensity.set(1.0, 1.0, 1.0);
-	this->specular_intensity.set(1.0, 1.0, 1.0);
-
-	this->name = name;
-}
-
-
 
 Light::~Light()
 {
 }
-
-void Light::render(Camera* camera)
-{
-	if (material)
-		material->render(mesh, model, camera);
-
-}
-void Light::renderInMenu() 
-{
-	
-	SceneNode::renderInMenu();
-
-	#ifndef SKIP_IMGUI
-
-	#endif
-	
-}
-
-Skybox :: Skybox() {
-
-
-}
-
-

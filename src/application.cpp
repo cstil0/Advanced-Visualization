@@ -16,9 +16,9 @@
 
 bool render_wireframe = false;
 Camera* Application::camera = nullptr;
-Application* Application::instance = NULL;
 
-//Light* light = nullptr;
+Light* light = nullptr;
+Application* Application::instance = NULL;
 
 Application::Application(int window_width, int window_height, SDL_Window* window)
 {
@@ -47,6 +47,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	camera->setPerspective(45.f,window_width/(float)window_height,0.1f,10000.f); //set the projection, we want to be perspective
 
 	{
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 		
@@ -101,11 +102,19 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		mat->texture = Texture::Get("data/models/ball/albedo.png");
 		
 
+=======
+		LightMaterial* mat = new LightMaterial();
+		SceneNode* node = new SceneNode("Visible node");
+		node->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
+		//node->model.scale(5, 5, 5);
+		mat->texture = Texture::Get("data/models/ball/albedo.png");
+>>>>>>> parent of 0686b2d (skybox)
 		node->material = mat;
 		mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/light.fs");
 		node_list.push_back(node);
 
 		vec3 position = vec3(3.0f, 1.0f, 3.0f);
+<<<<<<< HEAD
 		vec3 color = vec3(255, 255, 255);
 
 		Light* light = new Light(position, color);
@@ -118,6 +127,11 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 >>>>>>> parent of 473844d (light_Material)
 =======
 >>>>>>> parent of 473844d (light_Material)
+=======
+		vec3 color = vec3(1.0, 1.0, 1.0);
+		light = new Light(position, color);
+		//mat->light = light;
+>>>>>>> parent of 0686b2d (skybox)
 	}
 	
 	//hide the cursor
@@ -145,8 +159,6 @@ void Application::render(void)
 
 		if(render_wireframe)
 			node_list[i]->renderWireframe(camera);
-		
-		
 	}
 
 	//Draw the floor grid
@@ -194,7 +206,6 @@ void Application::onKeyDown( SDL_KeyboardEvent event )
 		case SDLK_ESCAPE: must_exit = true; break; //ESC key, kill the app
 		case SDLK_F1: render_debug = !render_debug; break;
 		case SDLK_F2: render_wireframe = !render_wireframe; break;
-
 		case SDLK_F5: Shader::ReloadAll(); break; 
 	}
 }

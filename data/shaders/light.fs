@@ -6,7 +6,10 @@ varying vec2 v_uv;
 varying vec4 v_color;
 
 uniform sampler2D u_texture;
+uniform vec3 u_light_pos;
+uniform vec3 u_light_color;
 uniform vec3 u_camera_pos;
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 
@@ -16,6 +19,10 @@ uniform vec3 u_Ia, u_Id, u_Is; //Ambient, diffuse, specular
 >>>>>>> parent of 473844d (light_Material)
 =======
 >>>>>>> parent of 473844d (light_Material)
+=======
+uniform vec3 u_light_color2;
+
+>>>>>>> parent of 0686b2d (skybox)
 
 uniform vec3 u_specular;
 uniform vec3 u_diffuse;
@@ -23,9 +30,11 @@ uniform vec3 u_diffuse;
 void main()
 {
 	vec4 color = texture2D( u_texture, v_uv );
-	
-	vec3 ambient_light = color.xyz * u_Ia;
-	//vec3 ambient_light = u_light_color;
+	vec3 Ia = u_light_color;
+	vec3 Id = u_light_color;
+	vec3 Is = u_light_color;
+
+	vec3 ambient_light = color.xyz * Ia;
 
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -33,10 +42,11 @@ void main()
 	vec3 L = normalize(v_world_position - u_light_pos); 
 	vec3 V = normalize(v_world_position - u_camera_pos); 
 	vec3 R = reflect(-L,N);
-	vec3 H = normalize(V + L);
+	//vec3 H = normalize(V + L);
 	
 	vec3 light_intensity = vec3(0,0,0);
 
+<<<<<<< HEAD
 	vec3 diffuse_light = u_diffuse*clamp(dot(L,N), 0.0f, 1.0f)*u_Id; 
 	vec3 specular_light = u_specular*pow(clamp(dot(R,V),0.0f, 1.0f),u_shininess)*u_Is;
 =======
@@ -44,8 +54,13 @@ void main()
 	vec3 light_intensity = vec3(0,0,0);
 
 >>>>>>> parent of 473844d (light_Material)
+=======
+	vec3 diffuse_light = u_diffuse*clamp(dot(L,N), 0.0f, 1.0f)*Id; 
+	vec3 specular_light = u_specular*pow(clamp(dot(R,V),0.0f, 1.0f),u_shininess)*Is;
+>>>>>>> parent of 0686b2d (skybox)
 
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 	vec3 test = vec3(0.0, 0.0, 1.0);
 	gl_FragColor = vec4( test, 1.0);
@@ -62,4 +77,7 @@ void main()
 
 	gl_FragColor = color;
 >>>>>>> parent of 473844d (light_Material)
+=======
+	gl_FragColor = vec4( clamp(light_intensity,0.0,1.0) , 1.0f);
+>>>>>>> parent of 0686b2d (skybox)
 }

@@ -8,7 +8,7 @@ unsigned int mesh_selected = 0;
 
 SceneNode::SceneNode()
 {
-	this->name = std::string("Node" + std::to_string(lastNameId++));
+	this->name = std::string("Node" + std::to_string(lastNameId++)); // also there change the names if we don't give the name
 }
 
 
@@ -26,6 +26,7 @@ void SceneNode::render(Camera* camera)
 {
 	if (material)
 		material->render(mesh, model, camera);
+	
 }
 
 void SceneNode::renderWireframe(Camera* camera)
@@ -33,6 +34,8 @@ void SceneNode::renderWireframe(Camera* camera)
 	WireframeMaterial mat = WireframeMaterial();
 	mat.render(mesh, model, camera);
 }
+
+
 
 void SceneNode::renderInMenu()
 {
@@ -66,19 +69,25 @@ void SceneNode::renderInMenu()
 	}
 }
 
+/*
+Light::Light(vec3 position, vec3 color )
+{
+	this->color = color;
+	this->position = position;
+
+}*/
+
 Light::Light()
 {
-	
 	this->name = std::string("Light" + std::to_string(lastNameId++));
-
 }
 
 Light::Light(const char* name)
 {
 	this->name = name;
-
-	
 }
+
+
 
 Light::~Light()
 {
@@ -86,13 +95,24 @@ Light::~Light()
 
 void Light::render(Camera* camera)
 {
-}
+	if (material)
+		material->render(mesh, model, camera);
 
-	
-	
-	
 }
-
-void Light::renderInMenu()
+void Light::renderInMenu() 
 {
+	
+	SceneNode::renderInMenu();
+
+	#ifndef SKIP_IMGUI
+
+	#endif
+	
 }
+
+Skybox :: Skybox() {
+
+
+}
+
+

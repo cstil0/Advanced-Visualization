@@ -7,13 +7,14 @@
 #include "mesh.h"
 #include "extra/hdre.h"
 
-//class Light;
+//Forward declaration
+class Light;
 
 class Material {
 public:
 
 	Shader* shader = NULL;
-	Texture* texture = NULL;
+	Texture* texture = NULL; 
 	vec4 color;
 
 	virtual void setUniforms(Camera* camera, Matrix44 model) = 0;
@@ -21,16 +22,20 @@ public:
 	virtual void renderInMenu() = 0;
 };
 
+//subclass-1----------------------------------------------
+
 class StandardMaterial : public Material {
 public:
 
 	StandardMaterial();
 	~StandardMaterial();
 
-	virtual void setUniforms(Camera* camera, Matrix44 model);
-	virtual void render(Mesh* mesh, Matrix44 model, Camera * camera);
-	virtual void renderInMenu();
+	void setUniforms(Camera* camera, Matrix44 model);
+	void render(Mesh* mesh, Matrix44 model, Camera * camera);
+	void renderInMenu();
 };
+
+//subclass-2----------------------------------------------
 
 class WireframeMaterial : public StandardMaterial {
 public:
@@ -43,10 +48,8 @@ public:
 
 //subclass-3----------------------------------------------
 
-class LightMaterial : public Material {
+class LightMaterial : public StandardMaterial {
 public:
-
-	Light* light = NULL ; 
 
 	vec3 ambient_intensity;
 	vec3 diffuse_intensity;
@@ -55,6 +58,8 @@ public:
 	vec3 specular;
 	vec3 diffuse;
 	float shininess;
+	
+	Light* light = NULL; 
 
 	LightMaterial();
 	~LightMaterial();
@@ -64,7 +69,8 @@ public:
 	void renderInMenu();
 };
 
-class SkyboxMaterial : public Material {
+
+class SkyboxMaterial : public StandardMaterial {
 public:
 
 	SkyboxMaterial();

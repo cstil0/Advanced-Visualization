@@ -18,6 +18,8 @@ bool render_wireframe = false;
 Camera* Application::camera = nullptr;
 Application* Application::instance = NULL;
 
+//Light* light = nullptr;
+
 Application::Application(int window_width, int window_height, SDL_Window* window)
 {
 	this->window_width = window_width;
@@ -51,10 +53,11 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		LightMaterial* model_mat = new LightMaterial();
 		model_mat->texture = Texture::Get("data/models/ball/albedo.png");
 		model_mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/light.fs");
-		
-		SceneNode* node = new SceneNode("Node");
+		//
+		SceneNode* node = new SceneNode("Visible node");
 		node->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
 		node->material = model_mat;
+
 		//node->model.scale(5, 5, 5);
 
 		Light* light = new Light();
@@ -67,25 +70,23 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		light->material = lm;
 		light->model.scale(0.05, 0.05, 0.05);
 		model_mat->light = light;
-		node->material = model_mat;
 
 
 		node_list.push_back(light);
 		node_list.push_back(node);
 
-		//---Skybox
-		//Skybox* skybox = new Skybox();
-		//Texture* cubemap = new Texture();
-		//cubemap->cubemapFromImages("data/environments/city"); //why texture id 2
-		//Mesh* cube_mesh = new Mesh();
-		//cube_mesh->createCube();
-		//skybox->mesh = cube_mesh;
-		//skybox->model.setTranslation(camera->eye.x, camera->eye.y, camera->eye.z);
-
-		//SkyboxMaterial* sky_mat = new SkyboxMaterial();
-		//sky_mat->texture = cubemap;
-		//sky_mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
-		//skybox->material = sky_mat;
+		////---Skybox
+		Skybox* skybox = new Skybox();
+		Texture* cubemap = new Texture();
+		cubemap->cubemapFromImages("data/environments/city"); //why texture id 2 ???
+		Mesh* cube_mesh = new Mesh();
+		cube_mesh->createCube();
+		skybox->mesh = cube_mesh;
+		skybox->model.setTranslation(camera->eye.x, camera->eye.y, camera->eye.z);
+		SkyboxMaterial* sky_mat = new SkyboxMaterial();
+		sky_mat->texture = cubemap;
+		sky_mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
+		skybox->material = sky_mat;
 		//node_list.push_back(skybox);
 	}
 	
@@ -114,6 +115,8 @@ void Application::render(void)
 
 		if(render_wireframe)
 			node_list[i]->renderWireframe(camera);
+		
+		
 	}
 
 	//Draw the floor grid
@@ -161,6 +164,7 @@ void Application::onKeyDown( SDL_KeyboardEvent event )
 		case SDLK_ESCAPE: must_exit = true; break; //ESC key, kill the app
 		case SDLK_F1: render_debug = !render_debug; break;
 		case SDLK_F2: render_wireframe = !render_wireframe; break;
+
 		case SDLK_F5: Shader::ReloadAll(); break; 
 	}
 }

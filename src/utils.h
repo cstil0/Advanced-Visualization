@@ -48,4 +48,7 @@ char* fetchBufferVec4ub(char* data, std::vector<Vector4ub>& vector);
 char* fetchBufferVec4(char* data, std::vector<Vector4>& vector);
 
 
+//ImGui functions
+
+
 #endif

@@ -7,14 +7,21 @@
 #include "mesh.h"
 #include "extra/hdre.h"
 
+<<<<<<< HEAD
 //Forward declaration
 class Light;
 
+=======
+>>>>>>> parent of 473844d (light_Material)
 class Material {
 public:
 
 	Shader* shader = NULL;
-	Texture* texture = NULL; 
+	Texture* texture = NULL; //color 
+
+	vec3 specular;
+	vec3 diffuse;
+
 	vec4 color;
 
 	virtual void setUniforms(Camera* camera, Matrix44 model) = 0;
@@ -46,6 +53,7 @@ public:
 	void render(Mesh* mesh, Matrix44 model, Camera * camera);
 };
 
+<<<<<<< HEAD
 //subclass-3----------------------------------------------
 
 class LightMaterial : public StandardMaterial {
@@ -78,4 +86,6 @@ public:
 	void render(Mesh* mesh, Matrix44 model, Camera* camera);
 };
 
+=======
+>>>>>>> parent of 473844d (light_Material)
 #endif

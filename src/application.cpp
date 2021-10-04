@@ -48,6 +48,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 	{
 <<<<<<< HEAD
+<<<<<<< HEAD
 		
 		// we create just 1 light
 	
@@ -91,6 +92,8 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		skybox->material = sky_mat;
 		node_list.push_back(skybox);
 =======
+=======
+>>>>>>> parent of 473844d (light_Material)
 		StandardMaterial* mat = new StandardMaterial();
 		SceneNode* node = new SceneNode("Visible node");
 		node->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
@@ -111,6 +114,9 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		mat->shader->setUniform("u_light_color", color);
 		
 
+<<<<<<< HEAD
+>>>>>>> parent of 473844d (light_Material)
+=======
 >>>>>>> parent of 473844d (light_Material)
 	}
 	

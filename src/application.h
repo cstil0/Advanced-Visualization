@@ -43,9 +43,12 @@ public:
 	//some vars
 	static Camera* camera; //our GLOBAL camera
 <<<<<<< HEAD
+<<<<<<< HEAD
 	// ESTO NO TIENE MUY BIENA PINTA
 	Light* light;
 
+=======
+>>>>>>> parent of 473844d (light_Material)
 =======
 >>>>>>> parent of 473844d (light_Material)
 	bool mouse_locked; //tells if the mouse is locked (not seen)

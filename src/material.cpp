@@ -93,6 +93,7 @@ void WireframeMaterial::render(Mesh* mesh, Matrix44 model, Camera * camera)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); //?s
 	}
 <<<<<<< HEAD
+<<<<<<< HEAD
 }
 
 //subclass-3----------------------------------------------
@@ -212,6 +213,9 @@ void SkyboxMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 	shader->disable();
 
 }
+=======
+}
+>>>>>>> parent of 473844d (light_Material)
 =======
 }
 >>>>>>> parent of 473844d (light_Material)

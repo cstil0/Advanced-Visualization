@@ -70,8 +70,13 @@ void SceneNode::renderInMenu()
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /*
 Light::Light(vec3 position, vec3 color )
+=======
+
+Light::Light(vec3 position, vec3 color)
+>>>>>>> parent of 473844d (light_Material)
 =======
 
 Light::Light(vec3 position, vec3 color)

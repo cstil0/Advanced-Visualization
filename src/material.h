@@ -8,9 +8,12 @@
 #include "extra/hdre.h"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 //Forward declaration
 class Light;
 
+=======
+>>>>>>> parent of 473844d (light_Material)
 =======
 >>>>>>> parent of 473844d (light_Material)
 class Material {
@@ -54,6 +57,7 @@ public:
 };
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 //subclass-3----------------------------------------------
 
 class LightMaterial : public StandardMaterial {
@@ -86,6 +90,8 @@ public:
 	void render(Mesh* mesh, Matrix44 model, Camera* camera);
 };
 
+=======
+>>>>>>> parent of 473844d (light_Material)
 =======
 >>>>>>> parent of 473844d (light_Material)
 #endif

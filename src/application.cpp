@@ -18,8 +18,6 @@ bool render_wireframe = false;
 Camera* Application::camera = nullptr;
 Application* Application::instance = NULL;
 
-//Light* light = nullptr;
-
 Application::Application(int window_width, int window_height, SDL_Window* window)
 {
 	this->window_width = window_width;
@@ -163,7 +161,6 @@ void Application::onKeyDown( SDL_KeyboardEvent event )
 		case SDLK_ESCAPE: must_exit = true; break; //ESC key, kill the app
 		case SDLK_F1: render_debug = !render_debug; break;
 		case SDLK_F2: render_wireframe = !render_wireframe; break;
-
 		case SDLK_F5: Shader::ReloadAll(); break; 
 	}
 }

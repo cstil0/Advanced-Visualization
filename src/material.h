@@ -7,7 +7,8 @@
 #include "mesh.h"
 #include "extra/hdre.h"
 
-//#include "scenenode.h"
+//Forward declaration
+class Light;
 
 class Material {
 public:
@@ -21,6 +22,8 @@ public:
 	virtual void renderInMenu() = 0;
 };
 
+//subclass-1----------------------------------------------
+
 class StandardMaterial : public Material {
 public:
 
@@ -32,6 +35,8 @@ public:
 	void renderInMenu();
 };
 
+//subclass-2----------------------------------------------
+
 class WireframeMaterial : public StandardMaterial {
 public:
 
@@ -41,21 +46,36 @@ public:
 	void render(Mesh* mesh, Matrix44 model, Camera * camera);
 };
 
+//subclass-3----------------------------------------------
 
 class LightMaterial : public StandardMaterial {
 public:
+
 	vec3 specular;
 	vec3 diffuse;
 	float shininess;
-	//Light* light = NULL; -> no funciona hay que arreglar esto !
+
+	Light* light = NULL; 
 
 	LightMaterial();
 	~LightMaterial();
 
+	//void setUniforms(Camera* camera, Matrix44 model, Light* light) ;
+	//void render(Mesh* mesh, Matrix44 model, Camera* camera, Light* light);
+
 	void setUniforms(Camera* camera, Matrix44 model) ;
 	void render(Mesh* mesh, Matrix44 model, Camera* camera);
-
+	void renderInMenu();
 };
 
+class SkyboxMaterial : public StandardMaterial {
+public:
+
+	SkyboxMaterial();
+	~SkyboxMaterial();
+
+	void setUniforms(Camera* camera, Matrix44 model);
+	void render(Mesh* mesh, Matrix44 model, Camera* camera);
+};
 
 #endif

@@ -47,7 +47,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	{
 		skybox = new Skybox();
 		skybox->mesh = new Mesh();
-		skybox->mesh->createCube();
+		skybox->mesh->createCube(); //implementar getCube.. facil
 		Texture* cubemap = new Texture();
 		cubemap->cubemapFromImages("data/environments/snow");
 		skybox->model.setTranslation(camera->eye.x, camera->eye.y, camera->eye.z);
@@ -66,6 +66,19 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		node->material = mat;
 		mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/light.fs");
 		node_list.push_back(node);
+
+		Skybox* skybox_node = new Skybox();
+		skybox_node->mesh = new Mesh();
+		skybox_node->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
+		Texture* cubemap2 = new Texture();
+		cubemap2->cubemapFromImages("data/environments/snow");
+		skybox_node->model.setTranslation(camera->eye.x, camera->eye.y, camera->eye.z);
+		SkyboxMaterial* node_mat = new SkyboxMaterial();
+		node_mat->texture = cubemap2;
+		node_mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/reflection.fs");
+		skybox_node->material = node_mat;
+		skybox_node->model.setTranslation(3, 3, 3);
+		node_list.push_back(skybox_node);
 
 		Light* light = new Light();
 		light->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
@@ -99,6 +112,7 @@ void Application::render(void)
 	glDisable(GL_CULL_FACE);
 
 	skybox->render(camera);
+	// buscar un identificador, 
 
 	for (size_t i = 0; i < node_list.size(); i++) {
 		node_list[i]->render(camera);

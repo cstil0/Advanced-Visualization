@@ -45,6 +45,7 @@ public:
 class LightMaterial : public Material {
 public:
 
+	// añadir los att.....
 	vec3 specular;
 	vec3 diffuse;
 	float shininess;

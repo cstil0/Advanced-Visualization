@@ -106,6 +106,7 @@ void LightMaterial::setUniforms(Camera* camera, Matrix44 model)
 
 	shader->setUniform("u_color", color);
 	shader->setUniform("u_exposure", Application::instance->scene_exposure);
+	// hay que 
 	shader->setUniform("u_Ia", vec3(1.0,1.0,1.0));
 	shader->setUniform("u_Id", vec3(1.0, 1.0, 1.0));
 	shader->setUniform("u_Is", vec3(1.0, 1.0, 1.0));
@@ -117,7 +118,7 @@ void LightMaterial::setUniforms(Camera* camera, Matrix44 model)
 
 
 	if (texture)
-		shader->setUniform("u_texture", texture);
+		shader->setUniform("u_texture", texture );
 	if (normal)
 		shader->setUniform("u_normal", normal);
 }

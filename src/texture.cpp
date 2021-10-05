@@ -191,6 +191,7 @@ bool Texture::cubemapFromImages(const char * folder)
 	}
 
 	createCubemap(img.width, img.height, faces);
+
 	setName(folder);
 	return true;
 }

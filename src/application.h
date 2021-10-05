@@ -24,6 +24,8 @@ public:
 	static Application* instance;
 
 	std::vector< SceneNode* > node_list;
+	std::vector< Light* > light_list;
+	Skybox* skybox;
 
 	//window
 	SDL_Window* window;
@@ -42,9 +44,6 @@ public:
 
 	//some vars
 	static Camera* camera; //our GLOBAL camera
-	// ESTO NO TIENE MUY BIENA PINTA
-	Light* light;
-
 	bool mouse_locked; //tells if the mouse is locked (not seen)
 
 	Application( int window_width, int window_height, SDL_Window* window );

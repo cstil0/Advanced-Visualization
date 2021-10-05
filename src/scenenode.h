@@ -6,10 +6,9 @@
 #include "shader.h"
 #include "mesh.h"
 #include "camera.h"
-
 #include "material.h"
 
-
+class Light;
 
 class SceneNode {
 public:
@@ -31,29 +30,29 @@ public:
 	virtual void renderInMenu();
 };
 
-
 class Light : public SceneNode {
 public:
+
+	vec3 ambient_intensity;
+	vec3 diffuse_intensity;
+	vec3 specular_intensity;
 
 	Light();
 	Light(const char* name);
 	~Light();
-	
-	void render(Camera* camera);
-	void renderInMenu();
-	
 
+	void render(Camera* camera);
 };
 
-class Skybox :public SceneNode {
+class Skybox : public SceneNode {
 public:
 
-	vec3 position;
-
-
 	Skybox();
+	Skybox(const char* name);
 	~Skybox();
 
-
+	void render(Camera* camera);
+	void updatePosition(Camera* camera);
 };
+
 #endif

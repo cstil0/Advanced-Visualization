@@ -51,7 +51,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		skybox_node->mesh = Mesh::getCube();
 		Texture* cubemap_texture = new Texture();
 		
-		cubemap_texture->cubemapFromImages("data/environments/city"); //Suman si quiere revisar!
+		cubemap_texture->cubemapFromImages("data/environments/dragonvale"); //Suman si quiere revisar!
 		
 		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
 		SkyboxMaterial* sky_mat = new SkyboxMaterial(sh, cubemap_texture);

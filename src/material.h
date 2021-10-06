@@ -7,6 +7,7 @@
 #include "mesh.h"
 #include "extra/hdre.h"
 
+//Forward declaration
 class Light;
 
 class Material {
@@ -45,12 +46,12 @@ public:
 class PhongMaterial : public StandardMaterial {
 public:
 
-	// añadir los att.....
+	
 	vec3 specular;
 	vec3 diffuse;
 	float shininess;
 
-	Light* light;
+	Light* light = NULL;
 
 	PhongMaterial();
 	~PhongMaterial();

@@ -105,6 +105,7 @@ void Light::renderInMenu()
 		ImGui::ColorEdit3("ambient_intensity", (float*)&this->ambient_intensity);
 		ImGui::ColorEdit3("diffuse_intensity", (float*)&this->diffuse_intensity);
 		ImGui::ColorEdit3("specular_intensity", (float*)&this->specular_intensity);
+
 	#endif
 }
 

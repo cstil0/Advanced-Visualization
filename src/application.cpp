@@ -18,6 +18,7 @@ bool render_wireframe = false;
 Camera* Application::camera = nullptr;
 Application* Application::instance = NULL;
 
+Shader* sh = NULL;
 Application::Application(int window_width, int window_height, SDL_Window* window)
 {
 	this->window_width = window_width;
@@ -45,16 +46,19 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	camera->setPerspective(45.f,window_width/(float)window_height,0.1f,10000.f); //set the projection, we want to be perspective
 
 	{
-		skybox = new Skybox();
-		skybox->mesh = new Mesh();
-		skybox->mesh->createCube();
-		Texture* cubemap = new Texture();
-		cubemap->cubemapFromImages("data/environments/snow");
-		skybox->model.setTranslation(camera->eye.x, camera->eye.y, camera->eye.z);
-		SkyboxMaterial* sky_mat = new SkyboxMaterial();
-		sky_mat->texture = cubemap;
-		sky_mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
-		skybox->material = sky_mat;
+		//---SkyboxNode---
+		Skybox* skybox_node = new Skybox();
+		skybox_node->mesh = Mesh::getCube();
+		Texture* cubemap_texture = new Texture();
+		
+		cubemap_texture->cubemapFromImages("data/environments/city"); //Suman si quiere revisar!
+		
+		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
+		SkyboxMaterial* sky_mat = new SkyboxMaterial(sh, cubemap_texture);
+		//sky_mat->texture = cubemap_texture;
+		//sky_mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
+		skybox_node->material = sky_mat;
+		node_list.push_back(skybox_node);
 
 		PhongMaterial* mat = new PhongMaterial();
 		SceneNode* node = new SceneNode("Visible node");
@@ -77,6 +81,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 		mat->light = light;
 
+		
 		node_list.push_back(light);
 
 	}
@@ -153,7 +158,11 @@ void Application::update(double seconds_elapsed)
 		Input::centerMouse();
 
 	// Update skybox position according to the camera
-	skybox->updatePosition(camera);
+	//skybox->updatePosition(camera);
+
+	//node_list[0]->model.translate(camera->eye.x, camera->eye.y, camera->eye.z);
+	node_list[0]->model.setTranslation(camera->eye.x, camera->eye.y, camera->eye.z);
+
 }
 
 //Keyboard event handler (sync input)

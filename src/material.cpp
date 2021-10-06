@@ -87,7 +87,7 @@ void WireframeMaterial::render(Mesh* mesh, Matrix44 model, Camera * camera)
 
 PhongMaterial::PhongMaterial()
 {
-	this->color.set(1.f, 0.f, 0.f, 0.f);
+	this->color.set(0.f, 0.f, 0.f, 0.f);//ambient material color
 	this->specular.set(0.5f,0.5f,0.5f);
 	this->diffuse.set(0.5f, 0.5f, 0.5f);
 	this->shininess = 20;
@@ -152,6 +152,12 @@ SkyboxMaterial::SkyboxMaterial()
 {
 }
 
+SkyboxMaterial::SkyboxMaterial( Shader* sh, Texture* tex )
+{
+	this->shader = sh;
+	this->texture = tex;
+}
+
 SkyboxMaterial::~SkyboxMaterial()
 {
 }
@@ -160,13 +166,10 @@ void SkyboxMaterial::setUniforms(Camera* camera, Matrix44 model)
 {
 	shader->setUniform("u_viewprojection", camera->viewprojection_matrix);
 	shader->setUniform("u_camera_position", camera->eye);
+	//model.translate(camera->eye.x, camera->eye.y, camera->eye.z);
 	shader->setUniform("u_model", model);
-	shader->setUniform("u_time", Application::instance->time);
-	shader->setUniform("u_output", Application::instance->output);
-
 	shader->setUniform("u_color", color);
-	shader->setUniform("u_exposure", Application::instance->scene_exposure);
-
+	
 	if (texture)
 		shader->setUniform("u_texture", texture);
 }

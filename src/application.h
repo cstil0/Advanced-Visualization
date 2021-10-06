@@ -24,8 +24,8 @@ public:
 	static Application* instance;
 
 	std::vector< SceneNode* > node_list;
-	std::vector< Light* > light_list;
-	Skybox* skybox;
+	//std::vector< Light* > light_list;
+	//Skybox* skybox;
 
 	//window
 	SDL_Window* window;

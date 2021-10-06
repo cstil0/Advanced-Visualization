@@ -63,6 +63,7 @@ class SkyboxMaterial : public StandardMaterial {
 public:
 
 	SkyboxMaterial();
+	SkyboxMaterial(Shader* sh, Texture* tex);
 	~SkyboxMaterial();
 
 	void setUniforms(Camera* camera, Matrix44 model);

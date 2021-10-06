@@ -80,9 +80,12 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		light->model.scale(0.05,0.05,0.05);
 
 		mat->light = light;
-
-		s
 		node_list.push_back(light);
+
+		//---Reflection---
+
+		
+
 
 	}
 	

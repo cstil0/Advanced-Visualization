@@ -14,6 +14,7 @@ class SceneNode {
 public:
 
 	static unsigned int lastNameId;
+	int typeOfNode;
 
 	SceneNode();
 	SceneNode(const char* name);
@@ -32,6 +33,8 @@ public:
 
 class Light : public SceneNode {
 public:
+
+	static unsigned int lastNameId;
 
 	vec3 ambient_intensity;
 	vec3 diffuse_intensity;

@@ -54,6 +54,7 @@ public:
 	Light* light = NULL;
 
 	PhongMaterial();
+	PhongMaterial(Shader* sh, Texture* tex);
 	~PhongMaterial();
 
 	void setUniforms(Camera* camera, Matrix44 model);

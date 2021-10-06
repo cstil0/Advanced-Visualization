@@ -3,17 +3,28 @@
 #include "texture.h"
 #include "utils.h"
 
+enum TYPEOFNODE {
+	NODE,
+	LIGHT,
+	SKYBOX
+};
+
 unsigned int SceneNode::lastNameId = 0;
+unsigned int Light::lastNameId = 0;
 unsigned int mesh_selected = 0;
+
+
 
 SceneNode::SceneNode()
 {
-	this->name = std::string("Node" + std::to_string(lastNameId++));
+	this->typeOfNode = int(TYPEOFNODE::NODE);
+	this->name = std::string("Node " + std::to_string(lastNameId++));
 }
 
 
 SceneNode::SceneNode(const char * name)
 {
+	this->typeOfNode = int(TYPEOFNODE::NODE);
 	this->name = name;
 }
 
@@ -70,8 +81,9 @@ void SceneNode::renderInMenu()
 
 Light::Light()
 {
-	this->name = std::string("Light" + std::to_string(lastNameId++));
-	this->ambient_intensity.set(0.1, 0.1, 0.1);
+	this->typeOfNode = int(TYPEOFNODE::LIGHT);
+	this->name = std::string("Light " + std::to_string(lastNameId++));
+	this->ambient_intensity.set(0.7, 0.7, 0.7);
 	this->diffuse_intensity.set(0.1, 0.1, 0.1);
 	this->specular_intensity.set(0.1, 0.1, 0.1);
 
@@ -81,6 +93,7 @@ Light::Light()
 Light::Light(const char* name)
 {
 	this->name = name;
+	this->typeOfNode = int(TYPEOFNODE::LIGHT);
 	this->ambient_intensity.set(0.7, 0.7, 0.7);
 	this->diffuse_intensity.set(0.1, 0.1, 0.1);
 	this->specular_intensity.set(0.1, 0.1, 0.1);
@@ -100,21 +113,26 @@ void Light::renderInMenu()
 {
 	SceneNode::renderInMenu();
 
-	#ifndef SKIP_IMGUI
-
-		ImGui::ColorEdit3("ambient_intensity", (float*)&this->ambient_intensity);
-		ImGui::ColorEdit3("diffuse_intensity", (float*)&this->diffuse_intensity);
-		ImGui::ColorEdit3("specular_intensity", (float*)&this->specular_intensity);
-
+	#ifndef SKIP_IMGUI //???¿¿¿¿
+		ImGui::TreeNode("Light intensities");
+			ImGui::ColorEdit3("ambient_intensity", (float*)&this->ambient_intensity);
+			ImGui::ColorEdit3("diffuse_intensity", (float*)&this->diffuse_intensity);
+			ImGui::ColorEdit3("specular_intensity", (float*)&this->specular_intensity);
+		ImGui::TreePop();
 	#endif
 }
 
+
 Skybox::Skybox()
 {
+	this->typeOfNode = int(TYPEOFNODE::SKYBOX);
+
 }
 
 Skybox::Skybox(const char* name)
 {
+	this->typeOfNode = int(TYPEOFNODE::SKYBOX);
+	this->name;
 }
 
 Skybox::~Skybox()

@@ -19,6 +19,7 @@ Camera* Application::camera = nullptr;
 Application* Application::instance = NULL;
 
 Shader* sh = NULL;
+
 Application::Application(int window_width, int window_height, SDL_Window* window)
 {
 	this->window_width = window_width;
@@ -48,39 +49,48 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	{
 		//---SkyboxNode---
 		Skybox* skybox_node = new Skybox();
-		skybox_node->mesh = Mesh::getCube();
-		Texture* cubemap_texture = new Texture();
-		
-		cubemap_texture->cubemapFromImages("data/environments/dragonvale"); //Suman si quiere revisar!
-		
 		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
+		Texture* cubemap_texture = new Texture();
+		cubemap_texture->cubemapFromImages("data/environments/dragonvale");
+		skybox_node->mesh = Mesh::getCube();
+		
 		SkyboxMaterial* sky_mat = new SkyboxMaterial(sh, cubemap_texture);
-		//sky_mat->texture = cubemap_texture;
-		//sky_mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
 		skybox_node->material = sky_mat;
 		node_list.push_back(skybox_node);
 
-		PhongMaterial* mat = new PhongMaterial();
-		SceneNode* node = new SceneNode("Visible node");
-		node->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
-		Texture* model_texture = Texture::Get("data/models/ball/albedo.png");
-		mat->texture = model_texture;
-		Texture* model_normal = Texture::Get("data/models/ball/brick_normal.png");
-		mat->normal = model_normal;
-		node->material = mat;
-		mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/light.fs");
-		node_list.push_back(node);
+		//---PhongEcuation---
+		int numb_nodes = 3;
+		for (int i = 0; i < numb_nodes; i++) {
+			SceneNode* node = new SceneNode("Ball");
+			node->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
+			vec3 position = node->model.getTranslation();
+			node->model.translate(position.x + i*5, position.y, position.z);
+		
+			sh = Shader::Get("data/shaders/basic.vs", "data/shaders/light.fs");
+			
+			Texture* node_texture = Texture::Get("data/models/ball/albedo.png");
+		
+			//mat->texture = node_texture;
+			//Texture* model_normal = Texture::Get("data/models/ball/brick_normal.png");
+			//mat->normal = model_normal;
+		
+			PhongMaterial* pm = new PhongMaterial(sh, node_texture);
+			node->material = pm;
 
-		Light* light = new Light("Light 1");
-		light->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
-		StandardMaterial* l_mat = new StandardMaterial();
-		l_mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/flat.fs");
-		light->material = l_mat;
-		light->model.setTranslation(3, 1, 3);
-		light->model.scale(0.05,0.05,0.05);
+			node_list.push_back(node);
+		
+			Light* light = new Light();
+			light->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
 
-		mat->light = light;
-		node_list.push_back(light);
+			StandardMaterial* l_mat = new StandardMaterial();
+			light->material = l_mat;
+			//light->model.setTranslation((position.x+10)*i, position.y*i, position.z*i);
+			light->model.translate(3*i, 1, 1);
+			light->model.scale(0.05,0.05,0.05);
+
+			pm->light = light;
+			node_list.push_back(light);
+		}
 
 		//---Reflection---
 
@@ -117,12 +127,6 @@ void Application::render(void)
 		if(render_wireframe)
 			node_list[i]->renderWireframe(camera);
 	}
-
-	/*
-	// Render lights
-	for (size_t i = 0; i < light_list.size(); i++) {
-		light_list[i]->render(camera);
-	}*/
 
 	//Draw the floor grid
 	if(render_debug)

@@ -87,11 +87,21 @@ void WireframeMaterial::render(Mesh* mesh, Matrix44 model, Camera * camera)
 
 PhongMaterial::PhongMaterial()
 {
-	this->color.set(0.f, 0.f, 0.f, 0.f);//ambient material color
+	this->color.set(0.f, 0.f, 0.f, 0.f); //ambient material color
 	this->specular.set(0.5f,0.5f,0.5f);
 	this->diffuse.set(0.5f, 0.5f, 0.5f);
 	this->shininess = 20;
+}
 
+PhongMaterial::PhongMaterial(Shader* sh, Texture* texture)
+{
+	this->color.set(0.f, 0.f, 0.f, 0.f); //ambient material color
+	this->specular.set(0.5f, 0.5f, 0.5f);
+	this->diffuse.set(0.5f, 0.5f, 0.5f);
+	this->shininess = 20;
+	
+	this->shader = sh;
+	this->texture = texture;
 }
 
 PhongMaterial::~PhongMaterial()
@@ -129,7 +139,7 @@ void PhongMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 
 		//upload uniforms
 		setUniforms(camera, model);
-		//glDepthFunc(GL_LEQUAL);
+		
 		//do the draw call
 		mesh->render(GL_TRIANGLES);
 
@@ -140,8 +150,7 @@ void PhongMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 
 void PhongMaterial::renderInMenu()
 {
-	ImGui::ColorEdit3("Color", (float*)&this->color); // Edit 3 floats representing a color
-
+	ImGui::ColorEdit3("Color A. Material", (float*)&this->color); // Edit 3 floats representing a color
 	ImGui::ColorEdit3("Specular", (float*)&this->specular);
 	ImGui::ColorEdit3("Diffuse", (float*)&this->diffuse);
 	ImGui::SliderFloat("Shininess", (float*)&this->shininess, 0, 50);

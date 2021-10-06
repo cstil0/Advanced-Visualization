@@ -7,7 +7,7 @@
 #include "mesh.h"
 #include "extra/hdre.h"
 
-//class Light;
+class Light;
 
 class Material {
 public:
@@ -42,24 +42,24 @@ public:
 	void render(Mesh* mesh, Matrix44 model, Camera * camera);
 };
 
-class LightMaterial : public Material {
+class PhongMaterial : public StandardMaterial {
 public:
 
 	vec3 specular;
 	vec3 diffuse;
 	float shininess;
 
-	//Light* light;
+	Light* light;
 
-	LightMaterial();
-	~LightMaterial();
+	PhongMaterial();
+	~PhongMaterial();
 
 	void setUniforms(Camera* camera, Matrix44 model);
 	void render(Mesh* mesh, Matrix44 model, Camera* camera);
 	void renderInMenu();
 };
 
-class SkyboxMaterial : public Material {
+class SkyboxMaterial : public StandardMaterial {
 public:
 
 	SkyboxMaterial();

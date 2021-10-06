@@ -64,14 +64,26 @@ void SceneNode::renderInMenu()
 
 		ImGui::TreePop();
 	}
+
+
 }
 
 Light::Light()
 {
+	this->name = std::string("Light" + std::to_string(lastNameId++));
+	this->ambient_intensity.set(0.1, 0.1, 0.1);
+	this->diffuse_intensity.set(0.1, 0.1, 0.1);
+	this->specular_intensity.set(0.1, 0.1, 0.1);
+
 }
+
 
 Light::Light(const char* name)
 {
+	this->name = name;
+	this->ambient_intensity.set(0.7, 0.7, 0.7);
+	this->diffuse_intensity.set(0.1, 0.1, 0.1);
+	this->specular_intensity.set(0.1, 0.1, 0.1);
 }
 
 Light::~Light()
@@ -82,6 +94,18 @@ void Light::render(Camera* camera)
 {
 	if (material)
 		material->render(mesh, model, camera);
+}
+
+void Light::renderInMenu()
+{
+	SceneNode::renderInMenu();
+
+	#ifndef SKIP_IMGUI
+
+		ImGui::ColorEdit3("ambient_intensity", (float*)&this->ambient_intensity);
+		ImGui::ColorEdit3("diffuse_intensity", (float*)&this->diffuse_intensity);
+		ImGui::ColorEdit3("specular_intensity", (float*)&this->specular_intensity);
+	#endif
 }
 
 Skybox::Skybox()

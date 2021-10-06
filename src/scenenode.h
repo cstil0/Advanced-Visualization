@@ -42,6 +42,7 @@ public:
 	~Light();
 
 	void render(Camera* camera);
+	void renderInMenu();
 };
 
 class Skybox : public SceneNode {

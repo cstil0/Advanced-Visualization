@@ -56,10 +56,10 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		sky_mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
 		skybox->material = sky_mat;
 
-		LightMaterial* mat = new LightMaterial();
+		PhongMaterial* mat = new PhongMaterial();
 		SceneNode* node = new SceneNode("Visible node");
 		node->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
-		Texture* model_texture = Texture::Get("data/models/ball/brick_diffuse.png");
+		Texture* model_texture = Texture::Get("data/models/ball/albedo.png");
 		mat->texture = model_texture;
 		Texture* model_normal = Texture::Get("data/models/ball/brick_normal.png");
 		mat->normal = model_normal;
@@ -67,14 +67,17 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/light.fs");
 		node_list.push_back(node);
 
-		Light* light = new Light();
+		Light* light = new Light("Light 1");
 		light->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
 		StandardMaterial* l_mat = new StandardMaterial();
 		l_mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/flat.fs");
 		light->material = l_mat;
 		light->model.setTranslation(3, 1, 3);
 		light->model.scale(0.05,0.05,0.05);
-		light_list.push_back(light);
+
+		mat->light = light;
+
+		node_list.push_back(light);
 
 	}
 	
@@ -98,7 +101,7 @@ void Application::render(void)
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 
-	skybox->render(camera);
+	//skybox->render(camera);
 
 	for (size_t i = 0; i < node_list.size(); i++) {
 		node_list[i]->render(camera);
@@ -107,10 +110,11 @@ void Application::render(void)
 			node_list[i]->renderWireframe(camera);
 	}
 
+	/*
 	// Render lights
 	for (size_t i = 0; i < light_list.size(); i++) {
 		light_list[i]->render(camera);
-	}
+	}*/
 
 	//Draw the floor grid
 	if(render_debug)

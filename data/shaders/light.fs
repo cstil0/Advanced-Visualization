@@ -20,6 +20,7 @@ uniform float u_shininess;
 
 void main()
 {
+<<<<<<< Updated upstream
 	vec4 color = texture2D( u_texture, v_uv );
 	//vec4 normal = texture2D( u_normal, v_uv );
 
@@ -33,6 +34,21 @@ void main()
 	vec3 V = normalize(u_camera_pos- position_view);
 	// SI PONGO LA L EN NEGATIVO, LA PARTE SPECULAR SE PONE EN EL OTRO LADO, ASI QUEDA TODO DONDE DEBE ESTAR, PERO NO SE PORQUE
 	vec3 R = reflect(L,N);/// revisar
+=======
+
+	// NO SE POR QUE CUANDO SUMO EL COLOR ESTE DE LA MANERA QUE SEA NO SE ME RENDERIZA LA BOLA.... DE MOMENTO LO DEJO ASÍ PARA QUE ALMENOS SE MUESTRE
+	//vec4 color = v_color;
+	//color += texture2D( u_texture, v_uv );
+
+	vec4 color =  texture2D( u_texture, v_uv );
+	//vec4 normal = texture2D( u_normal, v_uv );
+
+	vec3 N = normalize(v_normal); // also we can use normal texture in the future
+	vec3 L = normalize(u_light_pos - v_world_position);
+	vec3 V = normalize(u_camera_pos- v_world_position);
+
+	vec3 R = reflect(L,N);
+>>>>>>> Stashed changes
 	//vec3 H = normalize(V + L);
 
 	vec3 light_intensity = vec3(0,0,0);

@@ -81,7 +81,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 		mat->light = light;
 
-		
+		s
 		node_list.push_back(light);
 
 	}

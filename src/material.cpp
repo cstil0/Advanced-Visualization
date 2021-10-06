@@ -115,7 +115,7 @@ void PhongMaterial::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_shininess", shininess);
 
 	if (texture)
-		shader->setUniform("u_texture", texture);
+		shader->setUniform("u_texture", texture );
 	if (normal)
 		shader->setUniform("u_normal", normal);
 }

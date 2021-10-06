@@ -129,6 +129,6 @@ void Skybox::render(Camera* camera)
 
 void Skybox::updatePosition(Camera* camera)
 {
-	model.setTranslation(camera->eye.x, camera->eye.y, camera->eye.z);
+	model.translate(camera->eye.x, camera->eye.y, camera->eye.z);
 }
 

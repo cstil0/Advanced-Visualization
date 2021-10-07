@@ -59,11 +59,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		skybox_node->material = sky_mat;
 		node_list.push_back(skybox_node);
 
-<<<<<<< Updated upstream
 		LightMaterial* mat = new LightMaterial();
-=======
-		PhongMaterial* mat = new PhongMaterial();
->>>>>>> Stashed changes
 		SceneNode* node = new SceneNode("Visible node");
 		node->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
 		Texture* model_texture = Texture::Get("data/models/ball/brick_diffuse.png");

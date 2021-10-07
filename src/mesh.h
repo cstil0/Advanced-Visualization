@@ -112,7 +112,7 @@ public:
 	void createGrid(float dist);
 	void displace(Image* heightmap, float altitude);
 	static Mesh* getQuad(); //get global quad
-
+	static Mesh* getCube();
 
 	//optimize meshes
 	void uploadToVRAM();

@@ -1406,6 +1406,18 @@ Mesh* Mesh::getQuad()
 	return quad;
 }
 
+Mesh* Mesh::getCube()
+{
+	static Mesh* cube = NULL;
+	if (!cube)
+	{
+		cube = new Mesh();
+		cube->createCube();
+		cube->uploadToVRAM();
+	}
+	return cube;
+}
+
 Mesh* Mesh::Get(const char* filename)
 {
 	assert(filename);

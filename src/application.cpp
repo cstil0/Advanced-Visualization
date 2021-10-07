@@ -45,20 +45,6 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	camera->setPerspective(45.f,window_width/(float)window_height,0.1f,10000.f); //set the projection, we want to be perspective
 
 	{
-<<<<<<< Updated upstream
-		skybox = new Skybox();
-		skybox->mesh = new Mesh();
-		skybox->mesh->createCube(); //implementar getCube.. facil
-		Texture* cubemap = new Texture();
-		cubemap->cubemapFromImages("data/environments/snow");
-		skybox->model.setTranslation(camera->eye.x, camera->eye.y, camera->eye.z);
-		SkyboxMaterial* sky_mat = new SkyboxMaterial();
-		sky_mat->texture = cubemap;
-		sky_mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
-		skybox->material = sky_mat;
-
-		LightMaterial* mat = new LightMaterial();
-=======
 		//---SkyboxNode---
 		Skybox* skybox_node = new Skybox();
 		skybox_node->mesh = Mesh::getCube();
@@ -72,8 +58,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		skybox_node->material = sky_mat;
 		node_list.push_back(skybox_node);
 
-		PhongMaterial* mat = new PhongMaterial();
->>>>>>> Stashed changes
+		LightMaterial* mat = new LightMaterial();
 		SceneNode* node = new SceneNode("Visible node");
 		node->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
 		Texture* model_texture = Texture::Get("data/models/ball/brick_diffuse.png");
@@ -85,22 +70,6 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/light.fs");
 		node_list.push_back(node);
 
-<<<<<<< Updated upstream
-		Skybox* skybox_node = new Skybox();
-		skybox_node->mesh = new Mesh();
-		skybox_node->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
-		Texture* cubemap2 = new Texture();
-		cubemap2->cubemapFromImages("data/environments/snow");
-		skybox_node->model.setTranslation(camera->eye.x, camera->eye.y, camera->eye.z);
-		SkyboxMaterial* node_mat = new SkyboxMaterial();
-		node_mat->texture = cubemap2;
-		node_mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/reflection.fs");
-		skybox_node->material = node_mat;
-		skybox_node->model.setTranslation(3, 3, 3);
-		node_list.push_back(skybox_node);
-
-		Light* light = new Light();
-=======
 		SceneNode* reflecting_node = new SceneNode();
 		reflecting_node->mesh = new Mesh();
 		reflecting_node->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
@@ -115,7 +84,6 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		node_list.push_back(reflecting_node);
 
 		Light* light = new Light("Light 1");
->>>>>>> Stashed changes
 		light->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
 		StandardMaterial* l_mat = new StandardMaterial();
 		l_mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/flat.fs");

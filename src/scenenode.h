@@ -56,7 +56,7 @@ public:
 	~Skybox();
 
 	void render(Camera* camera);
-	void updatePosition(Camera* camera);
+	//void updatePosition(Camera* camera);
 };
 
 #endif

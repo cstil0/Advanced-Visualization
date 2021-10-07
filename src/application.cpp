@@ -131,7 +131,6 @@ void Application::render(void)
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 
-	//skybox->render(camera);
 
 	for (size_t i = 0; i < node_list.size(); i++) {
 		node_list[i]->render(camera);
@@ -177,11 +176,7 @@ void Application::update(double seconds_elapsed)
 		Input::centerMouse();
 
 	// Update skybox position according to the camera
-	//skybox->updatePosition(camera);
-
-	//node_list[0]->model.translate(camera->eye.x, camera->eye.y, camera->eye.z);
 	node_list[0]->model.setTranslation(camera->eye.x, camera->eye.y, camera->eye.z);
-
 }
 
 //Keyboard event handler (sync input)

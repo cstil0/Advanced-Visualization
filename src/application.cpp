@@ -53,8 +53,9 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		cubemap_texture->cubemapFromImages("data/environments/snow"); //Suman si quiere revisar!
 		
 		Shader* sky_shader = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
-		SkyboxMaterial* sky_mat = new SkyboxMaterial(sky_shader, cubemap_texture);
+		SkyboxMaterial* sky_mat = new SkyboxMaterial();
 		sky_mat->texture = cubemap_texture;
+		sky_mat->shader = sky_shader;
 		skybox_node->material = sky_mat;
 		node_list.push_back(skybox_node);
 
@@ -114,7 +115,7 @@ void Application::render(void)
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 
-	skybox->render(camera);
+	//skybox->render(camera);
 	// buscar un identificador, 
 
 	for (size_t i = 0; i < node_list.size(); i++) {
@@ -166,7 +167,7 @@ void Application::update(double seconds_elapsed)
 		Input::centerMouse();
 
 	// Update skybox position according to the camera
-	skybox->updatePosition(camera);
+	node_list[0]->model.setTranslation(camera->eye.x, camera->eye.y, camera->eye.z);
 }
 
 //Keyboard event handler (sync input)

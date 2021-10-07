@@ -1418,7 +1418,6 @@ Mesh* Mesh::getCube()
 	return cube;
 }
 
-
 Mesh* Mesh::Get(const char* filename)
 {
 	assert(filename);

@@ -33,7 +33,7 @@ void main()
 	vec3 R = reflect(L,N);
 	//vec3 H = normalize(V + L);
 
-	vec3 light_intensity = vec3(0,0,0);
+	vec3 light_intensity = vec3(0.0);
 	vec3 ambient_light = color.xyz * u_Ia;
 	vec3 diffuse_light = u_diffuse* clamp(dot(L,N), 0.0f, 1.0f) * u_Id;
 	vec3 specular_light = u_specular * pow( clamp(dot(R,V),0.0f, 1.0f) , u_shininess) * u_Is;

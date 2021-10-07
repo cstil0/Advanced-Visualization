@@ -66,7 +66,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 			vec3 position = node->model.getTranslation();
 			node->model.translate(position.x + i*5, position.y, position.z);
 		
-			sh = Shader::Get("data/shaders/basic.vs", "data/shaders/light.fs");
+			sh = Shader::Get("data/shaders/basic.vs", "data/shaders/texture.fs");
 			
 			Texture* node_texture = Texture::Get("data/models/ball/albedo.png");
 		

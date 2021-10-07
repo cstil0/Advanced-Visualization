@@ -94,7 +94,19 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 		//---Reflection---
 
+		SceneNode* reflecting_node = new SceneNode("Reflection");
+		reflecting_node->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
 		
+		Texture* reflecting_texture = new Texture();
+		reflecting_texture->cubemapFromImages("data/environments/snow");
+		
+		StandardMaterial* reflecting_mat = new StandardMaterial();
+		reflecting_mat->texture = reflecting_texture;
+		reflecting_mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/reflection.fs");
+		reflecting_node->material = reflecting_mat;
+		reflecting_node->model.setTranslation(-3, 0, 3);
+		reflecting_node->model.scale(2, 2, 2);
+		node_list.push_back(reflecting_node);
 
 
 	}

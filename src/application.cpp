@@ -69,32 +69,40 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		// And we can have a attribute light node in the PhongMaterial to have acess of light's information 
 		// (position, colors, etc.)
 		//And finally, when every information is passed, we push both nodes in the list.
-		int numb_nodes = 3;
-		for (int i = 0; i < numb_nodes; i++) {
-			SceneNode* node = new SceneNode("Ball");
-			node->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
-			vec3 position = node->model.getTranslation();
-			node->model.translate(position.x + i*5, position.y, position.z);
-		
-			sh = Shader::Get("data/shaders/basic.vs", "data/shaders/light.fs");
-			Texture* node_texture = Texture::Get("data/models/ball/albedo.png");
-			
-			PhongMaterial* pm = new PhongMaterial(sh, node_texture);
-			node->material = pm;
-
-			node_list.push_back(node);
-		
+		int numb_lights = 2;
+		for (int i = 0; i < numb_lights; i++) {
 			Light* light = new Light();
 			light->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
 
 			StandardMaterial* l_mat = new StandardMaterial();
 			light->material = l_mat;
 			//light->model.setTranslation((position.x+10)*i, position.y*i, position.z*i);
-			light->model.translate(3*i, 1, 1);
+			light->model.translate(3*i, 2, -3*i);
 			light->model.scale(0.05,0.05,0.05);
-			pm->light = light;
 			node_list.push_back(light);
 		}
+
+		SceneNode* node = new SceneNode("Ball");
+		node->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
+		vec3 position = node->model.getTranslation();
+		node->model.translate(position.x, position.y, position.z);
+
+		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/light.fs");
+		Texture* node_texture = Texture::Get("data/models/ball/albedo.png");
+
+		PhongMaterial* pm = new PhongMaterial(sh, node_texture);
+
+		for (int i = 0; i < node_list.size(); i++)
+		{
+			
+			if (node_list[i]->typeOfNode == SceneNode::TYPEOFNODE::LIGHT) {
+				Light* current_light = (Light*)node_list[i];
+				pm->light_list.push_back(current_light);
+			}
+		}
+		
+		node->material = pm;
+		node_list.push_back(node);
 
 		//---Reflection---
 		// We create a reflected node and it's corresponfing material, since in this case

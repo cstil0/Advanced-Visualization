@@ -52,7 +52,7 @@ public:
 	vec3 diffuse;
 	float shininess;
 
-	Light* light = NULL;
+	std::vector <Light*> light_list;
 
 	PhongMaterial();
 	PhongMaterial(Shader* sh, Texture* tex);

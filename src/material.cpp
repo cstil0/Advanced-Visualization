@@ -96,6 +96,7 @@ void WireframeMaterial::render(Mesh* mesh, Matrix44 model, Camera * camera)
 
 PhongMaterial::PhongMaterial()
 {
+	
 	this->color.set(0.f, 0.f, 0.f, 0.f); //ambient material color
 	this->specular.set(0.5f,0.5f,0.5f);
 	this->diffuse.set(0.5f, 0.5f, 0.5f);
@@ -124,10 +125,33 @@ void PhongMaterial::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_model", model);
 	shader->setUniform("u_color", this->color);
 
-	shader->setUniform("u_Ia", this->light->ambient_intensity);
+	std::vector<vec3> light_position;
+	std::vector<vec3> light_Ia;
+	std::vector<vec3> light_Id;
+	std::vector<vec3> light_Is;
+
+	for (int i = 0; i < this->light_list.size(); i++)
+	{
+		Light* light = light_list[i];
+		light_position.push_back(light->model.getTranslation());
+		light_Ia.push_back(light->ambient_intensity);
+		light_Id.push_back(light->diffuse_intensity);
+		light_Is.push_back(light->specular_intensity);
+
+		
+	}
+
+	/*shader->setUniform("u_Ia", this->light->ambient_intensity);
 	shader->setUniform("u_Id", this->light->diffuse_intensity);
 	shader->setUniform("u_Is", this->light->specular_intensity);
 	shader->setUniform("u_light_pos", this->light->model.getTranslation());
+	*/
+
+	shader->setUniform("u_light_pos", light_position);
+	shader->setUniform("u_Ia", light_Ia);
+	shader->setUniform("u_Id", light_Id);
+	shader->setUniform("u_Is", light_Is);
+
 
 	shader->setUniform("u_specular", specular);
 	shader->setUniform("u_diffuse", diffuse);
@@ -162,7 +186,7 @@ void PhongMaterial::renderInMenu()
 	ImGui::ColorEdit3("Color A. Material", (float*)&this->color); // Edit 3 floats representing a color
 	ImGui::ColorEdit3("Specular", (float*)&this->specular);
 	ImGui::ColorEdit3("Diffuse", (float*)&this->diffuse);
-	ImGui::SliderFloat("Shininess", (float*)&this->shininess, 0, 50);
+	ImGui::SliderFloat("Shininess", (float*)&this->shininess, 0.1, 50);
 
 }
 

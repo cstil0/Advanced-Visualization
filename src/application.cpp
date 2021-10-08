@@ -48,10 +48,13 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 	{
 		//---SkyboxNode---
+		//We first create a skybox node and we need to render it first, since it need a specific material
+		//We create a SkyboxMaterial to save all the corresponding information (shader, cubemap) that it need,  
+		//then we pass this material to to skybox node, and finally push it in the list of nodes.
 		Skybox* skybox_node = new Skybox();
 		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
 		Texture* cubemap_texture = new Texture();
-		cubemap_texture->cubemapFromImages("data/environments/dragonvale");
+		cubemap_texture->cubemapFromImages("data/environments/snow");
 		skybox_node->mesh = Mesh::getCube();
 		
 		SkyboxMaterial* sky_mat = new SkyboxMaterial(sh, cubemap_texture);
@@ -59,6 +62,13 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		node_list.push_back(skybox_node);
 
 		//---PhongEcuation---
+		// Following the same flow like before, we create a ball node, and its attribute material,
+		// we create the PhongMaterial with corresponding parameters, like shader, and texture.
+		// Also we want to represent the node light in the scene, so we create it and pass the information  
+		// to its StanddrdMaterial, since in this case, it just represent the node light that affect our ball
+		// And we can have a attribute light node in the PhongMaterial to have acess of light's information 
+		// (position, colors, etc.)
+		//And finally, when every information is passed, we push both nodes in the list.
 		int numb_nodes = 3;
 		for (int i = 0; i < numb_nodes; i++) {
 			SceneNode* node = new SceneNode("Ball");
@@ -66,14 +76,9 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 			vec3 position = node->model.getTranslation();
 			node->model.translate(position.x + i*5, position.y, position.z);
 		
-			sh = Shader::Get("data/shaders/basic.vs", "data/shaders/texture.fs");
-			
+			sh = Shader::Get("data/shaders/basic.vs", "data/shaders/light.fs");
 			Texture* node_texture = Texture::Get("data/models/ball/albedo.png");
-		
-			//mat->texture = node_texture;
-			//Texture* model_normal = Texture::Get("data/models/ball/brick_normal.png");
-			//mat->normal = model_normal;
-		
+			
 			PhongMaterial* pm = new PhongMaterial(sh, node_texture);
 			node->material = pm;
 
@@ -87,22 +92,22 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 			//light->model.setTranslation((position.x+10)*i, position.y*i, position.z*i);
 			light->model.translate(3*i, 1, 1);
 			light->model.scale(0.05,0.05,0.05);
-
 			pm->light = light;
 			node_list.push_back(light);
 		}
 
 		//---Reflection---
+		// We create a reflected node and it's corresponfing material, since in this case
+		//---. ME HE QUEDADO AUI!!!
 
 		SceneNode* reflecting_node = new SceneNode("Reflection");
 		reflecting_node->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
 		
 		Texture* reflecting_texture = new Texture();
 		reflecting_texture->cubemapFromImages("data/environments/snow");
+		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/reflection.fs");
+		StandardMaterial* reflecting_mat = new StandardMaterial(sh, reflecting_texture);
 		
-		StandardMaterial* reflecting_mat = new StandardMaterial();
-		reflecting_mat->texture = reflecting_texture;
-		reflecting_mat->shader = Shader::Get("data/shaders/basic.vs", "data/shaders/reflection.fs");
 		reflecting_node->material = reflecting_mat;
 		reflecting_node->model.setTranslation(-3, 0, 3);
 		reflecting_node->model.scale(2, 2, 2);
@@ -176,7 +181,8 @@ void Application::update(double seconds_elapsed)
 		Input::centerMouse();
 
 	// Update skybox position according to the camera
-	node_list[0]->model.setTranslation(camera->eye.x, camera->eye.y, camera->eye.z);
+	
+	node_list[SceneNode::TYPEOFNODE::SKYBOX]->model.setTranslation(camera->eye.x, camera->eye.y, camera->eye.z);
 }
 
 //Keyboard event handler (sync input)

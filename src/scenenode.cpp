@@ -3,11 +3,6 @@
 #include "texture.h"
 #include "utils.h"
 
-enum TYPEOFNODE {
-	NODE,
-	LIGHT,
-	SKYBOX
-};
 
 unsigned int SceneNode::lastNameId = 0;
 unsigned int Light::lastNameId = 0;
@@ -81,7 +76,7 @@ void SceneNode::renderInMenu()
 
 Light::Light()
 {
-	this->typeOfNode = int(TYPEOFNODE::LIGHT);
+	this->typeOfNode = (int)TYPEOFNODE::LIGHT;
 	this->name = std::string("Light " + std::to_string(lastNameId++));
 	this->ambient_intensity.set(0.7, 0.7, 0.7);
 	this->diffuse_intensity.set(0.1, 0.1, 0.1);
@@ -93,7 +88,7 @@ Light::Light()
 Light::Light(const char* name)
 {
 	this->name = name;
-	this->typeOfNode = int(TYPEOFNODE::LIGHT);
+	this->typeOfNode = (int)TYPEOFNODE::LIGHT;
 	this->ambient_intensity.set(0.7, 0.7, 0.7);
 	this->diffuse_intensity.set(0.1, 0.1, 0.1);
 	this->specular_intensity.set(0.1, 0.1, 0.1);
@@ -125,13 +120,13 @@ void Light::renderInMenu()
 
 Skybox::Skybox()
 {
-	this->typeOfNode = int(TYPEOFNODE::SKYBOX);
+	this->typeOfNode = (int)TYPEOFNODE::SKYBOX;
 
 }
 
 Skybox::Skybox(const char* name)
 {
-	this->typeOfNode = int(TYPEOFNODE::SKYBOX);
+	this->typeOfNode = (int)TYPEOFNODE::SKYBOX;
 	this->name;
 }
 
@@ -145,8 +140,4 @@ void Skybox::render(Camera* camera)
 		material->render(mesh, model, camera);
 }
 
-//void Skybox::updatePosition(Camera* camera)
-//{
-//	model.setTranslation(camera->eye.x, camera->eye.y, camera->eye.z);
-//}
 

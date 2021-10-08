@@ -13,6 +13,13 @@ class Light;
 class SceneNode {
 public:
 
+	enum TYPEOFNODE {
+		SKYBOX,
+		NODE,
+		LIGHT
+	};
+
+
 	static unsigned int lastNameId;
 	int typeOfNode;
 
@@ -56,7 +63,7 @@ public:
 	~Skybox();
 
 	void render(Camera* camera);
-	//void updatePosition(Camera* camera);
+	
 };
 
 #endif

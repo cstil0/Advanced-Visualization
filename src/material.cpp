@@ -9,6 +9,15 @@ StandardMaterial::StandardMaterial()
 	shader = Shader::Get("data/shaders/basic.vs", "data/shaders/flat.fs");
 }
 
+StandardMaterial::StandardMaterial(Shader* sh, Texture* tex)
+{
+	color = vec4(1.f, 1.f, 1.f, 1.f);
+	
+	this->shader = sh;
+	this->texture = tex;
+}
+
+
 StandardMaterial::~StandardMaterial()
 {
 

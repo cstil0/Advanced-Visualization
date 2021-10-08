@@ -22,8 +22,6 @@ void main()
 
 	vec4 color = v_color;
 	color += texture2D( u_texture, v_uv );
-
-	//vec4 color =  texture2D( u_texture, v_uv );
 	//vec4 normal = texture2D( u_normal, v_uv );
 
 	vec3 N = normalize(v_normal); // also we can use normal texture in the future

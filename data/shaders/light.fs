@@ -21,8 +21,6 @@ void main()
     vec4 color = v_color;
     color += texture2D( u_texture, v_uv );
 
-    //vec4 color =  texture2D( u_texture, v_uv );
-
     vec3 L = vec3(0.0f);
     vec3 N = normalize(v_normal); 
     vec3 V = normalize(u_camera_pos- v_world_position);

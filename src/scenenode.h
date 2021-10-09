@@ -19,12 +19,12 @@ public:
 		LIGHT
 	};
 
-
 	static unsigned int lastNameId;
 	int typeOfNode;
 
 	SceneNode();
-	SceneNode(const char* name);
+	SceneNode(const char* name, Material* material, Mesh* mesh);
+	
 	~SceneNode();
 
 	Material * material = NULL;
@@ -32,6 +32,8 @@ public:
 
 	Mesh* mesh = NULL;
 	Matrix44 model;
+
+	bool visible_flag;
 
 	virtual void render(Camera* camera);
 	virtual void renderWireframe(Camera* camera);

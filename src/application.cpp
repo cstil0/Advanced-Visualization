@@ -51,7 +51,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		//We first create a skybox node and we need to render it first, since it need a specific material
 		//We create a SkyboxMaterial to save all the corresponding information (shader, cubemap) that it need,  
 		//then we pass this material to to skybox node, and finally push it in the list of nodes.
-		Skybox* skybox_node = new Skybox();
+		Skybox* skybox_node = new Skybox("Skybox");
 		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
 		Texture* cubemap_texture = new Texture();
 		cubemap_texture->cubemapFromImages("data/environments/snow");
@@ -77,15 +77,13 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 			StandardMaterial* l_mat = new StandardMaterial();
 			light->material = l_mat;
 			//light->model.setTranslation((position.x+10)*i, position.y*i, position.z*i);
-			light->model.translate(3*i, 2, -3*i);
-			light->model.scale(0.05,0.05,0.05);
+			
+			light->model.translate(2*i, 2, -i);
+			light->model.scale(0.1, 0.1, 0.1);
 			node_list.push_back(light);
 		}
-		//We create a ball that have phong light aproximation
-		SceneNode* node = new SceneNode("Ball");
-		node->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
-		//vec3 position = node->model.getTranslation();
-		//node->model.translate(position.x, position.y, position.z);
+
+		//We create a ball that have light with phong aproximation
 
 		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/light.fs");
 		Texture* node_texture = Texture::Get("data/models/ball/albedo.png");
@@ -102,7 +100,8 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 				pm->light_list.push_back(current_light);
 			}
 		}
-		node->material = pm;
+		
+		SceneNode* node = new SceneNode("NodeWithLight", pm, Mesh::Get("data/meshes/sphere.obj.mbin"));
 		node_list.push_back(node);
 
 		//---Reflection---
@@ -110,18 +109,31 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		// we don't need modify the functions (render, setUniforms) we can reuse StandardMaterial 
 		// to organize this architecture. Then, we push it to the node_list.
 
-		SceneNode* reflecting_node = new SceneNode("Reflection");
-		reflecting_node->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
-		
+	
 		Texture* reflecting_texture = new Texture();
 		reflecting_texture->cubemapFromImages("data/environments/snow");
 		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/reflection.fs");
 		StandardMaterial* reflecting_mat = new StandardMaterial(sh, reflecting_texture);
 		
+		SceneNode* reflecting_node = new SceneNode("NodeWithReflection", reflecting_mat, Mesh::Get("data/meshes/sphere.obj.mbin"));
+
 		reflecting_node->material = reflecting_mat;
-		reflecting_node->model.setTranslation(-3, 0, 3);
 		reflecting_node->model.scale(2, 2, 2);
+		reflecting_node->model.setTranslation(-3, 0, 3);
+		
 		node_list.push_back(reflecting_node);
+
+		//Texture node without ilumination
+		
+		Texture* texture = Texture::Get("data/models/ball/brick_disp.png");
+		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/texture.fs");
+		StandardMaterial* material = new StandardMaterial(sh, texture);
+
+		SceneNode* texture_node = new SceneNode("NodeWithoutLight", material, Mesh::Get("data/meshes/sphere.obj.mbin"));
+		
+		texture_node->model.scale(2, 2, 2);
+		texture_node->model.setTranslation(3, 0, -3);
+		node_list.push_back(texture_node);
 
 
 	}

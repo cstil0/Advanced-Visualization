@@ -5,13 +5,13 @@
 
 StandardMaterial::StandardMaterial()
 {
-	color = vec4(1.f, 1.f, 1.f, 1.f);
+	color = vec4(1.f, 1.f, 0.f, 1.f);
 	shader = Shader::Get("data/shaders/basic.vs", "data/shaders/flat.fs");
 }
 
 StandardMaterial::StandardMaterial(Shader* sh, Texture* tex)
 {
-	color = vec4(1.f, 1.f, 1.f, 1.f);
+	color = vec4(1.f, 1.f, 0.f, 1.f);
 	
 	this->shader = sh;
 	this->texture = tex;
@@ -36,7 +36,7 @@ void StandardMaterial::setUniforms(Camera* camera, Matrix44 model)
 	//shader->setUniform("u_exposure", Application::instance->scene_exposure);
 
 	if (texture)
-		shader->setUniform("u_texture", texture);
+		shader->setUniform("u_texture", texture, EOutput::ALBEDO);
 	//if (normal)
 	//	shader->setUniform("u_normal", normal);
 }
@@ -62,6 +62,7 @@ void StandardMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 void StandardMaterial::renderInMenu()
 {
 	ImGui::ColorEdit3("Color", (float*)&color); // Edit 3 floats representing a color
+	
 }
 
 WireframeMaterial::WireframeMaterial()
@@ -98,16 +99,16 @@ PhongMaterial::PhongMaterial()
 {
 	
 	this->color.set(0.f, 0.f, 0.f, 0.f); //ambient material color
-	this->specular.set(0.5f,0.5f,0.5f);
-	this->diffuse.set(0.5f, 0.5f, 0.5f);
+	this->specular.set(0.5f, 0.0f, 0.0f);
+	this->diffuse.set(0.0f, 0.0f, 0.5f);
 	this->shininess = 20;
 }
 
 PhongMaterial::PhongMaterial(Shader* sh, Texture* texture)
 {
 	this->color.set(0.f, 0.f, 0.f, 0.f); //ambient material color
-	this->specular.set(0.5f, 0.5f, 0.5f);
-	this->diffuse.set(0.5f, 0.5f, 0.5f);
+	this->specular.set(0.5f, 0.0f, 0.0f);
+	this->diffuse.set(0.0f, 0.0f, 0.5f);
 	this->shininess = 20;
 	
 	this->shader = sh;
@@ -125,6 +126,7 @@ void PhongMaterial::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_model", model);
 	shader->setUniform("u_color", this->color);
 
+	//We create variables to store lights information and then fill them with a bucle for
 	std::vector<vec3> light_position;
 	std::vector<vec3> light_Ia;
 	std::vector<vec3> light_Id;
@@ -138,9 +140,9 @@ void PhongMaterial::setUniforms(Camera* camera, Matrix44 model)
 		light_Id.push_back(light->diffuse_intensity);
 		light_Is.push_back(light->specular_intensity);
 
-		
 	}
 
+	//In case of one light
 	/*shader->setUniform("u_Ia", this->light->ambient_intensity);
 	shader->setUniform("u_Id", this->light->diffuse_intensity);
 	shader->setUniform("u_Is", this->light->specular_intensity);
@@ -152,16 +154,16 @@ void PhongMaterial::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_Id", light_Id);
 	shader->setUniform("u_Is", light_Is);
 
-
 	shader->setUniform("u_specular", specular);
 	shader->setUniform("u_diffuse", diffuse);
 	shader->setUniform("u_shininess", shininess);
 
 	if (texture)
-		shader->setUniform("u_texture", texture );
-	if (normal)
-		shader->setUniform("u_normal", normal);
+		shader->setUniform("u_texture", texture, EOutput::ALBEDO);
+	//if (normal)
+	//	shader->setUniform("u_normal", normal);
 }
+
 
 void PhongMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 {
@@ -213,7 +215,7 @@ void SkyboxMaterial::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_color", color);
 	
 	if (texture)
-		shader->setUniform("u_texture", texture);
+		shader->setUniform("u_texture", texture, EOutput::ALBEDO);
 }
 
 void SkyboxMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)

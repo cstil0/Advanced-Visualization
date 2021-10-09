@@ -66,7 +66,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		// we create the PhongMaterial with corresponding parameters, like shader, and texture.
 		// Also we want to represent the node light in the scene, so we create it and pass the information  
 		// to its StanddrdMaterial, since in this case, it just represent the node light that affect our ball
-		// And we can have a attribute light node in the PhongMaterial to have acess of light's information 
+		// And we can have a attribute light_node_list in the PhongMaterial to have acess of light's information 
 		// (position, colors, etc.)
 		//And finally, when every information is passed, we push both nodes in the list.
 		int numb_lights = 2;
@@ -81,32 +81,34 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 			light->model.scale(0.05,0.05,0.05);
 			node_list.push_back(light);
 		}
-
+		//We create a ball that have phong light aproximation
 		SceneNode* node = new SceneNode("Ball");
 		node->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
-		vec3 position = node->model.getTranslation();
-		node->model.translate(position.x, position.y, position.z);
+		//vec3 position = node->model.getTranslation();
+		//node->model.translate(position.x, position.y, position.z);
 
 		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/light.fs");
 		Texture* node_texture = Texture::Get("data/models/ball/albedo.png");
 
 		PhongMaterial* pm = new PhongMaterial(sh, node_texture);
-
+		//Since in this case, we want have multiple lights, in this case using singlePass
+		//We pass all the lights inf. to the shader, and in there accumulating total light factor.
+		//Therefore, we have to check the list of nodes, and downcast if is a light node, and pass
+		//them to the attribute light_list.
 		for (int i = 0; i < node_list.size(); i++)
 		{
-			
 			if (node_list[i]->typeOfNode == SceneNode::TYPEOFNODE::LIGHT) {
 				Light* current_light = (Light*)node_list[i];
 				pm->light_list.push_back(current_light);
 			}
 		}
-		
 		node->material = pm;
 		node_list.push_back(node);
 
 		//---Reflection---
 		// We create a reflected node and it's corresponfing material, since in this case
-		//---. ME HE QUEDADO AUI!!!
+		// we don't need modify the functions (render, setUniforms) we can reuse StandardMaterial 
+		// to organize this architecture. Then, we push it to the node_list.
 
 		SceneNode* reflecting_node = new SceneNode("Reflection");
 		reflecting_node->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
@@ -153,8 +155,8 @@ void Application::render(void)
 	}
 
 	//Draw the floor grid
-	if(render_debug)
-		drawGrid();
+	//if(render_debug)
+		//drawGrid();
 }
 
 void Application::update(double seconds_elapsed)

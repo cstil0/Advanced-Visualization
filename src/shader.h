@@ -59,7 +59,8 @@ public:
 	void setUniform(const char* varname, const Matrix44& input) { assert(current == this); setMatrix44(varname, input); }
 	void setUniform(const char* varname, Texture* texture, int slot = -1) { assert(current == this); setTexture(varname, texture, slot); }
 	void setUniform(const char* varname, std::vector<Matrix44>& m_vector) { assert(current == this && m_vector.size()); setMatrix44Array(varname, &m_vector[0], m_vector.size()); }
-
+	
+	// we create a setUniform function to be able upload parameters that are std Vector of vector3
 	void setUniform(const char* varname, std::vector<Vector3>& v_vector) { assert(current == this && v_vector.size()); setVector3Array(varname, &v_vector[0], v_vector.size()); }
 
 

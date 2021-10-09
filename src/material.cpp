@@ -210,7 +210,6 @@ void SkyboxMaterial::setUniforms(Camera* camera, Matrix44 model)
 {
 	shader->setUniform("u_viewprojection", camera->viewprojection_matrix);
 	shader->setUniform("u_camera_position", camera->eye);
-	//model.translate(camera->eye.x, camera->eye.y, camera->eye.z);
 	shader->setUniform("u_model", model);
 	shader->setUniform("u_color", color);
 	
@@ -227,6 +226,9 @@ void SkyboxMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 
 		//upload uniforms
 		setUniforms(camera, model);
+		
+		//We disable the depth test because we want render skybox as the background of the scene
+		// And to avoid objects that is hebind the cube if we have into account the Zbuffer
 		
 		glDisable(GL_DEPTH_TEST);
 

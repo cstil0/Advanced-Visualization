@@ -65,7 +65,7 @@ public:
 	~Skybox();
 
 	void render(Camera* camera);
-	
+	void renderInMenu();
 };
 
 #endif

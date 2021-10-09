@@ -123,7 +123,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		
 		node_list.push_back(reflecting_node);
 
-		//Texture node without ilumination
+		//---Texture node without ilumination---
 		
 		Texture* texture = Texture::Get("data/models/ball/brick_disp.png");
 		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/texture.fs");
@@ -134,7 +134,6 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		texture_node->model.scale(2, 2, 2);
 		texture_node->model.setTranslation(3, 0, -3);
 		node_list.push_back(texture_node);
-
 
 	}
 	
@@ -202,8 +201,7 @@ void Application::update(double seconds_elapsed)
 	if (mouse_locked)
 		Input::centerMouse();
 
-	// Update skybox position according to the camera
-	
+	// Update skybox center position according to the camera position
 	node_list[SceneNode::TYPEOFNODE::SKYBOX]->model.setTranslation(camera->eye.x, camera->eye.y, camera->eye.z);
 }
 

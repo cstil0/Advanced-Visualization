@@ -6,7 +6,6 @@
 
 unsigned int SceneNode::lastNameId = 0;
 unsigned int Light::lastNameId = 0;
-//unsigned int Skybox::lastNameId = 0;
 
 unsigned int mesh_selected = 0;
 
@@ -153,6 +152,11 @@ void Skybox::render(Camera* camera)
 {
 	if (material && this->visible_flag)
 		material->render(mesh, model, camera);
+}
+
+void Skybox::renderInMenu()
+{
+	ImGui::Checkbox("Visible", &visible_flag);
 }
 
 

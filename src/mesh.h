@@ -114,8 +114,6 @@ public:
 	static Mesh* getQuad(); //get global quad
 	static Mesh* getCube(); //get global cube
 
-
-
 	//optimize meshes
 	void uploadToVRAM();
 	bool interleaveBuffers();

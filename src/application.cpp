@@ -69,7 +69,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		// And we can have a attribute light_node_list in the PhongMaterial to have acess of light's information 
 		// (position, colors, etc.)
 		//And finally, when every information is passed, we push both nodes in the list.
-		int numb_lights = 2;
+		int numb_lights = 1;
 		for (int i = 0; i < numb_lights; i++) {
 			Light* light = new Light();
 			light->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");

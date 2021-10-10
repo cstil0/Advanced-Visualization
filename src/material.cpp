@@ -11,7 +11,7 @@ StandardMaterial::StandardMaterial()
 
 StandardMaterial::StandardMaterial(Shader* sh, Texture* tex)
 {
-	color = vec4(1.f, 1.f, 0.f, 1.f);
+	color = vec4(0.4f, 0.5f, 0.5f, 1.f);
 	
 	this->shader = sh;
 	this->texture = tex;
@@ -98,7 +98,7 @@ void WireframeMaterial::render(Mesh* mesh, Matrix44 model, Camera * camera)
 PhongMaterial::PhongMaterial()
 {
 	
-	this->color.set(0.f, 0.f, 0.f, 0.f); //ambient material color
+	this->color.set(0.7f, 0.7f, 0.2f, 0.f); //ambient material color
 	this->specular.set(0.5f, 0.0f, 0.0f);
 	this->diffuse.set(0.0f, 0.0f, 0.5f);
 	this->shininess = 20;
@@ -106,7 +106,7 @@ PhongMaterial::PhongMaterial()
 
 PhongMaterial::PhongMaterial(Shader* sh, Texture* texture)
 {
-	this->color.set(0.f, 0.f, 0.f, 0.f); //ambient material color
+	this->color.set(0.7f, 0.7f, 0.2f, 0.f); //ambient material color
 	this->specular.set(0.5f, 0.0f, 0.0f);
 	this->diffuse.set(0.0f, 0.0f, 0.5f);
 	this->shininess = 20;
@@ -128,17 +128,21 @@ void PhongMaterial::setUniforms(Camera* camera, Matrix44 model)
 
 	//We create variables to store lights information and then fill them with a bucle for
 	std::vector<vec3> light_position;
-	std::vector<vec3> light_Ia;
+	//std::vector<vec3> light_Ia;
 	std::vector<vec3> light_Id;
 	std::vector<vec3> light_Is;
+
+	//vec3 light_Ia;
 
 	for (int i = 0; i < this->light_list.size(); i++)
 	{
 		Light* light = light_list[i];
 		light_position.push_back(light->model.getTranslation());
-		light_Ia.push_back(light->ambient_intensity);
+		//light_Ia.push_back();
 		light_Id.push_back(light->diffuse_intensity);
 		light_Is.push_back(light->specular_intensity);
+
+		
 
 	}
 
@@ -150,7 +154,7 @@ void PhongMaterial::setUniforms(Camera* camera, Matrix44 model)
 	*/
 
 	shader->setUniform("u_light_pos", light_position);
-	shader->setUniform("u_Ia", light_Ia);
+	shader->setUniform("u_Ia", this->light_list[0]->ambient_intensity); //just one time
 	shader->setUniform("u_Id", light_Id);
 	shader->setUniform("u_Is", light_Is);
 

@@ -46,7 +46,10 @@ void SceneNode::renderWireframe(Camera* camera)
 
 void SceneNode::renderInMenu()
 {
-	ImGui::Checkbox("Visible", &visible_flag);
+	if (! (this->typeOfNode == TYPEOFNODE::LIGHT)) {
+		ImGui::Checkbox("Visible", &visible_flag);
+	}
+	
 	//Model edit
 	if (ImGui::TreeNode("Model")) 
 	{
@@ -117,16 +120,19 @@ void Light::renderInMenu()
 {
 	SceneNode::renderInMenu();
 
-	#ifndef SKIP_IMGUI 
-		if (ImGui::TreeNode("Light intensities"))
-		{
+	int numLight = 0;
+	
+	if (ImGui::TreeNode("Light intensities"))
+	{
+		if (numLight == 0) {
 			ImGui::ColorEdit3("ambient_intensity", (float*)&this->ambient_intensity);
-			ImGui::ColorEdit3("diffuse_intensity", (float*)&this->diffuse_intensity);
-			ImGui::ColorEdit3("specular_intensity", (float*)&this->specular_intensity);
-			ImGui::TreePop();
+			numLight++;
 		}
+		ImGui::ColorEdit3("diffuse_intensity", (float*)&this->diffuse_intensity);
+		ImGui::ColorEdit3("specular_intensity", (float*)&this->specular_intensity);
+		ImGui::TreePop();
+	}
 
-	#endif
 }
 
 

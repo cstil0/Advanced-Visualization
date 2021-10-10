@@ -37,8 +37,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	scene_exposure = 1;
 	output = 0;
 
-	//since the color of the ambient is a global variable
-	
+	//define the color of the ambient as a global variable since it is a property of the scene
 	ambient_light.set(0.7, 0.7, 0.7);
 
 	// OpenGL flags
@@ -52,9 +51,9 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 	{
 		//---SkyboxNode---
-		//We first create a skybox node and we need to render it first, since it need a specific material
-		//We create a SkyboxMaterial to save all the corresponding information (shader, cubemap) that it need,  
-		//then we pass this material to to skybox node, and finally push it in the list of nodes.
+		//We first create a skybox node and we need to render it first, since it needs a specific material
+		//We create a SkyboxMaterial to save all its corresponding information (shader, cubemap),  
+		//then we pass this material to the skybox node, and finally push it in the list of nodes.
 		Skybox* skybox_node = new Skybox("Skybox");
 		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
 		Texture* cubemap_texture = new Texture();
@@ -65,39 +64,36 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		skybox_node->material = sky_mat;
 		node_list.push_back(skybox_node);
 
-		//---PhongEcuation---
-		// Following the same flow like before, we create a ball node, and its attribute material,
-		// we create the PhongMaterial with corresponding parameters, like shader, and texture.
-		// Also we want to represent the node light in the scene, so we create it and pass the information  
+		//---PhongImplementation---
+		// Following the same flow as before, we create a ball node, and its attribute material,
+		// we create the PhongMaterial with its corresponding parameters.
+		// Also we want to represent the light node in the scene, so we create it and pass the information  
 		// to its StanddrdMaterial, since in this case, it just represent the node light that affect our ball
-		// And we can have a attribute light_node_list in the PhongMaterial to have acess of light's information 
-		// (position, colors, etc.)
-		//And finally, when every information is passed, we push both nodes in the list.
-		int numb_lights = 1;
+		// And we can have the attribute light_node_list in the PhongMaterial to have acess of light's information
+		// Finally, when every information is passed, we push both nodes in the list.
+		int numb_lights = 2;
 		for (int i = 0; i < numb_lights; i++) {
 			Light* light = new Light();
 			light->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
 
 			StandardMaterial* l_mat = new StandardMaterial();
 			light->material = l_mat;
-			//light->model.setTranslation((position.x+10)*i, position.y*i, position.z*i);
 			
-			light->model.translate(2*i, 2, -i);
+			light->model.translate(-2+4*i, 2*i, 2*i);
 			light->model.scale(0.1, 0.1, 0.1);
 			node_list.push_back(light);
 		}
 
-		//We create a ball that have light with phong aproximation
-
+		//Create a ball rendered with Phong approximation
 		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/light.fs");
 		Texture* node_texture = Texture::Get("data/models/ball/albedo.png");
 
 		PhongMaterial* pm = new PhongMaterial(sh, node_texture);
-		//Since in this case, we want have multiple lights, in this case using singlePass
-		//We pass all the lights inf. to the shader, and in there accumulating total light factor.
-		//Therefore, we have to check the list of nodes, and downcast if is a light node, and pass
-		//them to the attribute light_list.
-		
+
+		//Since in this case we want have multiple lights we use a singlePass.
+		//We pass all the lights inf. to the shader, and compute the total light intensity there.
+		//Therefore, we need to check the list of nodes, downcast if is a light node, and save it
+		//into the attribute light_list of the node we just created.
 		for (int i = 0; i < node_list.size(); i++)
 		{
 			if (node_list[i]->typeOfNode == SceneNode::TYPEOFNODE::LIGHT) {
@@ -111,10 +107,8 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 		//---Reflection---
 		// We create a reflected node and it's corresponfing material, since in this case
-		// we don't need modify the functions (render, setUniforms) we can reuse StandardMaterial 
-		// to organize this architecture. Then, we push it to the node_list.
-
-	
+		// we don't need modify the functions (render and setUniforms), we can reuse StandardMaterial 
+		// to organize this architecture. Then, we push it to the node_list.	
 		Texture* reflecting_texture = new Texture();
 		reflecting_texture->cubemapFromImages("data/environments/snow");
 		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/reflection.fs");
@@ -129,7 +123,6 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		node_list.push_back(reflecting_node);
 
 		//---Texture node without ilumination---
-		
 		Texture* texture = Texture::Get("data/models/ball/brick_disp.png");
 		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/texture.fs");
 		StandardMaterial* material = new StandardMaterial(sh, texture);
@@ -182,9 +175,6 @@ void Application::update(double seconds_elapsed)
 	
 	//example
 	float angle = seconds_elapsed * 10.f * DEG2RAD;
-	/*for (int i = 0; i < root.size(); i++) {
-		root[i]->model.rotate(angle, Vector3(0,1,0));
-	}*/
 
 	//mouse input to rotate the cam
 	if ((Input::mouse_state & SDL_BUTTON_LEFT && !ImGui::IsAnyWindowHovered() 

@@ -1,4 +1,3 @@
-
 varying vec3 v_position; //position in local coords
 varying vec3 v_world_position; //position in world coord
 varying vec3 v_normal; //normal in the pixel
@@ -27,7 +26,7 @@ void main()
     vec4 color = u_color;
     color *= texture2D( u_texture, uv );
     
-    //We calculate the light equation vectors
+    // Compute the light equation vectors
     vec3 L = vec3(0.0f);
     vec3 N = normalize(v_normal); 
     vec3 V = normalize(u_camera_pos - v_world_position);

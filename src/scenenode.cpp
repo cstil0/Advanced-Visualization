@@ -78,8 +78,6 @@ void SceneNode::renderInMenu()
 
 		ImGui::TreePop();
 	}
-
-	
 }
 
 Light::Light()
@@ -88,8 +86,8 @@ Light::Light()
 	this->visible_flag = TRUE;
 	this->name = std::string("Light " + std::to_string(lastNameId++));
 	this->typeOfNode = (int)TYPEOFNODE::LIGHT;
-	this->diffuse_intensity.set(0.9, 0.1, 0.9);
-	this->specular_intensity.set(0.0, 0.9, 0.0);
+	this->diffuse_intensity.set(1.0, 1.0, 1.0);
+	this->specular_intensity.set(1.0f, 1.0f, 1.0f);
 
 }
 
@@ -100,8 +98,8 @@ Light::Light(const char* name)
 	this->name = name;
 	this->visible_flag = TRUE;
 	this->typeOfNode = (int)TYPEOFNODE::LIGHT;
-	this->diffuse_intensity.set(0.9, 0.1, 0.9);
-	this->specular_intensity.set(0.0, 0.9, 0.0);
+	this->diffuse_intensity.set(1.0, 1.0, 1.0);
+	this->specular_intensity.set(1.0f, 1.0f, 1.0f);
 }
 
 Light::~Light()

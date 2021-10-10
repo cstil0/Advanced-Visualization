@@ -12,7 +12,7 @@ class Light;
 
 class SceneNode {
 public:
-
+	// Used to identify which type of node it is
 	enum TYPEOFNODE {
 		SKYBOX,
 		NODE,

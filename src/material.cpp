@@ -29,16 +29,11 @@ void StandardMaterial::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_viewprojection", camera->viewprojection_matrix);
 	shader->setUniform("u_camera_position", camera->eye);
 	shader->setUniform("u_model", model);
-	//shader->setUniform("u_time", Application::instance->time);
-	//shader->setUniform("u_output", Application::instance->output);
 
 	shader->setUniform("u_color", this->color);
-	//shader->setUniform("u_exposure", Application::instance->scene_exposure);
 
 	if (texture)
 		shader->setUniform("u_texture", texture, EOutput::ALBEDO);
-	//if (normal)
-	//	shader->setUniform("u_normal", normal);
 }
 
 void StandardMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
@@ -99,16 +94,16 @@ PhongMaterial::PhongMaterial()
 {
 	
 	this->color.set(0.7f, 0.7f, 0.2f, 0.f); //ambient material color
-	this->specular.set(0.5f, 0.0f, 0.0f);
-	this->diffuse.set(0.0f, 0.0f, 0.5f);
+	this->specular.set(1.0f, 1.0f, 0.0f);
+	this->diffuse.set(0.0f, 0.0f, 1.0f);
 	this->shininess = 20;
 }
 
 PhongMaterial::PhongMaterial(Shader* sh, Texture* texture)
 {
-	this->color.set(0.7f, 0.7f, 0.2f, 0.f); //ambient material color
-	this->specular.set(0.5f, 0.0f, 0.0f);
-	this->diffuse.set(0.0f, 0.0f, 0.5f);
+	this->color.set(0.7f, 0.7f, 0.7f, 0.f); //ambient material color
+	this->specular.set(1.0f, 1.0f, 0.0f);
+	this->diffuse.set(0.0f, 0.0f, 1.0f);
 	this->shininess = 20;
 	
 	this->shader = sh;
@@ -126,7 +121,7 @@ void PhongMaterial::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_model", model);
 	shader->setUniform("u_color", this->color);
 
-	//We create variables to store lights information and then fill them with a bucle for
+	// Create some variables to store lights information and then fill using a for loop
 	std::vector<vec3> light_position;
 	std::vector<vec3> light_Id;
 	std::vector<vec3> light_Is;
@@ -140,13 +135,6 @@ void PhongMaterial::setUniforms(Camera* camera, Matrix44 model)
 
 	}
 
-	//In case of one light
-	/*shader->setUniform("u_Ia", this->light->ambient_intensity);
-	shader->setUniform("u_Id", this->light->diffuse_intensity);
-	shader->setUniform("u_Is", this->light->specular_intensity);
-	shader->setUniform("u_light_pos", this->light->model.getTranslation());
-	*/
-
 	shader->setUniform("u_light_pos", light_position);
 	shader->setUniform("u_Ia", Application::instance->ambient_light); //just one time
 	shader->setUniform("u_Id", light_Id);
@@ -158,8 +146,6 @@ void PhongMaterial::setUniforms(Camera* camera, Matrix44 model)
 
 	if (texture)
 		shader->setUniform("u_texture", texture, EOutput::ALBEDO);
-	//if (normal)
-	//	shader->setUniform("u_normal", normal);
 }
 
 
@@ -187,7 +173,7 @@ void PhongMaterial::renderInMenu()
 	ImGui::ColorEdit3("Color A. Material", (float*)&this->color); // Edit 3 floats representing a color
 	ImGui::ColorEdit3("Specular", (float*)&this->specular);
 	ImGui::ColorEdit3("Diffuse", (float*)&this->diffuse);
-	ImGui::SliderFloat("Shininess", (float*)&this->shininess, 0.1, 50);
+	ImGui::SliderFloat("Shininess", (float*)&this->shininess, 1, 50);
 
 }
 
@@ -227,8 +213,7 @@ void SkyboxMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 		setUniforms(camera, model);
 		
 		//We disable the depth test because we want render skybox as the background of the scene
-		// And to avoid objects that is hebind the cube if we have into account the Zbuffer
-		
+		// And to avoid objects that are behind the cube if we take into account the Zbuffer
 		glDisable(GL_DEPTH_TEST);
 
 		//do the draw call

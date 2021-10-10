@@ -52,7 +52,5 @@ void main()
     //Final phong equation
     light_intensity += ambient_light + diffuse_light + specular_light;
 
-    //gl_FragColor = vec4( 1.0, 0, 0, 1.0);
-
     gl_FragColor = vec4( light_intensity, 1.0);
 }

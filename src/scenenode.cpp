@@ -88,7 +88,6 @@ Light::Light()
 	this->visible_flag = TRUE;
 	this->name = std::string("Light " + std::to_string(lastNameId++));
 	this->typeOfNode = (int)TYPEOFNODE::LIGHT;
-	this->ambient_intensity.set(0.7, 0.7, 0.7);
 	this->diffuse_intensity.set(0.9, 0.1, 0.9);
 	this->specular_intensity.set(0.0, 0.9, 0.0);
 
@@ -101,7 +100,6 @@ Light::Light(const char* name)
 	this->name = name;
 	this->visible_flag = TRUE;
 	this->typeOfNode = (int)TYPEOFNODE::LIGHT;
-	this->ambient_intensity.set(0.7, 0.7, 0.7);
 	this->diffuse_intensity.set(0.9, 0.1, 0.9);
 	this->specular_intensity.set(0.0, 0.9, 0.0);
 }
@@ -124,10 +122,6 @@ void Light::renderInMenu()
 	
 	if (ImGui::TreeNode("Light intensities"))
 	{
-		if (numLight == 0) {
-			ImGui::ColorEdit3("ambient_intensity", (float*)&this->ambient_intensity);
-			numLight++;
-		}
 		ImGui::ColorEdit3("diffuse_intensity", (float*)&this->diffuse_intensity);
 		ImGui::ColorEdit3("specular_intensity", (float*)&this->specular_intensity);
 		ImGui::TreePop();

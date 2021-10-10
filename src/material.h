@@ -51,6 +51,7 @@ public:
 	vec3 specular;
 	vec3 diffuse;
 	float shininess;
+	
 
 	std::vector <Light*> light_list;
 

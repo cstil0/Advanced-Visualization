@@ -37,6 +37,10 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	scene_exposure = 1;
 	output = 0;
 
+	//since the color of the ambient is a global variable
+	
+	ambient_light.set(0.7, 0.7, 0.7);
+
 	// OpenGL flags
 	glEnable( GL_CULL_FACE ); //render both sides of every triangle
 	glEnable( GL_DEPTH_TEST ); //check the occlusions using the Z buffer
@@ -93,6 +97,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		//We pass all the lights inf. to the shader, and in there accumulating total light factor.
 		//Therefore, we have to check the list of nodes, and downcast if is a light node, and pass
 		//them to the attribute light_list.
+		
 		for (int i = 0; i < node_list.size(); i++)
 		{
 			if (node_list[i]->typeOfNode == SceneNode::TYPEOFNODE::LIGHT) {

@@ -41,6 +41,8 @@ public:
 	bool render_debug;
 	float scene_exposure;
 	int output;
+	vec3 ambient_light;
+	
 
 	//some vars
 	static Camera* camera; //our GLOBAL camera

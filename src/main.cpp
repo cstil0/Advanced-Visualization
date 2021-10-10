@@ -102,7 +102,9 @@ void renderGUI(SDL_Window* window, Application * game)
 		if (ImGui::TreeNode("Scene")) {
 			ImGui::DragFloat("Exposure", &Application::instance->scene_exposure, 0.01f,-2, 2);
 			ImGui::Combo("Output", &Application::instance->output, "COMPLETE\0ALBEDO\0ROUGHNESS\0\METALNESS\0NORMALS\0");
+			ImGui::ColorEdit3("Ambient Light", (float*)&Application::instance->ambient_light);
 			ImGui::TreePop();
+
 		}
 
 		if (ImGui::TreeNode("Camera")) {

@@ -128,21 +128,15 @@ void PhongMaterial::setUniforms(Camera* camera, Matrix44 model)
 
 	//We create variables to store lights information and then fill them with a bucle for
 	std::vector<vec3> light_position;
-	//std::vector<vec3> light_Ia;
 	std::vector<vec3> light_Id;
 	std::vector<vec3> light_Is;
-
-	//vec3 light_Ia;
 
 	for (int i = 0; i < this->light_list.size(); i++)
 	{
 		Light* light = light_list[i];
 		light_position.push_back(light->model.getTranslation());
-		//light_Ia.push_back();
 		light_Id.push_back(light->diffuse_intensity);
 		light_Is.push_back(light->specular_intensity);
-
-		
 
 	}
 
@@ -154,7 +148,7 @@ void PhongMaterial::setUniforms(Camera* camera, Matrix44 model)
 	*/
 
 	shader->setUniform("u_light_pos", light_position);
-	shader->setUniform("u_Ia", this->light_list[0]->ambient_intensity); //just one time
+	shader->setUniform("u_Ia", Application::instance->ambient_light); //just one time
 	shader->setUniform("u_Id", light_Id);
 	shader->setUniform("u_Is", light_Is);
 
@@ -189,6 +183,7 @@ void PhongMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 
 void PhongMaterial::renderInMenu()
 {
+
 	ImGui::ColorEdit3("Color A. Material", (float*)&this->color); // Edit 3 floats representing a color
 	ImGui::ColorEdit3("Specular", (float*)&this->specular);
 	ImGui::ColorEdit3("Diffuse", (float*)&this->diffuse);

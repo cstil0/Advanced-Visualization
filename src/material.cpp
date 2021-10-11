@@ -149,23 +149,23 @@ void PhongMaterial::setUniforms(Camera* camera, Matrix44 model)
 }
 
 
-void PhongMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
-{
-	if (mesh && shader)
-	{
-		//enable shader
-		shader->enable();
-
-		//upload uniforms
-		setUniforms(camera, model);
-		
-		//do the draw call
-		mesh->render(GL_TRIANGLES);
-
-		//disable shader
-		shader->disable();
-	}
-}
+//void PhongMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
+//{
+//	if (mesh && shader)
+//	{
+//		//enable shader
+//		shader->enable();
+//
+//		//upload uniforms
+//		setUniforms(camera, model);
+//		
+//		//do the draw call
+//		mesh->render(GL_TRIANGLES);
+//
+//		//disable shader
+//		shader->disable();
+//	}
+//}
 
 void PhongMaterial::renderInMenu()
 {
@@ -180,6 +180,7 @@ void PhongMaterial::renderInMenu()
 SkyboxMaterial::SkyboxMaterial()
 {
 }
+
 
 SkyboxMaterial::SkyboxMaterial( Shader* sh, Texture* tex )
 {
@@ -231,3 +232,59 @@ void SkyboxMaterial::renderInMenu()
 
 }
 
+PBRMaterial::PBRMaterial()
+{
+}
+
+PBRMaterial::PBRMaterial(Shader* sh, Texture* tex, Texture* normal, Texture* rough, Texture* metal) {
+	this->shader = sh;
+	this->texture = tex;
+	this->normal_texture = normal;
+	this->roughness_texture = rough;
+	this->metalness_texture = metal;
+}
+
+PBRMaterial::~PBRMaterial()
+{
+}
+
+void PBRMaterial::setUniforms(Camera* camera, Matrix44 model)
+{
+	shader->setUniform("u_viewprojection", camera->viewprojection_matrix);
+	shader->setUniform("u_camera_position", camera->eye);
+	shader->setUniform("u_model", model);
+	shader->setUniform("u_color", color);
+	
+
+	if (texture)
+		shader->setTexture("u_texture", texture, EOutput::ALBEDO);
+	if (this->normal_texture)
+		shader->setTexture("u_normalmap_texture", this->normal_texture, EOutput::NORMALS);
+	if (this->roughness_texture)
+		shader->setTexture("u_roughness_texture", this->roughness_texture, EOutput::ROUGHNESS);
+	if (this->metalness_texture)
+		shader->setTexture("u_metalness_texture", this->metalness_texture, EOutput::METALNESS);
+
+}
+
+void PBRMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
+{
+	if (mesh && shader)
+	{
+		//enable shader
+		shader->enable();
+
+		//upload uniforms
+		setUniforms(camera, model);
+
+		//do the draw call
+		mesh->render(GL_TRIANGLES);
+
+		//disable shader
+		shader->disable();
+	}
+}
+
+void PBRMaterial::renderInMenu() {
+
+}

@@ -15,7 +15,7 @@ public:
 
 	Shader* shader = NULL;
 	Texture* texture = NULL;
-	Texture* normal = NULL;
+	
 	vec4 color;
 
 	virtual void setUniforms(Camera* camera, Matrix44 model) = 0;
@@ -60,7 +60,7 @@ public:
 	~PhongMaterial();
 
 	void setUniforms(Camera* camera, Matrix44 model);
-	void render(Mesh* mesh, Matrix44 model, Camera* camera);
+	//void render(Mesh* mesh, Matrix44 model, Camera* camera);
 	void renderInMenu();
 };
 
@@ -75,5 +75,21 @@ public:
 	void render(Mesh* mesh, Matrix44 model, Camera* camera);
 	void renderInMenu();
 };
+
+class PBRMaterial : public StandardMaterial {
+public:
+	Texture* normal_texture = NULL;
+	Texture* roughness_texture = NULL;
+	Texture* metalness_texture = NULL;
+
+	PBRMaterial();
+	PBRMaterial(Shader* sh, Texture* tex, Texture* normal, Texture* rough, Texture* metal);
+	~PBRMaterial();
+
+	void setUniforms(Camera* camera, Matrix44 model);
+	void render(Mesh* mesh, Matrix44 model, Camera* camera);
+	void renderInMenu();
+};
+
 
 #endif

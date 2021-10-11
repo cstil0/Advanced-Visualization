@@ -50,6 +50,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	camera->setPerspective(45.f,window_width/(float)window_height,0.1f,10000.f); //set the projection, we want to be perspective
 
 	{
+		/*
 		//---SkyboxNode---
 		//We first create a skybox node and we need to render it first, since it needs a specific material
 		//We create a SkyboxMaterial to save all its corresponding information (shader, cubemap),  
@@ -133,6 +134,27 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		texture_node->model.setTranslation(3, 0, -3);
 		node_list.push_back(texture_node);
 
+		*/
+
+		Texture* color_texture = Texture::Get("data/models/ball/albedo.png");
+		Texture* normalmap_texture = Texture::Get("data/models/ball/normal.png");
+		Texture* roughness_texture = Texture::Get("data/models/ball/roughness.png");
+		Texture* metalness_texture = Texture::Get("data/models/ball/metalness.png");
+
+		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/pbr.fs");
+		PBRMaterial* pbr_material = new PBRMaterial(sh, color_texture, normalmap_texture, roughness_texture, metalness_texture);
+		
+		SceneNode* pbr_node = new SceneNode("BallPBR", pbr_material, Mesh::Get("data/meshes/sphere.obj.mbin"));
+		node_list.push_back(pbr_node);
+
+
+
+
+
+
+
+
+
 	}
 	
 	//hide the cursor
@@ -197,7 +219,7 @@ void Application::update(double seconds_elapsed)
 		Input::centerMouse();
 
 	// Update skybox center position according to the camera position
-	node_list[SceneNode::TYPEOFNODE::SKYBOX]->model.setTranslation(camera->eye.x, camera->eye.y, camera->eye.z);
+	//node_list[SceneNode::TYPEOFNODE::SKYBOX]->model.setTranslation(camera->eye.x, camera->eye.y, camera->eye.z);
 }
 
 //Keyboard event handler (sync input)

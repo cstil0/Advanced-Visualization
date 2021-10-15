@@ -62,6 +62,11 @@ public:
 	void onGamepadButtonUp(SDL_JoyButtonEvent event);
 	void onResize(int width, int height);
 	void onFileChanged(const char* filename);
+
+	//functions to render in the scene
+	void renderSkybox();
+	void renderPhongEquation();
+	void renderReflection();
 };
 
 

@@ -74,12 +74,19 @@ vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
     return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
-vec3 GeometryDistributionFunction(vec3 N, vec3 L, vec3 H, vec3 V){
+vec3 FresnelSchlick(float LdotN, vec3 F0)
+{
+    return F0 + ( 1.0 - F0) * pow(clamp(1.0 - LdotN, 0.0, 1.0), 5.0); // otra vez clmap??
+}
+
+
+float GeometryDistributionFunction(vec3 N, vec3 L, vec3 H, vec3 V){
 	float NdotH = clamp(dot(N,H), 0.0f, 1.0f);
 	float NdotV = clamp(dot(N,V), 0.0f, 1.0f);
 	float VdotH = clamp(dot(V,H), 0.0f, 1.0f);
 	float NdotL = clamp(dot(N,L), 0.0f, 1.0f);
-	retrun min(1,(2*NdotH*NdotV)/VdotH, (2*NdotH*NdotL)/VdotH);
+
+	return min(1, min( (2*NdotH*NdotV)/VdotH , (2*NdotH*NdotL)/VdotH ) );
 }
 
 //void computeVectors(out L, ) PARA CALCULAR LOS VECTORES, PERO HAY QUE MIRAR SI ES IN O OUT
@@ -92,38 +99,41 @@ void main()
 	// Compute the light equation vectors
 	vec3 L = normalize(u_light_pos - v_world_position);
     vec3 normal = normalize(v_normal); 
-	vec3 normal_pixel = texture2D(u_normalmap_texture, uv);
+	vec3 normal_pixel = texture2D(u_normalmap_texture, uv).xyz;
 	vec3 V = normalize(u_camera_pos - v_world_position);
 
 	vec3 N = perturbNormal(normal, V, uv, normal_pixel );
 	vec3 H = normalize(V + L);
-	vec3 R = reflect(L,N);
+	vec3 R = reflect(L, N);
 
 	vec4 albedo = u_color;
 
-	//textures:
+	// textures:
+	
 	albedo *= texture2D( u_texture, uv ); //base color
 	float roughness = texture2D(u_roughness_texture, uv).x;
 	float metalness = texture2D(u_metalness_texture, uv).x;
 
 	vec3 f_diffuse = ((1.0 - metalness) *albedo.xyz) / PI; //since we are doing the linear interpolation with dialectric and conductor material
- 	float F0 = 0.04;
+ 	vec3 F0 = mix(0.04, albedo.xyz, metalness);
+
 	float LdotN = clamp(dot(L,N), 0.0f, 1.0f); //? OR MAYBE nDOTl
-	vec3 F = FresnelSchlickRoughness(LdotN, F0, roughness);
+	// vec3 F = FresnelSchlickRoughness( LdotN, F0, roughness);
+	vec3 F = FresnelSchlick( LdotN, F0 );
 
 	float G = GeometryDistributionFunction(N, H, L, V);
+	
+
+
+
+
+	// vec3 f_specular = 0.0;
 
 
 
 
 
-	vec3 f_specular = 0.0;
-
-
-
-
-
-	gl_FragColor = color;
+	gl_FragColor = vec4(F, 1.0);
 
 	// 1. Create Material
 	// ...

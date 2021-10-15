@@ -43,7 +43,7 @@ vec3 getReflectionColor(vec3 r, float roughness)
 	else if(lod < 5.0) color = mix( textureCube(u_texture_prem_3, r), textureCube(u_texture_prem_4, r), lod - 4.0 );
 	else color = textureCube(u_texture_prem_4, r);
 
-	color.rgb = linear_to_gamma(color.rgb);
+	//color.rgb = linear_to_gamma(color.rgb);
 
 	return color.rgb;
 }

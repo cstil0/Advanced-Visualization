@@ -66,7 +66,23 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/pbr.fs");
 		PBRMaterial* pbr_material = new PBRMaterial(sh, color_texture, normalmap_texture, roughness_texture, metalness_texture);
 		
+		//create a light
+		int numb_lights = 1;
+		for (int i = 0; i < numb_lights; i++) {
+			Light* light = new Light();
+			light->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
+
+			StandardMaterial* l_mat = new StandardMaterial();
+			light->material = l_mat;
+
+			light->model.translate(-2 + 4 * i, 2 * i, 2 * i);
+			light->model.scale(0.1, 0.1, 0.1);
+			node_list.push_back(light);
+			pbr_material->light = light;
+		}
+
 		SceneNode* pbr_node = new SceneNode("BallPBR", pbr_material, Mesh::Get("data/meshes/sphere.obj.mbin"));
+		pbr_node->material = pbr_material;
 		node_list.push_back(pbr_node);
 
 

@@ -74,6 +74,14 @@ vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
     return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
+vec3 GeometryDistributionFunction(vec3 N, vec3 L, vec3 H, vec3 V){
+	float NdotH = clamp(dot(N,H), 0.0f, 1.0f);
+	float NdotV = clamp(dot(N,V), 0.0f, 1.0f);
+	float VdotH = clamp(dot(V,H), 0.0f, 1.0f);
+	float NdotL = clamp(dot(N,L), 0.0f, 1.0f);
+	retrun min(1,(2*NdotH*NdotV)/VdotH, (2*NdotH*NdotL)/VdotH);
+}
+
 //void computeVectors(out L, ) PARA CALCULAR LOS VECTORES, PERO HAY QUE MIRAR SI ES IN O OUT
 
 
@@ -100,10 +108,10 @@ void main()
 
 	vec3 f_diffuse = ((1.0 - metalness) *albedo.xyz) / PI; //since we are doing the linear interpolation with dialectric and conductor material
  	float F0 = 0.04;
-	float LdotN = clamp(dot(L,N), 0.0f, 1.0f);
+	float LdotN = clamp(dot(L,N), 0.0f, 1.0f); //? OR MAYBE nDOTl
 	vec3 F = FresnelSchlickRoughness(LdotN, F0, roughness);
 
-	float G = GeometryDistributionFunction();
+	float G = GeometryDistributionFunction(N, H, L, V);
 
 
 

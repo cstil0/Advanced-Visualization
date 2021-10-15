@@ -82,6 +82,8 @@ public:
 	Texture* roughness_texture = NULL;
 	Texture* metalness_texture = NULL;
 
+	Light* light = NULL;
+
 	PBRMaterial();
 	PBRMaterial(Shader* sh, Texture* tex, Texture* normal, Texture* rough, Texture* metal);
 	~PBRMaterial();

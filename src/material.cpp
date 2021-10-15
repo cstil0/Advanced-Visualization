@@ -254,7 +254,7 @@ void PBRMaterial::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_camera_position", camera->eye);
 	shader->setUniform("u_model", model);
 	shader->setUniform("u_color", color);
-	
+	shader->setUniform("u_light_pos", light->model.getTranslation());
 
 	if (texture)
 		shader->setTexture("u_texture", texture, EOutput::ALBEDO);

@@ -114,8 +114,8 @@ void main()
 	float roughness = texture2D(u_roughness_texture, uv).x;
 	float metalness = texture2D(u_metalness_texture, uv).x;
 
-	vec3 f_diffuse = ((1.0 - metalness) *albedo.xyz) / PI; //since we are doing the linear interpolation with dialectric and conductor material
- 	vec3 F0 = mix(0.04, albedo.xyz, metalness);
+	vec3 f_diffuse = ((1.0 - metalness) * albedo.xyz) / PI; //since we are doing the linear interpolation with dialectric and conductor material
+ 	vec3 F0 = mix( vec3(0.04), albedo.xyz, metalness);
 
 	float LdotN = clamp(dot(L,N), 0.0f, 1.0f); //? OR MAYBE nDOTl
 	// vec3 F = FresnelSchlickRoughness( LdotN, F0, roughness);
@@ -133,7 +133,7 @@ void main()
 
 
 
-	gl_FragColor = vec4(F, 1.0);
+	gl_FragColor = vec4( F,1.0);
 
 	// 1. Create Material
 	// ...

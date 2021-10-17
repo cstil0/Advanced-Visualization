@@ -63,8 +63,27 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		Texture* roughness_texture = Texture::Get("data/models/ball/roughness.png");
 		Texture* metalness_texture = Texture::Get("data/models/ball/metalness.png");
 
+		// ME ESTOY PENSANDO SI MEJOR PONER ESTAS VARIABLES EN UNA CLASE PARECIDA A LIGHT A LA QUE PODAMOS ACCEDER DESDE CADA OBJETO DE LA ESCENA, YA QUE SINO
+		// EN EL CASO DE QUE TUVIESEMOS MUCHOS SERÍA MUY POCO EFICIENTE GUARDARLO EN CADA MATERIAL
+		HDRE* hdre = HDRE::Get("data/environments/pisa.hdre");
+		Texture* level0 = new Texture();
+		Texture* level1 = new Texture();
+		Texture* level2 = new Texture();
+		Texture* level3 = new Texture();
+		Texture* level4 = new Texture();
+		Texture* level5 = new Texture();
+		level0->cubemapFromHDRE(hdre, 0);
+		level1->cubemapFromHDRE(hdre, 1);
+		level2->cubemapFromHDRE(hdre, 2);
+		level3->cubemapFromHDRE(hdre, 3);
+		level4->cubemapFromHDRE(hdre, 4);
+		level4->cubemapFromHDRE(hdre, 5);
+
+		Texture* BRDFLut = Texture::Get("data/brdfLUT.png");
+
 		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/pbr.fs");
-		PBRMaterial* pbr_material = new PBRMaterial(sh, color_texture, normalmap_texture, roughness_texture, metalness_texture);
+		PBRMaterial* pbr_material = new PBRMaterial(sh, color_texture, normalmap_texture, roughness_texture, metalness_texture, 
+			level0, level1, level2, level3, level4, level5, BRDFLut);
 		
 		//create a light
 		int numb_lights = 1;
@@ -84,8 +103,6 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		SceneNode* pbr_node = new SceneNode("BallPBR", pbr_material, Mesh::Get("data/meshes/sphere.obj.mbin"));
 		pbr_node->material = pbr_material;
 		node_list.push_back(pbr_node);
-
-
 
 	}
 	

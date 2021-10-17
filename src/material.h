@@ -82,10 +82,19 @@ public:
 	Texture* roughness_texture = NULL;
 	Texture* metalness_texture = NULL;
 
+	Texture* hdre_level0 = NULL;
+	Texture* hdre_level1 = NULL;
+	Texture* hdre_level2 = NULL;
+	Texture* hdre_level3 = NULL;
+	Texture* hdre_level4 = NULL;
+	Texture* hdre_level5 = NULL;
+
+	Texture* BRDFLut = NULL;
+
 	Light* light = NULL;
 
 	PBRMaterial();
-	PBRMaterial(Shader* sh, Texture* tex, Texture* normal, Texture* rough, Texture* metal);
+	PBRMaterial(Shader* sh, Texture* tex, Texture* normal, Texture* rough, Texture* metal, Texture* level0, Texture* level1, Texture* level2, Texture* level3, Texture* level4, Texture* level5, Texture* BRDFLut);
 	~PBRMaterial();
 
 	void setUniforms(Camera* camera, Matrix44 model);

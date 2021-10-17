@@ -236,12 +236,21 @@ PBRMaterial::PBRMaterial()
 {
 }
 
-PBRMaterial::PBRMaterial(Shader* sh, Texture* tex, Texture* normal, Texture* rough, Texture* metal) {
+PBRMaterial::PBRMaterial(Shader* sh, Texture* tex, Texture* normal, Texture* rough, Texture* metal, Texture* level0, Texture* level1, Texture* level2, Texture* level3, Texture* level4, Texture* level5, Texture* BRDFLut) {
 	this->shader = sh;
 	this->texture = tex;
 	this->normal_texture = normal;
 	this->roughness_texture = rough;
 	this->metalness_texture = metal;
+
+	this->hdre_level0 = level0;
+	this->hdre_level1 = level1;
+	this->hdre_level2 = level2;
+	this->hdre_level3 = level3;
+	this->hdre_level4 = level4;
+	this->hdre_level5 = level5;
+
+	this->BRDFLut = BRDFLut;
 }
 
 PBRMaterial::~PBRMaterial()
@@ -264,7 +273,20 @@ void PBRMaterial::setUniforms(Camera* camera, Matrix44 model)
 		shader->setTexture("u_roughness_texture", this->roughness_texture, EOutput::ROUGHNESS);
 	if (this->metalness_texture)
 		shader->setTexture("u_metalness_texture", this->metalness_texture, EOutput::METALNESS);
-
+	if (this->hdre_level0)
+		shader->setTexture("u_texture_prem", this->hdre_level0, EOutput::LEVEL0);
+	if (this->hdre_level1)
+		shader->setTexture("u_texture_prem_0", this->hdre_level1, EOutput::LEVEL1);
+	if (this->hdre_level2)
+		shader->setTexture("u_texture_prem_1", this->hdre_level2, EOutput::LEVEL2);
+	if (this->hdre_level3)
+		shader->setTexture("u_texture_prem_2", this->hdre_level3, EOutput::LEVEL3);
+	if (this->hdre_level4)
+		shader->setTexture("u_texture_prem_3", this->hdre_level4, EOutput::LEVEL4);
+	if (this->hdre_level5)
+		shader->setTexture("u_texture_prem_4", this->hdre_level5, EOutput::LEVEL5);
+	if (this->BRDFLut)
+		shader->setTexture("u_BRDFLut", this->BRDFLut, EOutput::BRDFLut);
 }
 
 void PBRMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)

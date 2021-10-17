@@ -14,6 +14,15 @@ uniform sampler2D u_roughness_texture;
 uniform sampler2D u_metalness_texture;
 uniform sampler2D u_normalmap_texture;
 
+uniform samplerCube u_texture_prem;
+uniform samplerCube u_texture_prem_0;
+uniform samplerCube u_texture_prem_1;
+uniform samplerCube u_texture_prem_2;
+uniform samplerCube u_texture_prem_3;
+uniform samplerCube u_texture_prem_4;
+
+uniform sampler2D u_BRDFLut;
+
 uniform vec3 u_camera_pos;
 
 //Lights uniforms parameters
@@ -79,7 +88,6 @@ vec3 FresnelSchlick(float LdotN, vec3 F0)
     return F0 + ( 1.0 - F0) * pow(clamp(1.0 - LdotN, 0.0, 1.0), 5.0); // otra vez clmap??
 }
 
-
 float GeometryDistributionFunction(vec3 N, vec3 L, vec3 H, vec3 V){
 	float NdotH = clamp(dot(N,H), 0.0f, 1.0f);
 	float NdotV = clamp(dot(N,V), 0.0f, 1.0f);
@@ -87,6 +95,24 @@ float GeometryDistributionFunction(vec3 N, vec3 L, vec3 H, vec3 V){
 	float NdotL = clamp(dot(N,L), 0.0f, 1.0f);
 
 	return min(1, min( (2*NdotH*NdotV)/VdotH , (2*NdotH*NdotL)/VdotH ) );
+}
+
+vec3 getReflectionColor(vec3 r, float roughness)
+{
+	float lod = roughness * 5.0;
+
+	vec4 color;
+
+	if(lod < 1.0) color = mix( textureCube(u_texture_prem, r), textureCube(u_texture_prem_0, r), lod );
+	else if(lod < 2.0) color = mix( textureCube(u_texture_prem_0, r), textureCube(u_texture_prem_1, r), lod - 1.0 );
+	else if(lod < 3.0) color = mix( textureCube(u_texture_prem_1, r), textureCube(u_texture_prem_2, r), lod - 2.0 );
+	else if(lod < 4.0) color = mix( textureCube(u_texture_prem_2, r), textureCube(u_texture_prem_3, r), lod - 3.0 );
+	else if(lod < 5.0) color = mix( textureCube(u_texture_prem_3, r), textureCube(u_texture_prem_4, r), lod - 4.0 );
+	else color = textureCube(u_texture_prem_4, r);
+
+	//color.rgb = linear_to_gamma(color.rgb);
+
+	return color.rgb;
 }
 
 //void computeVectors(out L, ) PARA CALCULAR LOS VECTORES, PERO HAY QUE MIRAR SI ES IN O OUT
@@ -109,31 +135,38 @@ void main()
 	vec4 albedo = u_color;
 
 	// textures:
-	
 	albedo *= texture2D( u_texture, uv ); //base color
 	float roughness = texture2D(u_roughness_texture, uv).x;
 	float metalness = texture2D(u_metalness_texture, uv).x;
 
-	vec3 f_diffuse = ((1.0 - metalness) * albedo.xyz) / PI; //since we are doing the linear interpolation with dialectric and conductor material
- 	vec3 F0 = mix( vec3(0.04), albedo.xyz, metalness);
+	// vec3 f_diffuse = ((1.0 - metalness) * albedo.xyz) / PI; //since we are doing the linear interpolation with dialectric and conductor material
+ 	// vec3 F0 = mix( vec3(0.04), albedo.xyz, metalness);
 
-	float LdotN = clamp(dot(L,N), 0.0f, 1.0f); //? OR MAYBE nDOTl
-	// vec3 F = FresnelSchlickRoughness( LdotN, F0, roughness);
-	vec3 F = FresnelSchlick( LdotN, F0 );
+	// float LdotN = clamp(dot(L,N), 0.0f, 1.0f); //? OR MAYBE nDOTl
+	// // vec3 F = FresnelSchlickRoughness( LdotN, F0, roughness);
+	// vec3 F = FresnelSchlick( LdotN, F0 );
 
-	float G = GeometryDistributionFunction(N, H, L, V);
-	
+	// float G = GeometryDistributionFunction(N, H, L, V);
 
+	// -- INDIRECT--
+	// -- IBL - specular term --
 
+	//Incomming light term
+	vec3 specularSample = getReflectionColor(N, roughness);
 
+	//Material Response term
+	float NdotV = clamp(dot(N,V), 0.0f, 1.0f);
+	vec2 LUT_coord = vec2(NdotV, roughness);
+	vec4 brdf2D = texture2D( u_BRDFLut, LUT_coord );
+	// CUANDO UNAMOS LAS DOS PARTES ESTO ESTARÁ REPETIDO
+	vec3 F0 = mix(vec3(0.04), albedo.xyz, metalness);
+	// float LdotN = clamp(dot(L,N), 0.0f, 1.0f);
+	vec3 F_rg = FresnelSchlickRoughness(NdotV, F0, roughness);
 
-	// vec3 f_specular = 0.0;
+	vec3 SpecularBRDF = F_rg * brdf2D.x + brdf2D.y;
+	vec3 SpecularIBL = specularSample * SpecularBRDF;
 
-
-
-
-
-	gl_FragColor = vec4( F,1.0);
+	gl_FragColor = vec4(SpecularIBL, 0.0f);
 
 	// 1. Create Material
 	// ...

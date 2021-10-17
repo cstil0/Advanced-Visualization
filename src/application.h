@@ -15,7 +15,14 @@ enum EOutput {
 	ALBEDO,
 	ROUGHNESS,
 	METALNESS,
-	NORMALS
+	NORMALS,
+	LEVEL0,
+	LEVEL1,
+	LEVEL2,
+	LEVEL3,
+	LEVEL4,
+	LEVEL5,
+	BRDFLut
 };
 
 class Application

@@ -151,7 +151,7 @@ void main()
 	vec3 L = normalize(u_light_pos - v_world_position);
 	vec3 V = normalize(u_camera_pos - v_world_position);
 	vec3 normal = normalize(v_normal); 
-	vec3 normal_pixel = normalize(texture2D(u_normalmap_texture, uv).xyz);
+	vec3 normal_pixel = normalize(texture2D(u_normalmap_texture, uv).xyz);//normalize?
 	vec3 N = perturbNormal(normal, V, uv, normal_pixel );
 	// vec3 N = normalize(v_normal);
 	vec3 H = normalize( V + L);
@@ -180,12 +180,13 @@ void main()
 	}
 	
 
-	float roughness = abs(roughness_tex - u_roughness); //total roughnesss
-	float metalness = abs(metalness_tex - u_metalness); //total metalness
+	float roughness = (roughness_tex * u_roughness); //total roughnesss
+	float metalness = (metalness_tex * u_metalness); //total metalness
 
 	// BSDF: bidirectional scattering distribution function
-	vec3 f_diffuse = ((1.0 - metalness) * color.xyz) / PI; //since we are doing the linear interpolation with dialectric and conductor material
-	
+	//vec3 f_diffuse = ((1.0 - metalness) * color.xyz) / PI; //since we are doing the linear interpolation with dialectric and conductor material
+	vec3 f_diffuse = mix( vec3(0.0), color.xyz, metalness) / PI; 
+
 	vec3 f_specular = BRDFSpecular( roughness, metalness, NdotH, LdotN, NdotV, NdotL, color.xyz );
 	
 	// float D = DistributionGGX(roughness, NdotH);

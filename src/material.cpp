@@ -182,6 +182,7 @@ SkyboxMaterial::SkyboxMaterial()
 }
 
 
+
 SkyboxMaterial::SkyboxMaterial( Shader* sh, Texture* tex )
 {
 	this->shader = sh;
@@ -236,12 +237,21 @@ PBRMaterial::PBRMaterial()
 {
 }
 
-PBRMaterial::PBRMaterial(Shader* sh, Texture* tex, Texture* normal, Texture* rough, Texture* metal) {
+PBRMaterial::PBRMaterial(Shader* sh, Texture* tex, Texture* normal, Texture* rough, Texture* metal, Texture* mr_texture ) {
 	this->shader = sh;
 	this->texture = tex;
 	this->normal_texture = normal;
 	this->roughness_texture = rough;
 	this->metalness_texture = metal;
+	this->mr_texture = mr_texture;
+	this->output = 1;
+	
+	
+	this->roughness = 0.1;
+	this->metalness = 0.4;
+	this->spec_scale = 0.1;
+	this->reflactance = 0.1;
+
 }
 
 PBRMaterial::~PBRMaterial()
@@ -254,7 +264,15 @@ void PBRMaterial::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_camera_position", camera->eye);
 	shader->setUniform("u_model", model);
 	shader->setUniform("u_color", color);
+
 	shader->setUniform("u_light_pos", light->model.getTranslation());
+	shader->setUniform("u_ambient_light", Application::instance->ambient_light);
+
+	shader->setUniform("u_output", output);
+	shader->setUniform("u_roughness", this->roughness);
+	shader->setUniform("u_metalness", this->metalness);
+	
+	shader->setUniform("u_met_rou", Application::instance->met_rou);
 
 	if (texture)
 		shader->setTexture("u_texture", texture, EOutput::ALBEDO);
@@ -264,8 +282,12 @@ void PBRMaterial::setUniforms(Camera* camera, Matrix44 model)
 		shader->setTexture("u_roughness_texture", this->roughness_texture, EOutput::ROUGHNESS);
 	if (this->metalness_texture)
 		shader->setTexture("u_metalness_texture", this->metalness_texture, EOutput::METALNESS);
-
+	if (Application::instance->met_rou && this->mr_texture) {
+		shader->setTexture("u_mr_texture", this->mr_texture, EOutput::METALNESS_ROUGHNESS);
+	}
 }
+
+// crear una funcion de upload textures, en caso que no haya, pues sera blanco
 
 void PBRMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 {
@@ -285,6 +307,16 @@ void PBRMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 	}
 }
 
-void PBRMaterial::renderInMenu() {
+void PBRMaterial::renderInMenu() 
+{
+	ImGui::ColorEdit3("Base Color", color.v); // Edit 3 floats representing a color
+	ImGui::SliderFloat("Roughness",&this->roughness, 0.0f, 1.0f);
+	ImGui::SliderFloat("Metalness", &this->metalness, 0.0f, 1.0f);
+	//ImGui::SliderFloat("Specular scale", &this->, 0.0f, 1.0f);
+	//ImGui::SliderFloat("Reflactance", &this->, 0.0f, 1.0f);
+
+	ImGui::Combo("Output", &output, "COMPLETE\0ALBEDO\0ROUGHNESS\0\METALNESS\0\NORMAL\0");
+	//ImGui::Image((void*)(intptr_t)texture->texture_id, ImVec2(w, h));
+	//ImGui::Combo("Output", &output, "ALBEDO\0ROUGHNESS\0\METALNESS\0");
 
 }

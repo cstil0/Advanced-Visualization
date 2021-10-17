@@ -78,14 +78,29 @@ public:
 
 class PBRMaterial : public StandardMaterial {
 public:
+
+
+	
 	Texture* normal_texture = NULL;
 	Texture* roughness_texture = NULL;
+
+	Texture* mr_texture = NULL;
 	Texture* metalness_texture = NULL;
+
+	int output;
+	// factors
+	float roughness;
+	float metalness;
+	float spec_scale;
+	float reflactance;
+
+	//flags
+	
 
 	Light* light = NULL;
 
 	PBRMaterial();
-	PBRMaterial(Shader* sh, Texture* tex, Texture* normal, Texture* rough, Texture* metal);
+	PBRMaterial(Shader* sh, Texture* tex, Texture* normal, Texture* rough, Texture* metal, Texture* mr = NULL);
 	~PBRMaterial();
 
 	void setUniforms(Camera* camera, Matrix44 model);

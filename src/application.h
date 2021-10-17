@@ -15,7 +15,8 @@ enum EOutput {
 	ALBEDO,
 	ROUGHNESS,
 	METALNESS,
-	NORMALS
+	NORMALS,
+	METALNESS_ROUGHNESS
 };
 
 class Application
@@ -38,9 +39,10 @@ public:
 	bool must_exit;
 	bool render_debug;
 	float scene_exposure;
+	
 	int output;
 	vec3 ambient_light;
-	
+	bool met_rou;
 
 	//some vars
 	static Camera* camera; //our GLOBAL camera

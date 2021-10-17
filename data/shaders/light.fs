@@ -8,6 +8,7 @@ varying vec4 v_color;
 uniform sampler2D u_texture;
 uniform vec3 u_camera_pos;
 uniform vec4 u_color;
+uniform vec3 u_ambient_light;
 
 //Lights uniforms parameters
 #define MAX_LIGHTS 10 

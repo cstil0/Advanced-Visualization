@@ -58,34 +58,55 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		//renderReflection();
 		
 
-		Texture* color_texture = Texture::Get("data/models/ball/albedo.png");
-		Texture* normalmap_texture = Texture::Get("data/models/ball/normal.png");
-		Texture* roughness_texture = Texture::Get("data/models/ball/roughness.png");
-		Texture* metalness_texture = Texture::Get("data/models/ball/metalness.png");
+		Texture* color_texture = Texture::Get("data/models/basic/albedo.png");
+		Texture* normalmap_texture = Texture::Get("data/models/basic/normal.png");
+		Texture* roughness_texture = Texture::Get("data/models/basic/roughness.png");
+		Texture* metalness_texture = Texture::Get("data/models/basic/metalness.png");
+
+		/*Texture* color_texture = Texture::Get("data/models/bench/albedo.png");
+		Texture* normalmap_texture = Texture::Get("data/models/bench/normal.png");
+		Texture* roughness_texture = Texture::Get("data/models/bench/roughness.png");
+		Texture* metalness_texture = Texture::Get("data/models/bench/metalness.png");*/
+
 
 		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/pbr.fs");
+		this->met_rou = FALSE;
 		PBRMaterial* pbr_material = new PBRMaterial(sh, color_texture, normalmap_texture, roughness_texture, metalness_texture);
 		
 		//create a light
 		int numb_lights = 1;
+		Light* light = new Light();
 		for (int i = 0; i < numb_lights; i++) {
-			Light* light = new Light();
 			light->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
 
 			StandardMaterial* l_mat = new StandardMaterial();
 			light->material = l_mat;
-
 			light->model.translate(-2 + 4 * i, 2 * i, 2 * i);
 			light->model.scale(0.1, 0.1, 0.1);
 			node_list.push_back(light);
-			pbr_material->light = light;
 		}
 
-		SceneNode* pbr_node = new SceneNode("BallPBR", pbr_material, Mesh::Get("data/meshes/sphere.obj.mbin"));
+		SceneNode* pbr_node = new SceneNode("BallPBR", pbr_material, Mesh::Get("data/models/ball/sphere.obj.mbin"));
 		pbr_node->material = pbr_material;
-		node_list.push_back(pbr_node);
+		pbr_material->light = light;
+		//node_list.push_back(pbr_node);
 
+		//----second object
+		
 
+		color_texture = Texture::Get("data/models/helmet/albedo.png");
+		normalmap_texture = Texture::Get("data/models/helmet/normal.png");
+		//roughness_texture = Texture::Get("data/models/bench/roughness.png");
+		//metalness_texture = Texture::Get("data/models/bench/metalness.png");
+		Texture* mr_texture = Texture::Get("data/models/helmet/roughness.png");
+
+		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/pbr.fs");
+		this->met_rou = TRUE;
+		pbr_material = new PBRMaterial(sh, color_texture, normalmap_texture, NULL, NULL, mr_texture);
+		SceneNode* pbr_node2 = new SceneNode("BallPBR2", pbr_material, Mesh::Get("data/models/helmet/helmet.obj.mbin"));
+		pbr_material->light = light;
+		pbr_node2->material = pbr_material;
+		node_list.push_back(pbr_node2);
 
 	}
 	

@@ -1,20 +1,28 @@
+
 //utilis definitions
 #define PI 3.14159265359
 
-//
 varying vec3 v_position; //position in local coords
 varying vec3 v_world_position; //position in world coord
 varying vec3 v_normal; //normal in the pixel
 varying vec2 v_uv; // texture coordinates
-varying vec4 v_color;
+//varying vec4 v_color;
 
 uniform vec4 u_color;
 uniform sampler2D u_texture;
 uniform sampler2D u_roughness_texture;
 uniform sampler2D u_metalness_texture;
 uniform sampler2D u_normalmap_texture;
+uniform sampler2D u_mr_texture;
 
 uniform vec3 u_camera_pos;
+uniform vec3 u_ambient_light;
+uniform float u_output;
+uniform bool u_met_rou;
+
+//factors
+uniform float u_roughness;
+uniform float u_metalness;
 
 //Lights uniforms parameters
 uniform vec3 u_light_pos;
@@ -24,7 +32,7 @@ struct PBRMat
 	//properties
 	float roughness;
 	float metalness;
-	// not sure aqui
+
 	float F;
 	float G;
 	float D;
@@ -69,27 +77,70 @@ vec3 perturbNormal( vec3 N, vec3 V, vec2 texcoord, vec3 normal_pixel ){
 	return normalize(TBN * normal_pixel);
 }
 
-vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+//functions for Specular BRDP
+
+float DistributionGGX(const in float roughness, const in float NdotH)
 {
-    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+	float alpha2 = roughness*roughness;
+    float NdotH2 = NdotH*NdotH;
+	float denom = NdotH2 * (alpha2 - 1.0) + 1.0;
+	denom = PI * denom * denom;
+    return alpha2 / denom ;
+
+	// float a2 = roughness * roughness;
+	// float f = (NdotH * NdotH) * (a2 - 1.0) + 1.0;
+	// return a2 / (PI * f * f);
 }
 
-vec3 FresnelSchlick(float LdotN, vec3 F0)
+vec3 FresnelSchlick(const in float LdotN, const in vec3 F0)
 {
-    return F0 + ( 1.0 - F0) * pow(clamp(1.0 - LdotN, 0.0, 1.0), 5.0); // otra vez clmap??
+    return F0 + ( 1.0 - F0) * pow( clamp(1.0 - LdotN, 0.0, 1.0) , 5.0); 
+}
+
+vec3 FresnelSchlickRoughness(const in float cosTheta, const in vec3 F0, const in float roughness)
+{
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow( clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
 
-float GeometryDistributionFunction(vec3 N, vec3 L, vec3 H, vec3 V){
-	float NdotH = clamp(dot(N,H), 0.0f, 1.0f);
-	float NdotV = clamp(dot(N,V), 0.0f, 1.0f);
-	float VdotH = clamp(dot(V,H), 0.0f, 1.0f);
-	float NdotL = clamp(dot(N,L), 0.0f, 1.0f);
-
-	return min(1, min( (2*NdotH*NdotV)/VdotH , (2*NdotH*NdotL)/VdotH ) );
+float GeometryGGX(const in float dotVector, const in float k )
+{
+	float nom = dotVector;
+    float denom = dotVector * (1.0 - k) + k;
+    return nom / denom;
 }
 
-//void computeVectors(out L, ) PARA CALCULAR LOS VECTORES, PERO HAY QUE MIRAR SI ES IN O OUT
+float GeometrySmith(const in float NdotV, const in float NdotL, const in float roughness)
+{
+	float k = ( (roughness+1)*(roughness+1) ) / 8.0;
+	float G1_v = GeometryGGX(NdotV, k);
+	float G1_n = GeometryGGX(NdotL, k);
+	return G1_v * G1_n;
+}
+
+
+// void computeVectors(vec3 u_light_pos, vec3 v_world_position, vec3 u_camera_pos, vec3 v_normal, )
+// {
+// 	vec3 L = normalize(u_light_pos - v_world_position);
+// 	vec3 V = normalize(u_camera_pos - v_world_position);
+// 	vec3 normal = normalize(v_normal); 
+// 	vec3 normal_pixel = texture2D(u_normalmap_texture, uv).xyz;
+// 	vec3 N = perturbNormal(normal, V, uv, normal_pixel );
+// 	vec3 H = normalize(V + L);
+// 	vec3 R = reflect(L, N);
+// } 
+
+vec3 BRDFSpecular(float roughness, float metalness, float NdotH, float LdotN, float NdotV, float NdotL, vec3 baseColor)
+{
+	float D = DistributionGGX(roughness, NdotH);
+
+	vec3 F0 = mix( vec3(0.04), baseColor, metalness);
+	vec3 F = FresnelSchlick( LdotN, F0 );
+
+	float G = GeometrySmith(NdotV, NdotL, roughness);
+	
+	return (F*G*D) / (4.0 * NdotL * NdotV + 1e-7 ); // in case of zero div
+}
 
 
 void main()
@@ -98,42 +149,76 @@ void main()
 
 	// Compute the light equation vectors
 	vec3 L = normalize(u_light_pos - v_world_position);
-    vec3 normal = normalize(v_normal); 
-	vec3 normal_pixel = texture2D(u_normalmap_texture, uv).xyz;
 	vec3 V = normalize(u_camera_pos - v_world_position);
-
+	vec3 normal = normalize(v_normal); 
+	vec3 normal_pixel = normalize(texture2D(u_normalmap_texture, uv).xyz);
 	vec3 N = perturbNormal(normal, V, uv, normal_pixel );
-	vec3 H = normalize(V + L);
-	vec3 R = reflect(L, N);
+	// vec3 N = normalize(v_normal);
+	vec3 H = normalize( V + L);
+	vec3 R = reflect(-L, N);
 
-	vec4 albedo = u_color;
+
+	float NdotH = max(dot(N,H), 0.0f);
+	float NdotV = max(dot(N,V), 0.0f);
+	float VdotH = max(dot(V,H), 0.0f);
+	float NdotL = max(dot(N,L), 0.0f);
+	float LdotN = max(dot(L,N), 0.0f); 
+	vec4 color = u_color;
+
 
 	// textures:
-	
-	albedo *= texture2D( u_texture, uv ); //base color
-	float roughness = texture2D(u_roughness_texture, uv).x;
-	float metalness = texture2D(u_metalness_texture, uv).x;
-
-	vec3 f_diffuse = ((1.0 - metalness) * albedo.xyz) / PI; //since we are doing the linear interpolation with dialectric and conductor material
- 	vec3 F0 = mix( vec3(0.04), albedo.xyz, metalness);
-
-	float LdotN = clamp(dot(L,N), 0.0f, 1.0f); //? OR MAYBE nDOTl
-	// vec3 F = FresnelSchlickRoughness( LdotN, F0, roughness);
-	vec3 F = FresnelSchlick( LdotN, F0 );
-
-	float G = GeometryDistributionFunction(N, H, L, V);
+	color *= texture2D( u_texture, uv ); //base color
+	float roughness_tex = 0.0;
+	float metalness_tex = 0.0;
+	if (u_met_rou){
+		roughness_tex = texture2D(u_mr_texture, uv).y;
+		metalness_tex = texture2D(u_mr_texture, uv).z;
+	}
+	else{
+		roughness_tex = texture2D(u_roughness_texture, uv).x;
+		metalness_tex = texture2D(u_metalness_texture, uv).x;
+	}
 	
 
+	float roughness = abs(roughness_tex - u_roughness); //total roughnesss
+	float metalness = abs(metalness_tex - u_metalness); //total metalness
 
+	// BSDF: bidirectional scattering distribution function
+	vec3 f_diffuse = ((1.0 - metalness) * color.xyz) / PI; //since we are doing the linear interpolation with dialectric and conductor material
+	
+	vec3 f_specular = BRDFSpecular( roughness, metalness, NdotH, LdotN, NdotV, NdotL, color.xyz );
+	
+	// float D = DistributionGGX(roughness, NdotH);
 
+	// vec3 F0 = mix( vec3(0.04), color.xyz, metalness);
+	// vec3 F = FresnelSchlick( LdotN, F0 );
 
-	// vec3 f_specular = 0.0;
+	// float G = GeometrySmith(NdotV, NdotL, roughness);
+	
 
+	vec3 direct = f_diffuse + f_specular;
 
+	//u_light_intensity = NdotL;
+	//compute how much light received the pixel
+	//vec3 lightParams = u_light_color * u_light_intensity ;
 
+	vec3 light =  color.xyz * u_ambient_light ;	
+	light += direct * NdotL;
 
+	
+	if ( u_output == 1.0 )
+		color = texture2D( u_texture, uv );
+	else if(u_output == 2.0)
+		color = texture2D(u_roughness_texture, uv);
+	else if(u_output == 3.0)	
+		color = texture2D(u_metalness_texture, uv);
+	else
+		color = vec4(N, 1.0);
 
-	gl_FragColor = vec4( F,1.0);
+	// gl_FragColor = color;
+	
+	//gl_FragColor = vec4(G);
+	gl_FragColor = vec4(light,1.0);
 
 	// 1. Create Material
 	// ...

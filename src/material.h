@@ -87,7 +87,7 @@ public:
 	Texture* mr_texture = NULL;
 	Texture* metalness_texture = NULL;
 
-	int output;
+	//int output;
 	// factors
 	float roughness;
 	float metalness;

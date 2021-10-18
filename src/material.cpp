@@ -5,13 +5,13 @@
 
 StandardMaterial::StandardMaterial()
 {
-	color = vec4(1.f, 1.f, 0.f, 1.f);
+	this->color = vec4(1.f, 1.f, 1.f, 1.f);
 	shader = Shader::Get("data/shaders/basic.vs", "data/shaders/flat.fs");
 }
 
 StandardMaterial::StandardMaterial(Shader* sh, Texture* tex)
 {
-	color = vec4(0.4f, 0.5f, 0.5f, 1.f);
+	this->color = vec4(1.f, 1.f, 1.f, 1.f);
 	
 	this->shader = sh;
 	this->texture = tex;
@@ -244,7 +244,7 @@ PBRMaterial::PBRMaterial(Shader* sh, Texture* tex, Texture* normal, Texture* rou
 	this->roughness_texture = rough;
 	this->metalness_texture = metal;
 	this->mr_texture = mr_texture;
-	this->output = 1;
+	//this->output = 0.0;
 	
 	
 	this->roughness = 0.1;
@@ -267,8 +267,10 @@ void PBRMaterial::setUniforms(Camera* camera, Matrix44 model)
 
 	shader->setUniform("u_light_pos", light->model.getTranslation());
 	shader->setUniform("u_ambient_light", Application::instance->ambient_light);
+	shader->setUniform("u_light_color", light->material->color.xyz ); //falta poner para el phong
+	
 
-	shader->setUniform("u_output", output);
+	shader->setUniform("u_output", Application::instance->output);
 	shader->setUniform("u_roughness", this->roughness);
 	shader->setUniform("u_metalness", this->metalness);
 	
@@ -314,7 +316,7 @@ void PBRMaterial::renderInMenu()
 	ImGui::SliderFloat("Metalness", &this->metalness, 0.0f, 1.0f);
 	//ImGui::SliderFloat("Specular scale", &this->, 0.0f, 1.0f);
 	//ImGui::SliderFloat("Reflactance", &this->, 0.0f, 1.0f);
-
+	int &output = Application::instance->output;
 	ImGui::Combo("Output", &output, "COMPLETE\0ALBEDO\0ROUGHNESS\0\METALNESS\0\NORMAL\0");
 	//ImGui::Image((void*)(intptr_t)texture->texture_id, ImVec2(w, h));
 	//ImGui::Combo("Output", &output, "ALBEDO\0ROUGHNESS\0\METALNESS\0");

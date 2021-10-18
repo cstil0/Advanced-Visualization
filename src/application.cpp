@@ -35,10 +35,10 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	elapsed_time = 0.0f;
 	mouse_locked = false;
 	scene_exposure = 1;
-	output = 0;
+	output = 0.0;
 
 	//define the color of the ambient as a global variable since it is a property of the scene
-	ambient_light.set(0.7, 0.7, 0.7);
+	ambient_light.set(0.1, 0.2, 0.3);
 
 	// OpenGL flags
 	glEnable( GL_CULL_FACE ); //render both sides of every triangle
@@ -81,7 +81,9 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 			StandardMaterial* l_mat = new StandardMaterial();
 			light->material = l_mat;
-			light->model.translate(-2 + 4 * i, 2 * i, 2 * i);
+			//light->model.translate(-2 + 4 * i, 5* i, 2 * i);
+			light->model.translate(-0.4, 1.9, 2.0);
+
 			light->model.scale(0.1, 0.1, 0.1);
 			node_list.push_back(light);
 		}
@@ -89,7 +91,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		SceneNode* pbr_node = new SceneNode("BallPBR", pbr_material, Mesh::Get("data/models/ball/sphere.obj.mbin"));
 		pbr_node->material = pbr_material;
 		pbr_material->light = light;
-		node_list.push_back(pbr_node);
+		//node_list.push_back(pbr_node);
 
 		//----second object
 		
@@ -106,6 +108,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		SceneNode* pbr_node2 = new SceneNode("BallPBR2", pbr_material, Mesh::Get("data/models/helmet/helmet.obj.mbin"));
 		pbr_material->light = light;
 		pbr_node2->material = pbr_material;
+		//pbr_node2->model.translate(6.0, 0.0, 0.0);
 		node_list.push_back(pbr_node2);
 
 	}

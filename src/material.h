@@ -82,6 +82,9 @@ public:
 	Texture* roughness_texture = NULL;
 	Texture* metalness_texture = NULL;
 
+	float metalness;
+	float roughness;
+
 	Texture* hdre_level0 = NULL;
 	Texture* hdre_level1 = NULL;
 	Texture* hdre_level2 = NULL;

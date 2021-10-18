@@ -251,6 +251,9 @@ PBRMaterial::PBRMaterial(Shader* sh, Texture* tex, Texture* normal, Texture* rou
 	this->hdre_level5 = level5;
 
 	this->BRDFLut = BRDFLut;
+
+	this->roughness = 1.0f;
+	this->metalness = 1.0f;
 }
 
 PBRMaterial::~PBRMaterial()
@@ -264,6 +267,8 @@ void PBRMaterial::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_model", model);
 	shader->setUniform("u_color", color);
 	shader->setUniform("u_light_pos", light->model.getTranslation());
+	shader->setUniform("u_roughness", roughness);
+	shader->setUniform("u_metalness", metalness);
 
 	if (texture)
 		shader->setTexture("u_texture", texture, EOutput::ALBEDO);
@@ -308,5 +313,6 @@ void PBRMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 }
 
 void PBRMaterial::renderInMenu() {
-
+	ImGui::SliderFloat("Roughness", (float*)&this->roughness, 0, 1);
+	ImGui::SliderFloat("Metalness", (float*)&this->metalness, 0, 1);
 }

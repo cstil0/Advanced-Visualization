@@ -21,6 +21,9 @@ uniform samplerCube u_texture_prem_2;
 uniform samplerCube u_texture_prem_3;
 uniform samplerCube u_texture_prem_4;
 
+uniform float u_roughness;
+uniform float u_metalness;
+
 uniform sampler2D u_BRDFLut;
 
 uniform vec3 u_camera_pos;
@@ -138,6 +141,9 @@ void main()
 	albedo *= texture2D( u_texture, uv ); //base color
 	float roughness = texture2D(u_roughness_texture, uv).x;
 	float metalness = texture2D(u_metalness_texture, uv).x;
+
+	roughness *= u_roughness;
+	metalness *= u_metalness;
 
 	// vec3 f_diffuse = ((1.0 - metalness) * albedo.xyz) / PI; //since we are doing the linear interpolation with dialectric and conductor material
  	// vec3 F0 = mix( vec3(0.04), albedo.xyz, metalness);

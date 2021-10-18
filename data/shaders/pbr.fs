@@ -77,19 +77,14 @@ vec3 perturbNormal( vec3 N, vec3 V, vec2 texcoord, vec3 normal_pixel ){
 	return normalize(TBN * normal_pixel);
 }
 
-//functions for Specular BRDP
+//------------functions for Specular BRDP----------------------------------------------------
 
 float DistributionGGX(const in float roughness, const in float NdotH)
 {
 	float alpha2 = roughness*roughness;
-    float NdotH2 = NdotH*NdotH;
-	float denom = NdotH2 * (alpha2 - 1.0) + 1.0;
+	float denom = (NdotH*NdotH) * (alpha2 - 1.0) + 1.0;
 	denom = PI * denom * denom;
     return alpha2 / denom ;
-
-	// float a2 = roughness * roughness;
-	// float f = (NdotH * NdotH) * (a2 - 1.0) + 1.0;
-	// return a2 / (PI * f * f);
 }
 
 vec3 FresnelSchlick(const in float LdotN, const in vec3 F0)
@@ -101,7 +96,6 @@ vec3 FresnelSchlickRoughness(const in float cosTheta, const in vec3 F0, const in
 {
     return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow( clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
-
 
 float GeometryGGX(const in float dotVector, const in float k )
 {
@@ -118,18 +112,6 @@ float GeometrySmith(const in float NdotV, const in float NdotL, const in float r
 	return G1_v * G1_n;
 }
 
-
-// void computeVectors(vec3 u_light_pos, vec3 v_world_position, vec3 u_camera_pos, vec3 v_normal, )
-// {
-// 	vec3 L = normalize(u_light_pos - v_world_position);
-// 	vec3 V = normalize(u_camera_pos - v_world_position);
-// 	vec3 normal = normalize(v_normal); 
-// 	vec3 normal_pixel = texture2D(u_normalmap_texture, uv).xyz;
-// 	vec3 N = perturbNormal(normal, V, uv, normal_pixel );
-// 	vec3 H = normalize(V + L);
-// 	vec3 R = reflect(L, N);
-// } 
-
 vec3 BRDFSpecular(float roughness, float metalness, float NdotH, float LdotN, float NdotV, float NdotL, vec3 baseColor)
 {
 	float D = DistributionGGX(roughness, NdotH);
@@ -142,6 +124,16 @@ vec3 BRDFSpecular(float roughness, float metalness, float NdotH, float LdotN, fl
 	return (F*G*D) / (4.0 * NdotL * NdotV + 1e-7 ); // in case of zero div
 }
 
+// void computeVectors(vec3 u_light_pos, vec3 v_world_position, vec3 u_camera_pos, vec3 v_normal, )
+// {
+// 	vec3 L = normalize(u_light_pos - v_world_position);
+// 	vec3 V = normalize(u_camera_pos - v_world_position);
+// 	vec3 normal = normalize(v_normal); 
+// 	vec3 normal_pixel = texture2D(u_normalmap_texture, uv).xyz;
+// 	vec3 N = perturbNormal(normal, V, uv, normal_pixel );
+// 	vec3 H = normalize(V + L);
+// 	vec3 R = reflect(L, N);
+// } 
 
 void main()
 {
@@ -151,9 +143,8 @@ void main()
 	vec3 L = normalize(u_light_pos - v_world_position);
 	vec3 V = normalize(u_camera_pos - v_world_position);
 	vec3 normal = normalize(v_normal); 
-	vec3 normal_pixel = normalize(texture2D(u_normalmap_texture, uv).xyz);//normalize?
+	vec3 normal_pixel = texture2D(u_normalmap_texture, uv).xyz;
 	vec3 N = perturbNormal(normal, V, uv, normal_pixel );
-	// vec3 N = normalize(v_normal);
 	vec3 H = normalize( V + L);
 	vec3 R = reflect(-L, N);
 
@@ -179,13 +170,12 @@ void main()
 		metalness_tex = texture2D(u_metalness_texture, uv).x;
 	}
 	
-
-	float roughness = (roughness_tex * u_roughness); //total roughnesss
-	float metalness = (metalness_tex * u_metalness); //total metalness
+	float roughness = roughness_tex * u_roughness; //total roughnesss
+	float metalness = metalness_tex * u_metalness; //total metalness
 
 	// BSDF: bidirectional scattering distribution function
-	//vec3 f_diffuse = ((1.0 - metalness) * color.xyz) / PI; //since we are doing the linear interpolation with dialectric and conductor material
-	vec3 f_diffuse = mix( vec3(0.0), color.xyz, metalness) / PI; 
+	vec3 f_diffuse = ((1.0 - metalness) * color.xyz) / PI; //since we are doing the linear interpolation with dialectric and conductor material
+	//vec3 f_diffuse = mix( vec3(0.0), color.xyz, metalness) / PI; 
 
 	vec3 f_specular = BRDFSpecular( roughness, metalness, NdotH, LdotN, NdotV, NdotL, color.xyz );
 	
@@ -198,13 +188,12 @@ void main()
 	
 
 	vec3 direct = f_diffuse + f_specular;
-
+	//vec3 direct = f_diffuse ;
 	//u_light_intensity = NdotL;
 	//compute how much light received the pixel
 	//vec3 lightParams = u_light_color * u_light_intensity ;
 
-	vec3 light =  color.xyz * u_ambient_light ;	
-	light += direct * NdotL;
+	vec3 light = direct * NdotL;
 
 	
 	if ( u_output == 1.0 )
@@ -216,10 +205,13 @@ void main()
 	else
 		color = vec4(N, 1.0);
 
-	// gl_FragColor = color;
+	//gl_FragColor = color;
 	
 	//gl_FragColor = vec4(G);
-	gl_FragColor = vec4(light,1.0);
+	//gl_FragColor = vec4(G*NdotL);
+	gl_FragColor = vec4(light, 1.0);
+
+
 
 	// 1. Create Material
 	// ...

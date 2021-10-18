@@ -89,7 +89,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		SceneNode* pbr_node = new SceneNode("BallPBR", pbr_material, Mesh::Get("data/models/ball/sphere.obj.mbin"));
 		pbr_node->material = pbr_material;
 		pbr_material->light = light;
-		//node_list.push_back(pbr_node);
+		node_list.push_back(pbr_node);
 
 		//----second object
 		

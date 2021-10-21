@@ -94,6 +94,8 @@ public:
 	float spec_scale;
 	float reflactance;
 
+	
+
 	//flags
 	
 

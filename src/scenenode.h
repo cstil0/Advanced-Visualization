@@ -48,6 +48,8 @@ public:
 	
 	vec3 diffuse_intensity;
 	vec3 specular_intensity;
+	
+	float light_intensity;
 
 	Light();
 	Light(const char* name);

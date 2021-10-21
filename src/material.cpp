@@ -268,7 +268,8 @@ void PBRMaterial::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_light_pos", light->model.getTranslation());
 	shader->setUniform("u_ambient_light", Application::instance->ambient_light);
 	shader->setUniform("u_light_color", light->material->color.xyz ); //falta poner para el phong
-	
+	shader->setUniform("u_light_intensity", light->light_intensity); //falta poner para el phong
+
 
 	shader->setUniform("u_output", Application::instance->output);
 	shader->setUniform("u_roughness", this->roughness);
@@ -314,6 +315,7 @@ void PBRMaterial::renderInMenu()
 	ImGui::ColorEdit3("Base Color", color.v); // Edit 3 floats representing a color
 	ImGui::SliderFloat("Roughness",&this->roughness, 0.0f, 1.0f);
 	ImGui::SliderFloat("Metalness", &this->metalness, 0.0f, 1.0f);
+	ImGui::SliderFloat("Intensity", &this->light->light_intensity, 0.0f, 10.0f);
 	//ImGui::SliderFloat("Specular scale", &this->, 0.0f, 1.0f);
 	//ImGui::SliderFloat("Reflactance", &this->, 0.0f, 1.0f);
 	int &output = Application::instance->output;

@@ -17,6 +17,7 @@ uniform vec3 u_camera_pos;
 uniform vec3 u_light_pos;
 uniform vec3 u_ambient_light;
 uniform vec3 u_light_color;
+uniform float u_light_intensity;
 
 //Textures
 uniform sampler2D u_texture;
@@ -89,18 +90,19 @@ vec3 perturbNormal( vec3 N, vec3 V, vec2 texcoord, vec3 normal_pixel ){
 
 float DistributionGGX(const in float roughness, const in float NdotH)
 {
-	float alpha2 = roughness*roughness;
+	float alpha = roughness*roughness;
+	float alpha2 = alpha*alpha;
 	float denom = (NdotH*NdotH) * (alpha2 - 1.0) + 1.0;
 	denom = PI * denom * denom;
     return alpha2 / denom ;
 }
 
-vec3 FresnelSchlick(const in float LdotN, const in vec3 F0)
+vec3 FresnelSchlick(const in float cosTheta, const in vec3 F0)
 {
-    return F0 + ( 1.0 - F0) * pow( clamp(1.0 - LdotN, 0.0, 1.0) , 5.0); 
+    return F0 + ( 1.0 - F0) * pow( clamp(1.0 - cosTheta, 0.0, 1.0) , 5.0);  /////quizas cambiarlo con max!
 }
 
-vec3 FresnelSchlickRoughness(const in float cosTheta, const in vec3 F0, const in float roughness)
+vec3 FresnelSchlickRoughness(const in float cosTheta, const in vec3 F0, const in float roughness) // este cosTheta es loh or hov
 {
     return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow( clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
@@ -125,7 +127,7 @@ vec3 BRDFSpecular(float roughness, float metalness, float NdotH, float LdotN, fl
 	float D = DistributionGGX(roughness, NdotH);
 
 	vec3 F0 = mix( vec3(0.04), baseColor, metalness);
-	vec3 F = FresnelSchlick( LdotN, F0 );
+	vec3 F = FresnelSchlick( LdotN, F0 ); 
 
 	float G = GeometrySmith(NdotV, NdotL, roughness);
 	
@@ -134,19 +136,16 @@ vec3 BRDFSpecular(float roughness, float metalness, float NdotH, float LdotN, fl
 
 
 //---------------compute Vectors-----------------------------
+
 // vec3 computeVectors(vec3 u_light_pos, vec3 v_world_position, vec3 u_camera_pos, vec3 v_normal, sampler2D u_normalmap_texture, vec2 uv)
 // {
-
-// \computeVectors
-
-// vec3 L = normalize(u_light_pos - v_world_position);
-// vec3 V = normalize(u_camera_pos - v_world_position);
-// vec3 normal = normalize(v_normal); 
-// vec3 normal_pixel = texture2D(u_normalmap_texture, uv).xyz;
-// vec3 N = perturbNormal(normal, V, uv, normal_pixel );
-// vec3 H = normalize(V + L);
-// vec3 R = reflect(L, N);
-
+// 	vec3 L = normalize(u_light_pos - v_world_position);
+// 	vec3 V = normalize(u_camera_pos - v_world_position);
+// 	vec3 normal = normalize(v_normal); 
+// 	vec3 normal_pixel = texture2D(u_normalmap_texture, uv).xyz;
+// 	vec3 N = perturbNormal(normal, V, uv, normal_pixel );
+// 	vec3 H = normalize(V + L);
+// 	vec3 R = reflect(L, N);
 // 	return L,V,N,H,R;
 // } 
 
@@ -156,7 +155,7 @@ void main()
 	vec4 color = u_color;
 	// vec3 L,V,N,H,R = computeVectors(u_light_pos, v_world_position, u_camera_pos, v_normal, u_normalmap_texture, uv);
 	
-	// #include "computeVectors"
+
 	// Compute the light equation vectors
 	vec3 L = normalize(u_light_pos - v_world_position);
 	vec3 V = normalize(u_camera_pos - v_world_position);
@@ -206,8 +205,9 @@ void main()
 
 	//compute how much light received the pixel
 	vec3 light = vec3(0.0);
-	light += u_ambient_light; 
-	light += direct * NdotL * u_light_color ;// NdotL is the light intensity
+	//light += u_ambient_light; -> preguntar si fuese NECESARIO!
+
+	light += direct * NdotL * u_light_color * u_light_intensity;
 
 	//---to debug the textures
 	if ( u_output == 0.0 ) //complete
@@ -227,7 +227,7 @@ void main()
 	// gl_FragColor = vec4(light, 1.0);
 
 	gl_FragColor = color;
-
+	// gl_FragColor = vec4(F,1.0);
 
 	// 1. Create Material
 	// ...

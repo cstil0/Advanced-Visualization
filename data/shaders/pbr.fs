@@ -1,6 +1,8 @@
 //utilis definitions
 #define PI 3.14159265359
 
+const float GAMMA = 2.2;
+const float INV_GAMMA = 1.0 / GAMMA;
 //
 varying vec3 v_position; //position in local coords
 varying vec3 v_world_position; //position in world coord
@@ -49,6 +51,18 @@ struct PBRMat
 	vec3 V;
 	
 };
+
+// degamma
+vec3 gamma_to_linear(vec3 color)
+{
+	return pow(color, vec3(GAMMA));
+}
+
+// gamma
+vec3 linear_to_gamma(vec3 color)
+{
+	return pow(color, vec3(INV_GAMMA));
+}
 
 mat3 cotangent_frame(vec3 N, vec3 p, vec2 uv){
 	// get edge vectors of the pixel triangle
@@ -137,6 +151,9 @@ void main()
 
 	vec4 albedo = u_color;
 
+	// Gamma space
+	albedo = linear_to_gamma(albedo);
+
 	// textures:
 	albedo *= texture2D( u_texture, uv ); //base color
 	float roughness = texture2D(u_roughness_texture, uv).x;
@@ -183,6 +200,9 @@ void main()
 	diffuseIBL *= (1-F_rg); // NO ESTOY MUY SEGURA DE QUE ESTE SEA EL TÉRMINO, YA QUE VEO QUE NO TIENE EL MISMO VALOR EN TODAS LAS COMPONENTES DEPENDIENDO DEL ROUGHNESS
 
 	vec3 finalIBL = specularIBL +  diffuseIBL;
+
+	// Gamma space
+	finalIBL = gamma_to_linear(finalIBL);
 	gl_FragColor = vec4(finalIBL, 0.0f);
 
 	// 1. Create Material

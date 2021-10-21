@@ -158,7 +158,7 @@ void main()
 	// -- IBL - specular term --
 
 	//Incomming light term
-	vec3 specularSample = getReflectionColor(N, roughness);
+	vec3 specularSample = getReflectionColor(N, roughness); // HE PUESTO N POR QUE ES EL QUE MEJOR SE VE, PERO NO LO ACABO DE ENTENDER YA QUE LA PARTE ESPECULAR SI QUE DEPENDE DE V...NO?
 
 	//Material Response term
 	float NdotV = clamp(dot(N,V), 0.0f, 1.0f);
@@ -169,10 +169,21 @@ void main()
 	// float LdotN = clamp(dot(L,N), 0.0f, 1.0f);
 	vec3 F_rg = FresnelSchlickRoughness(NdotV, F0, roughness);
 
-	vec3 SpecularBRDF = F_rg * brdf2D.x + brdf2D.y;
-	vec3 SpecularIBL = specularSample * SpecularBRDF;
+	vec3 specularBRDF = F_rg * brdf2D.x + brdf2D.y;
+	vec3 specularIBL = specularSample * specularBRDF;
 
-	gl_FragColor = vec4(SpecularIBL, 0.0f);
+	// -- IBL - diffuse term --
+	// Incomming light term
+	float most_roughness = 0.9f; // He puesto 0.9 por que por algun motivo la textura u_texture_prem_4 es completamente negra...
+	vec3 diffuseSample = getReflectionColor(N, most_roughness);
+
+	// Material response term
+	vec3 diffuseColor = mix(albedo.xyz, vec3(0.0f),metalness) / PI; //since we are doing the linear interpolation with dialectric and conductor material
+	vec3 diffuseIBL = diffuseSample * diffuseColor;
+	diffuseIBL *= (1-F_rg); // NO ESTOY MUY SEGURA DE QUE ESTE SEA EL TÉRMINO, YA QUE VEO QUE NO TIENE EL MISMO VALOR EN TODAS LAS COMPONENTES DEPENDIENDO DEL ROUGHNESS
+
+	vec3 finalIBL = specularIBL +  diffuseIBL;
+	gl_FragColor = vec4(finalIBL, 0.0f);
 
 	// 1. Create Material
 	// ...

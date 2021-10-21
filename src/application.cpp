@@ -58,10 +58,10 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		//renderReflection();
 		
 
-		Texture* color_texture = Texture::Get("data/models/ball/albedo.png");
-		Texture* normalmap_texture = Texture::Get("data/models/ball/normal.png");
-		Texture* roughness_texture = Texture::Get("data/models/ball/roughness.png");
-		Texture* metalness_texture = Texture::Get("data/models/ball/metalness.png");
+		Texture* color_texture = Texture::Get("data/models/helmet/albedo.png");
+		Texture* normalmap_texture = Texture::Get("data/models/helmet/normal.png");
+		Texture* roughness_texture = Texture::Get("data/models/helmet/roughness.png");
+		Texture* metalness_texture = Texture::Get("data/models/helmet/metalness.png");
 
 		// ME ESTOY PENSANDO SI MEJOR PONER ESTAS VARIABLES EN UNA CLASE PARECIDA A LIGHT A LA QUE PODAMOS ACCEDER DESDE CADA OBJETO DE LA ESCENA, YA QUE SINO
 		// EN EL CASO DE QUE TUVIESEMOS MUCHOS SERÍA MUY POCO EFICIENTE GUARDARLO EN CADA MATERIAL
@@ -100,7 +100,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 			pbr_material->light = light;
 		}
 
-		SceneNode* pbr_node = new SceneNode("BallPBR", pbr_material, Mesh::Get("data/meshes/sphere.obj.mbin"));
+		SceneNode* pbr_node = new SceneNode("BallPBR", pbr_material, Mesh::Get("data/models/helmet/helmet.obj.mbin"));
 		pbr_node->material = pbr_material;
 		node_list.push_back(pbr_node);
 

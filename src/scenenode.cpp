@@ -120,12 +120,12 @@ void Light::renderInMenu()
 
 	int numLight = 0;
 	
-	if (ImGui::TreeNode("Light intensities"))
-	{
-		ImGui::ColorEdit3("diffuse_intensity", (float*)&this->diffuse_intensity);
-		ImGui::ColorEdit3("specular_intensity", (float*)&this->specular_intensity);
-		ImGui::TreePop();
-	}
+	//if (ImGui::TreeNode("Light intensities") ) // and if we use phong ...
+	//{
+	//	ImGui::ColorEdit3("diffuse_intensity", (float*)&this->diffuse_intensity);
+	//	ImGui::ColorEdit3("specular_intensity", (float*)&this->specular_intensity);
+	//	ImGui::TreePop();
+	//}
 
 }
 

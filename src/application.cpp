@@ -70,8 +70,8 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 
 		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/pbr.fs");
-		this->met_rou = FALSE;
-		PBRMaterial* pbr_material = new PBRMaterial(sh, color_texture, normalmap_texture, roughness_texture, metalness_texture);
+		
+		PBRMaterial* pbr_material = new PBRMaterial(sh, color_texture, normalmap_texture, roughness_texture, metalness_texture, false);
 		
 		//create a light
 		int numb_lights = 1;
@@ -89,6 +89,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		}
 
 		SceneNode* pbr_node = new SceneNode("BallPBR", pbr_material, Mesh::Get("data/models/ball/sphere.obj.mbin"));
+		
 		pbr_node->material = pbr_material;
 		pbr_material->light = light;
 		//node_list.push_back(pbr_node);
@@ -103,8 +104,8 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		Texture* mr_texture = Texture::Get("data/models/helmet/roughness.png");
 
 		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/pbr.fs");
-		this->met_rou = TRUE;
-		pbr_material = new PBRMaterial(sh, color_texture, normalmap_texture, NULL, NULL, mr_texture);
+		
+		pbr_material = new PBRMaterial(sh, color_texture, normalmap_texture, NULL, NULL, true, mr_texture);
 		SceneNode* pbr_node2 = new SceneNode("BallPBR2", pbr_material, Mesh::Get("data/models/helmet/helmet.obj.mbin"));
 		pbr_material->light = light;
 		pbr_node2->material = pbr_material;

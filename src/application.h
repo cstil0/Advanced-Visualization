@@ -42,7 +42,7 @@ public:
 	
 	int output;
 	vec3 ambient_light;
-	bool met_rou;
+	
 
 	//some vars
 	static Camera* camera; //our GLOBAL camera

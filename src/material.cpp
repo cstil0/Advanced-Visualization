@@ -149,23 +149,7 @@ void PhongMaterial::setUniforms(Camera* camera, Matrix44 model)
 }
 
 
-//void PhongMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
-//{
-//	if (mesh && shader)
-//	{
-//		//enable shader
-//		shader->enable();
-//
-//		//upload uniforms
-//		setUniforms(camera, model);
-//		
-//		//do the draw call
-//		mesh->render(GL_TRIANGLES);
-//
-//		//disable shader
-//		shader->disable();
-//	}
-//}
+
 
 void PhongMaterial::renderInMenu()
 {
@@ -237,20 +221,19 @@ PBRMaterial::PBRMaterial()
 {
 }
 
-PBRMaterial::PBRMaterial(Shader* sh, Texture* tex, Texture* normal, Texture* rough, Texture* metal, Texture* mr_texture ) {
+PBRMaterial::PBRMaterial(Shader* sh, Texture* tex, Texture* normal, Texture* rough, Texture* metal, bool bool_mr, Texture* mr_texture) {
 	this->shader = sh;
 	this->texture = tex;
 	this->normal_texture = normal;
 	this->roughness_texture = rough;
 	this->metalness_texture = metal;
 	this->mr_texture = mr_texture;
-	//this->output = 0.0;
-	
 	
 	this->roughness = 0.1;
 	this->metalness = 0.4;
 	this->spec_scale = 0.1;
 	this->reflactance = 0.1;
+	this->bool_met_rou = bool_mr;
 
 }
 
@@ -275,7 +258,7 @@ void PBRMaterial::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_roughness", this->roughness);
 	shader->setUniform("u_metalness", this->metalness);
 	
-	shader->setUniform("u_met_rou", Application::instance->met_rou);
+	shader->setUniform("u_met_rou", this->bool_met_rou);
 
 	if (texture)
 		shader->setTexture("u_texture", texture, EOutput::ALBEDO);
@@ -285,7 +268,7 @@ void PBRMaterial::setUniforms(Camera* camera, Matrix44 model)
 		shader->setTexture("u_roughness_texture", this->roughness_texture, EOutput::ROUGHNESS);
 	if (this->metalness_texture)
 		shader->setTexture("u_metalness_texture", this->metalness_texture, EOutput::METALNESS);
-	if (Application::instance->met_rou && this->mr_texture) {
+	if (this->bool_met_rou && this->mr_texture) {
 		shader->setTexture("u_mr_texture", this->mr_texture, EOutput::METALNESS_ROUGHNESS);
 	}
 }

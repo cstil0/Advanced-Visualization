@@ -71,10 +71,10 @@ void SceneNode::renderInMenu()
 	}
 
 	//Geometry
-	if (mesh && ImGui::TreeNode("Geometry"))
+	if (!(this->typeOfNode == TYPEOFNODE::LIGHT) && mesh && ImGui::TreeNode("Geometry"))
 	{
 		bool changed = false;
-		changed |= ImGui::Combo("Mesh", (int*)&mesh_selected, "SPHERE\0HELMET\0");
+		changed |= ImGui::Combo("Mesh", (int*)&mesh_selected, "BASIC\0HELMET\0");
 
 		ImGui::TreePop();
 	}
@@ -120,12 +120,15 @@ void Light::renderInMenu()
 
 	int numLight = 0;
 	
-	//if (ImGui::TreeNode("Light intensities") ) // and if we use phong ...
-	//{
-	//	ImGui::ColorEdit3("diffuse_intensity", (float*)&this->diffuse_intensity);
-	//	ImGui::ColorEdit3("specular_intensity", (float*)&this->specular_intensity);
-	//	ImGui::TreePop();
-	//}
+	if (ImGui::TreeNode("Light intensities") ) 
+	{
+		ImGui::SliderFloat("Intensity", &this->light_intensity, 0.0f, 10.0f);
+		// and if we use phong ...
+		//ImGui::ColorEdit3("diffuse_intensity", (float*)&this->diffuse_intensity);
+		//ImGui::ColorEdit3("specular_intensity", (float*)&this->specular_intensity);
+		
+		ImGui::TreePop();
+	}
 
 }
 

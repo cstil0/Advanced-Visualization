@@ -167,10 +167,10 @@ SkyboxMaterial::SkyboxMaterial()
 
 
 
-SkyboxMaterial::SkyboxMaterial( Shader* sh, Texture* tex )
+SkyboxMaterial::SkyboxMaterial( Shader* sh )
 {
 	this->shader = sh;
-	this->texture = tex;
+	//this->texture = tex;
 }
 
 SkyboxMaterial::~SkyboxMaterial()
@@ -183,9 +183,16 @@ void SkyboxMaterial::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_camera_position", camera->eye);
 	shader->setUniform("u_model", model);
 	shader->setUniform("u_color", color);
+	int type_env = Application::instance->type_environment;
+	shader->setUniform("u_output", type_env);
+
 	
-	if (texture)
-		shader->setUniform("u_texture", texture, EOutput::ALBEDO);
+	if (this->panorama_tex)
+		shader->setUniform("u_panorama_tex", panorama_tex, ESkybox::PANORAMA);
+	if (this->snow_tex)
+		shader->setUniform("u_snow_tex", snow_tex, ESkybox::SNOW);
+
+
 }
 
 void SkyboxMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
@@ -298,7 +305,7 @@ void PBRMaterial::renderInMenu()
 	ImGui::ColorEdit3("Base Color", color.v); // Edit 3 floats representing a color
 	ImGui::SliderFloat("Roughness",&this->roughness, 0.0f, 1.0f);
 	ImGui::SliderFloat("Metalness", &this->metalness, 0.0f, 1.0f);
-	ImGui::SliderFloat("Intensity", &this->light->light_intensity, 0.0f, 10.0f);
+	//ImGui::SliderFloat("Intensity", &this->light->light_intensity, 0.0f, 10.0f);
 	//ImGui::SliderFloat("Specular scale", &this->, 0.0f, 1.0f);
 	//ImGui::SliderFloat("Reflactance", &this->, 0.0f, 1.0f);
 	int &output = Application::instance->output;

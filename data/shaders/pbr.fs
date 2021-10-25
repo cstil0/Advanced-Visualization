@@ -15,6 +15,8 @@ uniform sampler2D u_texture;
 uniform sampler2D u_roughness_texture;
 uniform sampler2D u_metalness_texture;
 uniform sampler2D u_normalmap_texture;
+uniform sampler2D u_met_rou; // ESTA TEXTURA Y LA DE ABAJO SON LA MISMA NO??
+uniform sampler2D u_mr_texture;
 
 uniform samplerCube u_texture_prem;
 uniform samplerCube u_texture_prem_0;
@@ -23,8 +25,8 @@ uniform samplerCube u_texture_prem_2;
 uniform samplerCube u_texture_prem_3;
 uniform samplerCube u_texture_prem_4;
 
-uniform float u_roughness;
-uniform float u_metalness;
+uniform float u_roughness; // ??
+uniform float u_metalness; //??
 
 uniform sampler2D u_BRDFLut;
 
@@ -33,24 +35,33 @@ uniform vec3 u_camera_pos;
 //Lights uniforms parameters
 uniform vec3 u_light_pos;
 
-struct PBRMat
+struct PBRStruct
 {
+	vec4 albedo;
+	
 	//properties
 	float roughness;
 	float metalness;
-	// not sure aqui
-	float F;
-	float G;
-	float D;
+	float roughness_tex;
+	float metalness_tex;
 
 	//vectors
 	vec3 N;
+	vec3 V;
 	vec3 L;
 	vec3 H;
 	vec3 R;
-	vec3 V;
-	
-};
+
+	float NdotH;
+	float NdotV;
+	float VdotH;
+	float NdotL;
+	float LdotN;
+
+	vec3 f_diffuse;
+	vec3 f_specular;
+
+}PBRMat;
 
 // degamma
 vec3 gamma_to_linear(vec3 color)
@@ -132,35 +143,108 @@ vec3 getReflectionColor(vec3 r, float roughness)
 	return color.rgb;
 }
 
+void computeVectors(inout PBRStruct mat)
+{
+	mat.L = normalize(u_light_pos - v_world_position);
+	mat.V = normalize(u_camera_pos - v_world_position);
+	vec3 normal = normalize(v_normal); 
+	vec3 normal_pixel = texture2D(u_normalmap_texture, v_uv).xyz;
+	mat.N = perturbNormal(normal, mat.V, v_uv, normal_pixel );
+	mat.H = normalize(mat.V + mat.L);
+	mat.R = reflect(mat.L, mat.N);
+} 
+
+void computeDotProducts(inout PBRStruct mat)
+{
+	mat.NdotH = max(dot(mat.N,mat.H), 0.0f);
+	mat.NdotV = max(dot(mat.N,mat.V), 0.0f);
+	mat.VdotH = max(dot(mat.V,mat.H), 0.0f);
+	mat.NdotL = max(dot(mat.N,mat.L), 0.0f);
+	mat.LdotN = max(dot(mat.L,mat.N), 0.0f);
+}
+
+void fillPBRProperties(inout PBRStruct mat)
+{
+	mat.albedo = u_color;
+	mat.albedo *= texture2D( u_texture, v_uv ); //base color
+	//roughness_tex = 0.0;
+	//float metalness_tex = 0.0;
+	if (u_met_rou){
+		mat.roughness_tex = texture2D(u_mr_texture, v_uv).y;
+		mat.metalness_tex = texture2D(u_mr_texture, v_uv).z;
+	}
+	else{
+		mat.roughness_tex = texture2D(u_roughness_texture, v_uv).x;
+		mat.metalness_tex = texture2D(u_metalness_texture, v_uv).x;
+	}
+	
+	mat.roughness = mat.roughness_tex * u_roughness; //total roughnesss
+	mat.metalness = mat.metalness_tex * u_metalness; //total metalness
+}
+
 //void computeVectors(out L, ) PARA CALCULAR LOS VECTORES, PERO HAY QUE MIRAR SI ES IN O OUT
 
 
 void main()
 {
+	// vec2 uv = v_uv;
+	// vec4 color = u_color;
+
+	// 1. Create Material
+	PBRMat = PBRStruct(
+
+						vec4(0.0),
+
+						0.0f, //roughness
+						0.0f, //metalness
+						0.0f,
+						0.0f,
+
+						vec3(0.0f), //vectors
+						vec3(0.0f),
+						vec3(0.0f),
+						vec3(0.0f),
+						vec3(0.0f),
+						
+						0.0f, //dot products
+						0.0f,
+						0.0f,
+						0.0f, 
+						0.0f,
+						
+						vec3(0.0f),
+						vec3(0.0f)
+						);
+
+	// 2. Fill Material
+	computeVectors(PBRMat);
+	computeDotProducts(PBRMat);
+	fillPBRProperties(PBRMat);
 	vec2 uv = v_uv;
 
 	// Compute the light equation vectors
-	vec3 L = normalize(u_light_pos - v_world_position);
-    vec3 normal = normalize(v_normal); 
-	vec3 normal_pixel = texture2D(u_normalmap_texture, uv).xyz;
-	vec3 V = normalize(u_camera_pos - v_world_position);
+	// vec3 L = normalize(u_light_pos - v_world_position);
+    // vec3 normal = normalize(v_normal); 
+	// vec3 normal_pixel = texture2D(u_normalmap_texture, uv).xyz;
+	// vec3 V = normalize(u_camera_pos - v_world_position);
 
-	vec3 N = perturbNormal(normal, V, uv, normal_pixel );
-	vec3 H = normalize(V + L);
-	vec3 R = reflect(L, N);
+	// vec3 N = perturbNormal(normal, V, uv, normal_pixel );
+	// vec3 H = normalize(V + L);
+	// vec3 R = reflect(L, N);
 
-	vec4 albedo = u_color;
+	// vec4 albedo = u_color;
 
 	// Gamma space
-	albedo = linear_to_gamma(albedo);
+	vec3 test = PBRMat.albedo.xyz;
+	vec3 albedo_gamma = gamma_to_linear(test); // GUARDAR DENTRO DE MAT??
 
 	// textures:
-	albedo *= texture2D( u_texture, uv ); //base color
-	float roughness = texture2D(u_roughness_texture, uv).x;
-	float metalness = texture2D(u_metalness_texture, uv).x;
+	albedo_gamma *= texture2D( u_texture, uv ).xyz; //base color
+	// float roughness = texture2D(u_roughness_texture, uv).x;
+	// float metalness = texture2D(u_metalness_texture, uv).x;
 
-	roughness *= u_roughness;
-	metalness *= u_metalness;
+	// roughness *= u_roughness;
+	// metalness *= u_metalness;
 
 	// vec3 f_diffuse = ((1.0 - metalness) * albedo.xyz) / PI; //since we are doing the linear interpolation with dialectric and conductor material
  	// vec3 F0 = mix( vec3(0.04), albedo.xyz, metalness);
@@ -175,34 +259,36 @@ void main()
 	// -- IBL - specular term --
 
 	//Incomming light term
-	vec3 specularSample = getReflectionColor(N, roughness); // HE PUESTO N POR QUE ES EL QUE MEJOR SE VE, PERO NO LO ACABO DE ENTENDER YA QUE LA PARTE ESPECULAR SI QUE DEPENDE DE V...NO?
+	vec3 specularSample = getReflectionColor(PBRMat.N, PBRMat.roughness); // HE PUESTO N POR QUE ES EL QUE MEJOR SE VE, PERO NO LO ACABO DE ENTENDER YA QUE LA PARTE ESPECULAR SI QUE DEPENDE DE V...NO?
 
 	//Material Response term
-	float NdotV = clamp(dot(N,V), 0.0f, 1.0f);
-	vec2 LUT_coord = vec2(NdotV, roughness);
+	// float NdotV = clamp(dot(N,V), 0.0f, 1.0f);
+	// float HdotV = clamp(dot(H,V), 0.0f, 1.0f);
+	// float LdotN = clamp(dot(L,N), 0.0f,1.0f);
+	vec2 LUT_coord = vec2(PBRMat.NdotV, PBRMat.roughness);
 	vec4 brdf2D = texture2D( u_BRDFLut, LUT_coord );
 	// CUANDO UNAMOS LAS DOS PARTES ESTO ESTARÁ REPETIDO
-	vec3 F0 = mix(vec3(0.04), albedo.xyz, metalness);
+	vec3 F0 = mix(vec3(0.04), albedo_gamma.xyz, PBRMat.metalness);
 	// float LdotN = clamp(dot(L,N), 0.0f, 1.0f);
-	vec3 F_rg = FresnelSchlickRoughness(NdotV, F0, roughness);
+	vec3 F_rg = FresnelSchlickRoughness(PBRMat.LdotN, F0, PBRMat.roughness);
 
 	vec3 specularBRDF = F_rg * brdf2D.x + brdf2D.y;
 	vec3 specularIBL = specularSample * specularBRDF;
 
 	// -- IBL - diffuse term --
 	// Incomming light term
-	float most_roughness = 0.9f; // He puesto 0.9 por que por algun motivo la textura u_texture_prem_4 es completamente negra...
-	vec3 diffuseSample = getReflectionColor(N, most_roughness);
+	float most_roughness = 1.0f; 
+	vec3 diffuseSample = getReflectionColor(PBRMat.N, most_roughness);
 
 	// Material response term
-	vec3 diffuseColor = mix(albedo.xyz, vec3(0.0f),metalness) / PI; //since we are doing the linear interpolation with dialectric and conductor material
+	vec3 diffuseColor = mix(albedo_gamma.xyz, vec3(0.0f),PBRMat.metalness) / PI; //since we are doing the linear interpolation with dialectric and conductor material
 	vec3 diffuseIBL = diffuseSample * diffuseColor;
-	diffuseIBL *= (1-F_rg); // NO ESTOY MUY SEGURA DE QUE ESTE SEA EL TÉRMINO, YA QUE VEO QUE NO TIENE EL MISMO VALOR EN TODAS LAS COMPONENTES DEPENDIENDO DEL ROUGHNESS
+	diffuseIBL *= (1-F_rg);
 
 	vec3 finalIBL = specularIBL +  diffuseIBL;
 
 	// Gamma space
-	finalIBL = gamma_to_linear(finalIBL);
+	finalIBL = linear_to_gamma(F_rg);
 	gl_FragColor = vec4(finalIBL, 0.0f);
 
 	// 1. Create Material

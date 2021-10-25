@@ -57,11 +57,17 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 		//renderReflection();
 		
+		// RENDER BALL
+		Texture* color_texture = Texture::Get("data/models/ball/albedo.png");
+		Texture* normalmap_texture = Texture::Get("data/models/ball/normal.png");
+		Texture* roughness_texture = Texture::Get("data/models/ball/roughness.png");
+		Texture* metalness_texture = Texture::Get("data/models/ball/metalness.png");
 
-		Texture* color_texture = Texture::Get("data/models/helmet/albedo.png");
-		Texture* normalmap_texture = Texture::Get("data/models/helmet/normal.png");
-		Texture* roughness_texture = Texture::Get("data/models/helmet/roughness.png");
-		Texture* metalness_texture = Texture::Get("data/models/helmet/metalness.png");
+		//// RENDER HELMET
+		//Texture* color_texture = Texture::Get("data/models/helmet/albedo.png");
+		//Texture* normalmap_texture = Texture::Get("data/models/helmet/normal.png");
+		//Texture* roughness_texture = Texture::Get("data/models/helmet/roughness.png");
+		//Texture* metalness_texture = Texture::Get("data/models/helmet/metalness.png");
 
 		// ME ESTOY PENSANDO SI MEJOR PONER ESTAS VARIABLES EN UNA CLASE PARECIDA A LIGHT A LA QUE PODAMOS ACCEDER DESDE CADA OBJETO DE LA ESCENA, YA QUE SINO
 		// EN EL CASO DE QUE TUVIESEMOS MUCHOS SERÍA MUY POCO EFICIENTE GUARDARLO EN CADA MATERIAL
@@ -77,7 +83,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		level2->cubemapFromHDRE(hdre, 2);
 		level3->cubemapFromHDRE(hdre, 3);
 		level4->cubemapFromHDRE(hdre, 4);
-		level4->cubemapFromHDRE(hdre, 5);
+		level5->cubemapFromHDRE(hdre, 5);
 
 		Texture* BRDFLut = Texture::Get("data/brdfLUT.png");
 
@@ -100,7 +106,11 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 			pbr_material->light = light;
 		}
 
-		SceneNode* pbr_node = new SceneNode("BallPBR", pbr_material, Mesh::Get("data/models/helmet/helmet.obj.mbin"));
+		// Render helmet
+		//SceneNode* pbr_node = new SceneNode("HelmetPBR", pbr_material, Mesh::Get("data/models/helmet/helmet.obj.mbin"));
+		// Render ball
+		SceneNode* pbr_node = new SceneNode("BallPBR", pbr_material, Mesh::Get("data/meshes/sphere.obj.mbin"));
+
 		pbr_node->material = pbr_material;
 		node_list.push_back(pbr_node);
 

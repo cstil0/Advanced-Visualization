@@ -280,6 +280,9 @@ void PBRMaterial::setUniforms(Camera* camera, Matrix44 model)
 	if (this->bool_met_rou && this->mr_texture) {
 		shader->setTexture("u_mr_texture", this->mr_texture, EOutput::METALNESS_ROUGHNESS);
 	}
+	if (this->emissive_texture) {
+		shader->setTexture("u_emissive_texture", this->emissive_texture, EOutput::EMISSIVE);
+	}
 
 	if (this->hdre_level0)
 		shader->setTexture("u_texture_prem", this->hdre_level0, EOutput::LEVEL0);

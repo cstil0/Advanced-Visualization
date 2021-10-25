@@ -1,8 +1,12 @@
 
 //utilis definitions
 #define PI 3.14159265359
+#define RECIPROCAL_PI 0.3183098861837697
 
+const float GAMMA = 2.2;
+const float INV_GAMMA = 1.0 / GAMMA;
 
+//varying variables
 varying vec3 v_position; //position in local coords
 varying vec3 v_world_position; //position in world coord
 varying vec3 v_normal; //normal in the pixel
@@ -15,8 +19,8 @@ uniform vec3 u_camera_pos;
 
 //Lights uniforms parameters
 uniform vec3 u_light_pos;
-uniform vec3 u_ambient_light;
 uniform vec3 u_light_color;
+uniform vec3 u_ambient_light;
 uniform float u_light_intensity;
 
 //Textures
@@ -25,8 +29,10 @@ uniform sampler2D u_roughness_texture;
 uniform sampler2D u_metalness_texture;
 uniform sampler2D u_normalmap_texture;
 uniform sampler2D u_mr_texture; 
+uniform sampler2D u_emissive_texture;
 uniform sampler2D u_BRDFLut;
 
+//HDRE 
 uniform samplerCube u_texture_prem;
 uniform samplerCube u_texture_prem_0;
 uniform samplerCube u_texture_prem_1;
@@ -34,8 +40,7 @@ uniform samplerCube u_texture_prem_2;
 uniform samplerCube u_texture_prem_3;
 uniform samplerCube u_texture_prem_4;
 
-
-//boolean
+//boolean 
 uniform float u_output;
 uniform bool u_met_rou;
 
@@ -43,39 +48,6 @@ uniform bool u_met_rou;
 uniform float u_roughness;
 uniform float u_metalness;
 
-struct matStruct {
-    vec4 ambientColor ;
-    vec4 diffuseColor ;
-} newMaterial;
-
-struct PBRStruct
-{
-	vec4 color;
-	
-	//properties
-	float roughness;
-	float metalness;
-	float roughness_tex;
-	float metalness_tex;
-
-	//vectors
-	vec3 N;
-	vec3 V;
-	vec3 L;
-	vec3 H;
-	vec3 R;
-
-	float NdotH ;
-	float NdotV ;
-	float NdotL ;
-	float LdotH ; // borrar uno luego!!!
-	float LdotV ;
-
-	vec3 F0;
-	vec3 f_diffuse;
-	vec3 f_specular;
-
-}PBRMat;
 
 //---------------Get Normalmap functions-----------------------------
 mat3 cotangent_frame(vec3 N, vec3 p, vec2 uv){
@@ -109,7 +81,125 @@ vec3 perturbNormal( vec3 N, vec3 V, vec2 texcoord, vec3 normal_pixel ){
 	return normalize(TBN * normal_pixel);
 }
 
-//---------------functions for Specular BRDF-----------------------------
+//---------------Gamma correction-----------------------------
+
+// degamma
+vec3 gamma_to_linear(vec3 color)
+{
+	return pow(color, vec3(GAMMA));
+}
+
+// gamma
+vec3 linear_to_gamma(vec3 color)
+{
+	return pow(color, vec3(INV_GAMMA));
+}
+
+//---------------Tonemap correction-----------------------------
+
+vec3 toneMap(vec3 color)
+{
+    return color / (color + vec3(1.0));
+}
+
+vec3 toneMapUncharted2Impl(vec3 color)
+{
+    const float A = 0.15;
+    const float B = 0.50;
+    const float C = 0.10;
+    const float D = 0.20;
+    const float E = 0.02;
+    const float F = 0.30;
+    return ((color*(A*color+C*B)+D*E)/(color*(A*color+B)+D*F))-E/F;
+}
+
+vec3 toneMapUncharted(vec3 color)
+{
+    const float W = 11.2;
+    color = toneMapUncharted2Impl(color * 2.0);
+    vec3 whiteScale = 1.0 / toneMapUncharted2Impl(vec3(W));
+    return color * whiteScale;
+}
+
+//---------------PBRStruct struct-----------------------------
+
+struct PBRStruct
+{
+	vec3 color;
+	
+	//properties
+	float roughness;
+	float metalness;
+	float roughness_tex;
+	float metalness_tex;
+
+	//vectors
+	vec3 N;
+	vec3 V;
+	vec3 L;
+	vec3 H;
+	vec3 R;
+
+	float NdotH ;
+	float NdotV ;
+	float NdotL ;
+	float LdotH ; 
+	//float LdotV ;
+
+	vec3 F0;
+	vec3 F_RG;
+	vec3 f_diffuse;
+	vec3 f_specular;
+
+
+}PBRMat;
+
+
+//---------------Fill PBR Materials Functions-----------------------------
+
+void computeVectors(inout PBRStruct mat)
+{
+	mat.L = normalize(u_light_pos - v_world_position);
+	mat.V = normalize(u_camera_pos - v_world_position);
+	vec3 normal = normalize(v_normal); 
+	vec3 normal_pixel = texture2D(u_normalmap_texture, v_uv).xyz;
+	mat.N = perturbNormal(normal, mat.V, v_uv, normal_pixel );
+	mat.H = normalize(mat.V + mat.L);
+	mat.R = reflect(-mat.V, mat.N);
+} 
+
+void computeDotProducts(inout PBRStruct mat)
+{
+	mat.NdotH = max(dot(mat.N,mat.H), 0.0f);
+	mat.NdotV = clamp(dot(mat.N,mat.V), 0.01f, 0.99f);
+	mat.NdotL = max(dot(mat.N,mat.L), 0.0f);
+	mat.LdotH = max(dot(mat.L,mat.H), 0.0f);
+	//mat.LdotV = max(dot(mat.L,mat.V), 0.0f);
+
+}
+
+void fillPBRProperties(inout PBRStruct mat)
+{
+	mat.color = u_color.xyz;//base color
+	mat.color *= texture2D( u_texture, v_uv ).xyz; 
+	mat.color = gamma_to_linear(mat.color);
+	if (u_met_rou){
+		mat.roughness_tex = texture2D(u_mr_texture, v_uv).y;
+		mat.metalness_tex = texture2D(u_mr_texture, v_uv).z;
+	}
+	else{
+		mat.roughness_tex = texture2D(u_roughness_texture, v_uv).x;
+		mat.metalness_tex = texture2D(u_metalness_texture, v_uv).x;
+	}
+	
+	mat.roughness = clamp(mat.roughness_tex * u_roughness, 0.01f, 0.99f); //total roughness and clamp it 
+	mat.metalness = mat.metalness_tex * u_metalness; //total metalness
+	mat.F0 = mix( vec3(0.04), mat.color, mat.metalness);
+
+}
+
+//---------------functions for BRDF-----------------------------
+
 // BSDF: bidirectional scattering distribution function
 float DistributionGGX(const in float roughness, const in float NdotH)
 {
@@ -149,14 +239,22 @@ vec3 BRDFSpecular(float roughness, float metalness, float NdotH, float NdotV, fl
 {
 	float D = DistributionGGX(roughness, NdotH);
 
-	vec3 F = FresnelSchlick( NdotL, F0 ); //same NdotL right????????
+	vec3 F = FresnelSchlick( NdotL, F0 ); 
 
 	float G = GeometrySmith(NdotV, NdotL, roughness);
 	
 	return (F*G*D) / (4.0 * NdotL * NdotV + 1e-7 ); // in case of zero div
 }
 
-//---------------IBL functions-----------------------------
+
+void computeBRDF(inout PBRStruct mat)
+{
+	//mat.f_diffuse = ((1.0 - mat.metalness) * mat.color) * RECIPROCAL_PI; //since we are doing the linear interpolation with dialectric and conductor material
+	mat.f_diffuse = mix( mat.color, vec3(0.0), mat.metalness) * RECIPROCAL_PI; 
+	mat.f_specular = BRDFSpecular( mat.roughness, mat.metalness, mat.NdotH, mat.NdotV, mat.NdotL, mat.color, mat.F0 );
+}
+
+//---------------compute IBL-----------------------------
 
 vec3 getReflectionColor(vec3 r, float roughness)
 {
@@ -175,78 +273,40 @@ vec3 getReflectionColor(vec3 r, float roughness)
 
 	return color.rgb;
 }
-//---------------compute Vectors-----------------------------
 
-void computeVectors(inout PBRStruct mat)
-{
-	mat.L = normalize(u_light_pos - v_world_position);
-	mat.V = normalize(u_camera_pos - v_world_position);
-	vec3 normal = normalize(v_normal); 
-	vec3 normal_pixel = texture2D(u_normalmap_texture, v_uv).xyz;
-	mat.N = perturbNormal(normal, mat.V, v_uv, normal_pixel );
-	mat.H = normalize(mat.V + mat.L);
-	mat.R = reflect(-mat.L, mat.N);
-} 
+vec3 computeSpecularIBL(inout PBRStruct mat){
+	mat.F_RG = FresnelSchlickRoughness( mat.LdotH, mat.F0 , mat.roughness ); 
+	vec2 brdf_coord = vec2( mat.NdotV, mat.roughness);
+	vec4 brdf2D = texture2D(u_BRDFLut, brdf_coord);// not sure el orden
 
-void computeDotProducts(inout PBRStruct mat)
-{
-	mat.NdotH = max(dot(mat.N,mat.H), 0.0f);
-	mat.NdotV = max(dot(mat.N,mat.V), 0.0f);
-	//float VdotH = max(dot(V,H), 0.0f);
-	mat.NdotL = max(dot(mat.N,mat.L), 0.0f);
-	//float LdotN = max(dot(L,N), 0.0f);
-	mat.LdotH = max(dot(mat.L,mat.H), 0.0f);
-	mat.LdotV = max(dot(mat.L,mat.V), 0.0f);
-
+	vec3 specularSample = getReflectionColor(mat.R, mat.roughness);
+	vec3 specularBRDF = mat.F_RG * brdf2D.x + brdf2D.y;
+	vec3 specularIBL = specularSample * specularBRDF;
+	return specularIBL;
 }
 
-void fillPBRProperties(inout PBRStruct mat)
-{
-	mat.color = u_color;//base color
-	mat.color *= texture2D( u_texture, v_uv ); //base color
-	//roughness_tex = 0.0;
-	//float metalness_tex = 0.0;
-	if (u_met_rou){
-		mat.roughness_tex = texture2D(u_mr_texture, v_uv).y;
-		mat.metalness_tex = texture2D(u_mr_texture, v_uv).z;
-	}
-	else{
-		mat.roughness_tex = texture2D(u_roughness_texture, v_uv).x;
-		mat.metalness_tex = texture2D(u_metalness_texture, v_uv).x;
-	}
-	
-	mat.roughness = mat.roughness_tex * u_roughness; //total roughness
-	mat.metalness = mat.metalness_tex * u_metalness; //total metalness
-	mat.F0 = mix( vec3(0.04), mat.color.xyz, mat.metalness);
-
+vec3 computeDiffuseIBL(inout PBRStruct mat){
+	vec3 diffuseSample = getReflectionColor(mat.N, 1.0f); //less roughness = 1
+	vec3 diffuseColor = mat.f_diffuse;
+	vec3 diffuseIBL = diffuseSample * diffuseColor;
+	diffuseIBL *= (1 - mat.F_RG);
+	return diffuseIBL;
 }
 
-void computeBRDF(inout PBRStruct mat)
-{
-	// vec4 colorMat = mat.color;
-	mat.f_diffuse = ((1.0 - mat.metalness) * mat.color.xyz) / PI; //since we are doing the linear interpolation with dialectric and conductor material
-	//vec3 f_diffuse = mix( vec3(0.0), color.xyz, metalness) / PI; 
-	// mat.f_diffuse = colorMat.xyz
-	mat.f_specular = BRDFSpecular( mat.roughness, mat.metalness, mat.NdotH, mat.NdotV, mat.NdotL, mat.color.xyz, mat.F0 );
-}
-
-//-----
-void test(inout matStruct mat)
-{
-	mat.ambientColor = vec4(u_light_color, 1.0);
-	mat.diffuseColor = u_color;
+vec3 computeIBL (inout PBRStruct mat){
+	vec3 specularIBL = computeSpecularIBL(mat);
+	vec3 diffuseIBL = computeDiffuseIBL(mat);
+	return specularIBL + diffuseIBL;
+	 
 }
 
 
 void main()
 {
-	// vec2 uv = v_uv;
-	// vec4 color = u_color;
-
 	// 1. Create Material
 	PBRMat = PBRStruct(
 
-						vec4(0.0), //color
+						vec3(0.0), //color
 
 						0.0f, //roughness
 						0.0f, //metalness
@@ -263,9 +323,10 @@ void main()
 						0.0f,
 						0.0f,
 						0.0f,
-						0.0f,
+						
 						
 						vec3(0.0f), //F0
+						vec3(0.0f), 
 						vec3(0.0f),
 						vec3(0.0f)
 						);
@@ -275,99 +336,28 @@ void main()
 	computeDotProducts(PBRMat);
 	fillPBRProperties(PBRMat);
 
-	// vec3 L = normalize(u_light_pos - v_world_position);
-	// vec3 V = normalize(u_camera_pos - v_world_position);
-	// vec3 normal = normalize(v_normal); 
-	// vec3 normal_pixel = texture2D(u_normalmap_texture, uv).xyz;
-	// vec3 N = perturbNormal(normal, V, uv, normal_pixel );
-	// vec3 H = normalize( V + L);
-	// vec3 R = reflect(-L, N);
-
-	// float NdotH = max(dot(N,H), 0.0f);
-	// float NdotV = max(dot(N,V), 0.0f);
-	// //float VdotH = max(dot(V,H), 0.0f);
-	// float NdotL = max(dot(N,L), 0.0f);
-	// //float LdotN = max(dot(L,N), 0.0f); 
-	
-	// // textures:
-	// color *= texture2D( u_texture, uv ); //base color
-	// float roughness_tex = 0.0;
-	// float metalness_tex = 0.0;
-	// if (u_met_rou){
-	// 	roughness_tex = texture2D(u_mr_texture, uv).y;
-	// 	metalness_tex = texture2D(u_mr_texture, uv).z;
-	// }
-	// else{
-	// 	roughness_tex = texture2D(u_roughness_texture, uv).x;
-	// 	metalness_tex = texture2D(u_metalness_texture, uv).x;
-	// }
-	
-	// float roughness = roughness_tex * u_roughness; //total roughnesss
-	// float metalness = metalness_tex * u_metalness; //total metalness
-
-
 	// 3. Shade (Direct + Indirect)
-
 	computeBRDF(PBRMat);
-	
-
-	// vec3 f_diffuse = ((1.0 - metalness) * color.xyz) / PI; //since we are doing the linear interpolation with dialectric and conductor material
-	// //vec3 f_diffuse = mix( vec3(0.0), color.xyz, metalness) / PI; 
-
-	// vec3 f_specular = BRDFSpecular( roughness, metalness, NdotH, LdotN, NdotV, NdotL, color.xyz );
-	
-	// //-----------dubug
-	// // float D = DistributionGGX(roughness, NdotH);
-	// // vec3 F0 = mix( vec3(0.04), color.xyz, metalness);
-	// // vec3 F = FresnelSchlick( LdotN, F0 );
-	// // float G = GeometrySmith(NdotV, NdotL, roughness);
-	
 	vec3 direct = PBRMat.f_diffuse + PBRMat.f_specular;
+	vec3 indirect = computeIBL(PBRMat);
 
-	//---------------------------------INDIRECT
-	//vec3 F0_met =  mix( vec3(0.04), mat.color.xyz, mat.metalness);//
-	
-	// vec3 F_Schilick_RG = FresnelSchlickRoughness( mat.LdotH , mat.F0 , mat.roughness); 
-	// vec2 brdf_coord = vec2(mat.roughness , mat.NdotV);
-	// vec2 brdf2D = texture2D(u_BRDFLut, brdf_coord).xy;
-	// vec3 specularSample = getReflectionColor(mat.R, mat.roughness);
-	// vec2 SpecularBRDF = F_Schilick_RG * brdf2D.x + brdf2D.y;
-	// vec2 SpecularIBL = specularSample.xy * SpecularBRDF;
-	// vec3 diffuseSample = getReflectionColor(mat.N, 1); //less roughness = 1
-	// 	vec2 diffuseColor = mat.color;
-	// 	vec2 DiffuseIBL = diffuseSample.xy * diffuseColor;
-	// 	DiffuseIBL *= (1 - F_Schilick_RG);
-
-	// 	vec2 indirect = SpecularIBL + DiffuseIBL;
-
-	vec3 F_RG = FresnelSchlickRoughness( PBRMat.LdotH, PBRMat.F0 , PBRMat.roughness ); 
-	vec2 brdf_coord = vec2( PBRMat.NdotV, PBRMat.roughness);///
-	vec4 brdf2D = texture2D(u_BRDFLut, brdf_coord);// not sure el orden
-
-	vec3 specularSample = getReflectionColor(PBRMat.R, PBRMat.roughness );
-	vec3 SpecularBRDF = F_RG * brdf2D.x + brdf2D.y;
-	vec3 SpecularIBL = specularSample * SpecularBRDF;
-
-	vec3 diffuseSample = getReflectionColor(PBRMat.N, 1.0f); //less roughness = 1
-	vec3 diffuseColor = PBRMat.color.xyz;
-	vec3 DiffuseIBL = diffuseSample * diffuseColor;
-	DiffuseIBL *= (1 - F_RG);
-
-	vec3 indirect = SpecularIBL + DiffuseIBL;
-
-	vec3 PBR = direct + indirect;
-	// //compute how much light received the pixel
+	// Compute how much light received the pixel
 	vec3 light = vec3(0.0);
-	// //light += u_ambient_light; -> preguntar si fuese NECESARIO!
+	light += direct * PBRMat.NdotL * u_light_color * u_light_intensity;
+	light += indirect;
 
-	light += PBR * PBRMat.NdotL * u_light_color * u_light_intensity;
+	// 4. Apply Tonemapping
+	light = toneMapUncharted(light);
 
-	//---to debug the textures
+	// 5. Any extra texture to apply after tonemapping
+	//apply emmisive tex
+	light += texture2D(u_emissive_texture, v_uv).xyz;
+
+	//---to debug the textures with diff cases
 	vec4 finalColor = vec4(0.0);
-
 	if ( u_output == 0.0 ) //complete
-		finalColor = vec4(indirect, 1.0);
-		//finalColor = vec4(PBRMat.NdotV);
+		finalColor = vec4(linear_to_gamma(light), 0.0f);
+		//finalColor = vec4(D);
 	else if ( u_output == 1.0 ) //albedo
 		finalColor = texture2D( u_texture, v_uv );
 	else if(u_output == 2.0)//roughness
@@ -376,32 +366,12 @@ void main()
 		finalColor = vec4(PBRMat.metalness_tex);
 	else if(u_output == 4.0)//normal
 		finalColor = vec4(PBRMat.N, 1.0);
-	else
+	else{ //LUT
+		vec2 brdf_coord = vec2( PBRMat.NdotV, PBRMat.roughness);
+		vec4 brdf2D = texture2D(u_BRDFLut, brdf_coord);
 		finalColor = brdf2D;
+	}
 
-
-	//gl_FragColor = color;
-	//gl_FragColor = vec4(G);
-	//gl_FragColor = vec4(G*NdotL);
-	// gl_FragColor = vec4(light, 1.0);
-
-
-	newMaterial = matStruct(vec4(0.0),vec4(0.0));
-
-	test(newMaterial);					
-							
 	gl_FragColor = finalColor;
-	// gl_FragColor = vec4(PBRMat.f_diffuse, 1.0);
-
-
-
-	// 4. Apply Tonemapping
-	// ...
-
-	// 5. Any extra texture to apply after tonemapping
-	// ...
-
-	// Last step: to gamma space
-	// ...
 
 }

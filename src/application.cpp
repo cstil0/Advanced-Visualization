@@ -84,15 +84,16 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 		SceneNode* pbr_node = new SceneNode("OBjectPBR", pbr_material, Mesh::Get("data/models/ball/sphere.obj.mbin"));
 		
-		pbr_node->material = pbr_material;
+		//pbr_node->material = pbr_material;
 		pbr_material->light = light;
-		node_list.push_back(pbr_node);
+		//node_list.push_back(pbr_node);
 
 		//----second object
 		
-		color_texture = Texture::Get("data/models/helmet/albedo.png");
-		normalmap_texture = Texture::Get("data/models/helmet/normal.png");
+		Texture* color_texture2 = Texture::Get("data/models/helmet/albedo.png");
+		Texture* normalmap_texture2 = Texture::Get("data/models/helmet/normal.png");
 		Texture* mr_texture = Texture::Get("data/models/helmet/roughness.png");
+		//Texture* e_texture = Texture::Get("data/models/helmet/emissive.png");
 
 		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/pbr.fs");
 
@@ -110,17 +111,18 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		Texture* level3 = new Texture();
 		Texture* level4 = new Texture();
 		Texture* level5 = new Texture();
-		level0->cubemapFromHDRE(hdre, LEVEL);
-		level1->cubemapFromHDRE(hdre, LEVEL++);
-		level2->cubemapFromHDRE(hdre, LEVEL++);
-		level3->cubemapFromHDRE(hdre, LEVEL++);
-		level4->cubemapFromHDRE(hdre, LEVEL++);
-		level5->cubemapFromHDRE(hdre, LEVEL++);
+
+		level0->cubemapFromHDRE(hdre, 0);
+		level1->cubemapFromHDRE(hdre, 1);
+		level2->cubemapFromHDRE(hdre, 2);
+		level3->cubemapFromHDRE(hdre, 3);
+		level4->cubemapFromHDRE(hdre, 4);
+		level5->cubemapFromHDRE(hdre, 5);
 
 		//Texture* BRDFLut = Texture::Get("data/brdfLUT.png");
 
 		//---
-		pbr_material = new PBRMaterial(sh, color_texture, normalmap_texture, NULL, NULL, true, mr_texture);
+		pbr_material = new PBRMaterial(sh, color_texture2, normalmap_texture2, NULL, NULL, true, mr_texture);
 		pbr_material->hdre_level0 = level0;
 		pbr_material->hdre_level1 = level1;
 		pbr_material->hdre_level2 = level2;
@@ -129,12 +131,13 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		pbr_material->hdre_level5 = level5;
 
 		pbr_material->BRDFLut = Texture::Get("data/brdfLUT.png");
+		pbr_material->emissive_texture = Texture::Get("data/models/helmet/emissive.png");
 
 		SceneNode* pbr_node2 = new SceneNode("BallPBR2", pbr_material, Mesh::Get("data/models/helmet/helmet.obj.mbin"));
 		pbr_material->light = light;
 		pbr_node2->material = pbr_material;
-
-		//node_list.push_back(pbr_node2);
+		pbr_node->material = pbr_material;
+		node_list.push_back(pbr_node2);
 
 
 

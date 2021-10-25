@@ -141,24 +141,6 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 
 
-
-		///----
-		/*HDRE* hdre = new HDRE();
-		if (hdre->load("data/environments/panorama.hdre"))
-			hdre = HDRE::Get("data/environments/panorama.hdre");
-		
-		Texture* tex = new Texture();
-		tex->cubemapFromHDRE(hdre, LEVEL);
-*/
-
-		//hdre = HDRE::sHDRELoaded("data/environments/panorama.hdre", hdre);
-
-		/*Texture* t = new Texture();
-		Texture::sTexturesLoaded("")*/
-
-		
-
-
 	}
 	
 	//hide the cursor
@@ -187,10 +169,16 @@ void Application::renderSkybox()
 	sky_mat->panorama_tex = cubemap_texture;
 	
 	//load snow tex
+	//Texture* cubemap_texture2 = new Texture();
+	//cubemap_texture2->cubemapFromImages("data/environments/snow");
+	HDRE* hdre2 = new HDRE();
+	if (hdre2->load("data/environments/pisa.hdre"))
+		hdre2 = HDRE::Get("data/environments/pisa.hdre");
+	
 	Texture* cubemap_texture2 = new Texture();
-	cubemap_texture2->cubemapFromImages("data/environments/snow");
-	sky_mat->snow_tex = cubemap_texture2;
-		
+	cubemap_texture2->cubemapFromHDRE(hdre2, 0.0); //level 0
+	sky_mat->pisa_tex = cubemap_texture2;
+
 	skybox_node->material = sky_mat;
 	node_list.push_back(skybox_node);
 }

@@ -189,8 +189,8 @@ void SkyboxMaterial::setUniforms(Camera* camera, Matrix44 model)
 	
 	if (this->panorama_tex)
 		shader->setUniform("u_panorama_tex", panorama_tex, ESkybox::PANORAMA);
-	if (this->snow_tex)
-		shader->setUniform("u_snow_tex", snow_tex, ESkybox::SNOW);
+	if (this->pisa_tex)
+		shader->setUniform("u_snow_tex", pisa_tex, ESkybox::PISA);
 
 
 }

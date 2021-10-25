@@ -66,7 +66,7 @@ class SkyboxMaterial : public StandardMaterial {
 public:
 
 	Texture* panorama_tex = NULL;
-	Texture* snow_tex = NULL;
+	Texture* pisa_tex = NULL;
 
 	SkyboxMaterial();
 	SkyboxMaterial(Shader* sh);

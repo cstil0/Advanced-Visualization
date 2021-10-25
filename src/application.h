@@ -29,7 +29,7 @@ enum EOutput {
 
 enum ESkybox {
 	PANORAMA,
-	SNOW
+	PISA
 
 };
 class Application

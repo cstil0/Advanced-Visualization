@@ -171,7 +171,7 @@ void computeVectors(inout PBRStruct mat)
 void computeDotProducts(inout PBRStruct mat)
 {
 	mat.NdotH = max(dot(mat.N,mat.H), 0.0f);
-	mat.NdotV = clamp(dot(mat.N,mat.V), 0.01f, 0.99f);
+	mat.NdotV = clamp(dot(mat.N,mat.V), 0.1f, 0.9f);
 	mat.NdotL = max(dot(mat.N,mat.L), 0.0f);
 	mat.LdotH = max(dot(mat.L,mat.H), 0.0f);
 	//mat.LdotV = max(dot(mat.L,mat.V), 0.0f);
@@ -192,7 +192,7 @@ void fillPBRProperties(inout PBRStruct mat)
 		mat.metalness_tex = texture2D(u_metalness_texture, v_uv).x;
 	}
 	
-	mat.roughness = clamp(mat.roughness_tex * u_roughness, 0.01f, 0.99f); //total roughness and clamp it 
+	mat.roughness = clamp(mat.roughness_tex * u_roughness, 0.1f, 0.9f); //total roughness and clamp it 
 	mat.metalness = mat.metalness_tex * u_metalness; //total metalness
 	mat.F0 = mix( vec3(0.04), mat.color, mat.metalness);
 
@@ -351,7 +351,8 @@ void main()
 
 	// 5. Any extra texture to apply after tonemapping
 	//apply emmisive tex
-	light += texture2D(u_emissive_texture, v_uv).xyz;
+
+	light += gamma_to_linear( texture2D(u_emissive_texture, v_uv).xyz);
 
 	//---to debug the textures with diff cases
 	vec4 finalColor = vec4(0.0);

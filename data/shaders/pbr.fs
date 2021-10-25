@@ -235,11 +235,10 @@ void main()
 	// vec4 albedo = u_color;
 
 	// Gamma space
-	vec3 test = PBRMat.albedo.xyz;
-	vec3 albedo_gamma = gamma_to_linear(test); // GUARDAR DENTRO DE MAT??
+	vec3 albedo_gamma = gamma_to_linear(PBRMat.albedo.xyz); // GUARDAR DENTRO DE MAT??
 
 	// textures:
-	albedo_gamma *= texture2D( u_texture, uv ).xyz; //base color
+	// albedo_gamma *= texture2D( u_texture, uv ).xyz; //base color
 	// float roughness = texture2D(u_roughness_texture, uv).x;
 	// float metalness = texture2D(u_metalness_texture, uv).x;
 
@@ -260,7 +259,6 @@ void main()
 
 	//Incomming light term
 	vec3 specularSample = getReflectionColor(PBRMat.N, PBRMat.roughness); // HE PUESTO N POR QUE ES EL QUE MEJOR SE VE, PERO NO LO ACABO DE ENTENDER YA QUE LA PARTE ESPECULAR SI QUE DEPENDE DE V...NO?
-
 	//Material Response term
 	// float NdotV = clamp(dot(N,V), 0.0f, 1.0f);
 	// float HdotV = clamp(dot(H,V), 0.0f, 1.0f);
@@ -270,7 +268,7 @@ void main()
 	// CUANDO UNAMOS LAS DOS PARTES ESTO ESTARÁ REPETIDO
 	vec3 F0 = mix(vec3(0.04), albedo_gamma.xyz, PBRMat.metalness);
 	// float LdotN = clamp(dot(L,N), 0.0f, 1.0f);
-	vec3 F_rg = FresnelSchlickRoughness(PBRMat.LdotN, F0, PBRMat.roughness);
+	vec3 F_rg = FresnelSchlickRoughness(PBRMat.VdotH, F0, PBRMat.roughness); // POR ALGUN MOTIVO ESTÁ COMO TENIENDO EN CUENTA LA LUZ Y TIENE MUY MALA PUNTA
 
 	vec3 specularBRDF = F_rg * brdf2D.x + brdf2D.y;
 	vec3 specularIBL = specularSample * specularBRDF;
@@ -288,7 +286,7 @@ void main()
 	vec3 finalIBL = specularIBL +  diffuseIBL;
 
 	// Gamma space
-	finalIBL = linear_to_gamma(F_rg);
+	finalIBL = linear_to_gamma(vec3(brdf2D.y));
 	gl_FragColor = vec4(finalIBL, 0.0f);
 
 	// 1. Create Material

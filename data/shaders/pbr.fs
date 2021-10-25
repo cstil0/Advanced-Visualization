@@ -151,7 +151,7 @@ void computeVectors(inout PBRStruct mat)
 	vec3 normal_pixel = texture2D(u_normalmap_texture, v_uv).xyz;
 	mat.N = perturbNormal(normal, mat.V, v_uv, normal_pixel );
 	mat.H = normalize(mat.V + mat.L);
-	mat.R = reflect(mat.L, mat.N);
+	mat.R = reflect(-mat.L, mat.N);
 } 
 
 void computeDotProducts(inout PBRStruct mat)
@@ -258,14 +258,14 @@ void main()
 	// -- IBL - specular term --
 
 	//Incomming light term
-	vec3 specularSample = getReflectionColor(PBRMat.N, PBRMat.roughness); // HE PUESTO N POR QUE ES EL QUE MEJOR SE VE, PERO NO LO ACABO DE ENTENDER YA QUE LA PARTE ESPECULAR SI QUE DEPENDE DE V...NO?
+	vec3 specularSample = getReflectionColor(PBRMat.R, PBRMat.roughness);
 	//Material Response term
 	// float NdotV = clamp(dot(N,V), 0.0f, 1.0f);
 	// float HdotV = clamp(dot(H,V), 0.0f, 1.0f);
 	// float LdotN = clamp(dot(L,N), 0.0f,1.0f);
 	vec2 LUT_coord = vec2(PBRMat.NdotV, PBRMat.roughness);
 	vec4 brdf2D = texture2D( u_BRDFLut, LUT_coord );
-	// CUANDO UNAMOS LAS DOS PARTES ESTO ESTARÁ REPETIDO
+
 	vec3 F0 = mix(vec3(0.04), albedo_gamma.xyz, PBRMat.metalness);
 	// float LdotN = clamp(dot(L,N), 0.0f, 1.0f);
 	vec3 F_rg = FresnelSchlickRoughness(PBRMat.VdotH, F0, PBRMat.roughness); // POR ALGUN MOTIVO ESTÁ COMO TENIENDO EN CUENTA LA LUZ Y TIENE MUY MALA PUNTA
@@ -286,7 +286,7 @@ void main()
 	vec3 finalIBL = specularIBL +  diffuseIBL;
 
 	// Gamma space
-	finalIBL = linear_to_gamma(vec3(brdf2D.y));
+	finalIBL = linear_to_gamma(vec3(PBRMat.roughness));
 	gl_FragColor = vec4(finalIBL, 0.0f);
 
 	// 1. Create Material

@@ -263,7 +263,7 @@ PBRMaterial::~PBRMaterial()
 void PBRMaterial::setUniforms(Camera* camera, Matrix44 model)
 {
 	shader->setUniform("u_viewprojection", camera->viewprojection_matrix);
-	shader->setUniform("u_camera_position", camera->eye);
+	shader->setUniform("u_camera_pos", camera->eye);
 	shader->setUniform("u_model", model);
 	shader->setUniform("u_color", color);
 	shader->setUniform("u_light_pos", light->model.getTranslation());

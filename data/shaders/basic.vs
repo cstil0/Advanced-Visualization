@@ -3,7 +3,7 @@ attribute vec3 a_normal;
 attribute vec2 a_uv;
 attribute vec4 a_color;
 
-uniform vec3 u_camera_pos;
+uniform vec3 u_camera_position;
 
 uniform mat4 u_model;
 uniform mat4 u_viewprojection;

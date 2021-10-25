@@ -90,17 +90,67 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 		//----second object
 		
-		Texture* color_texture2 = Texture::Get("data/models/helmet/albedo.png");
-		Texture* normalmap_texture2 = Texture::Get("data/models/helmet/normal.png");
-		Texture* mr_texture = Texture::Get("data/models/helmet/roughness.png");
-		//Texture* e_texture = Texture::Get("data/models/helmet/emissive.png");
+		//Texture* color_texture2 = Texture::Get("data/models/helmet/albedo.png");
+		//Texture* normalmap_texture2 = Texture::Get("data/models/helmet/normal.png");
+		//Texture* mr_texture = Texture::Get("data/models/helmet/roughness.png");
+		////Texture* e_texture = Texture::Get("data/models/helmet/emissive.png");
+
+		//sh = Shader::Get("data/shaders/basic.vs", "data/shaders/pbr.fs");
+
+		////---
+
+		//// ME ESTOY PENSANDO SI MEJOR PONER ESTAS VARIABLES EN UNA CLASE PARECIDA A LIGHT A LA QUE PODAMOS ACCEDER DESDE CADA OBJETO DE LA ESCENA, YA QUE SINO
+		//// EN EL CASO DE QUE TUVIESEMOS MUCHOS SERÍA MUY POCO EFICIENTE GUARDARLO EN CADA MATERIAL
+		//HDRE* hdre = new HDRE();
+		//if (hdre->load("data/environments/panorama.hdre"))
+		//	hdre = HDRE::Get("data/environments/panorama.hdre");
+
+		//Texture* level0 = new Texture();
+		//Texture* level1 = new Texture();
+		//Texture* level2 = new Texture();
+		//Texture* level3 = new Texture();
+		//Texture* level4 = new Texture();
+		//Texture* level5 = new Texture();
+
+		//level0->cubemapFromHDRE(hdre, 0);
+		//level1->cubemapFromHDRE(hdre, 1);
+		//level2->cubemapFromHDRE(hdre, 2);
+		//level3->cubemapFromHDRE(hdre, 3);
+		//level4->cubemapFromHDRE(hdre, 4);
+		//level5->cubemapFromHDRE(hdre, 5);
+
+		////Texture* BRDFLut = Texture::Get("data/brdfLUT.png");
+
+		////---
+		//pbr_material = new PBRMaterial(sh, color_texture2, normalmap_texture2, NULL, NULL, true, mr_texture);
+		//pbr_material->hdre_level0 = level0;
+		//pbr_material->hdre_level1 = level1;
+		//pbr_material->hdre_level2 = level2;
+		//pbr_material->hdre_level3 = level3;
+		//pbr_material->hdre_level4 = level4;
+		//pbr_material->hdre_level5 = level5;
+
+		//pbr_material->BRDFLut = Texture::Get("data/brdfLUT.png");
+		//pbr_material->emissive_texture = Texture::Get("data/models/helmet/emissive.png");
+		//pbr_material->ao_texture = Texture::Get("data/models/helmet/ao.png");
+
+
+		//SceneNode* pbr_node2 = new SceneNode("BallPBR2", pbr_material, Mesh::Get("data/models/helmet/helmet.obj.mbin"));
+		//pbr_material->light = light;
+		//pbr_node2->material = pbr_material;
+		//pbr_node->material = pbr_material;
+		//node_list.push_back(pbr_node2);
+
+		//---3 object!!!!
+
+		Texture* color_texture3 = Texture::Get("data/models/lantern/albedo.png");
+		Texture* normalmap_texture3 = Texture::Get("data/models/lantern/normal.png");
+		Texture* roughness_texture3 = Texture::Get("data/models/lantern/roughness.png");
+		Texture* metalness_texture3 = Texture::Get("data/models/lantern/metalness.png");
 
 		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/pbr.fs");
 
-		//---
 
-		// ME ESTOY PENSANDO SI MEJOR PONER ESTAS VARIABLES EN UNA CLASE PARECIDA A LIGHT A LA QUE PODAMOS ACCEDER DESDE CADA OBJETO DE LA ESCENA, YA QUE SINO
-		// EN EL CASO DE QUE TUVIESEMOS MUCHOS SERÍA MUY POCO EFICIENTE GUARDARLO EN CADA MATERIAL
 		HDRE* hdre = new HDRE();
 		if (hdre->load("data/environments/panorama.hdre"))
 			hdre = HDRE::Get("data/environments/panorama.hdre");
@@ -122,7 +172,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		//Texture* BRDFLut = Texture::Get("data/brdfLUT.png");
 
 		//---
-		pbr_material = new PBRMaterial(sh, color_texture2, normalmap_texture2, NULL, NULL, true, mr_texture);
+		pbr_material = new PBRMaterial(sh, color_texture3, normalmap_texture3, roughness_texture3, metalness_texture3, false);
 		pbr_material->hdre_level0 = level0;
 		pbr_material->hdre_level1 = level1;
 		pbr_material->hdre_level2 = level2;
@@ -131,15 +181,18 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		pbr_material->hdre_level5 = level5;
 
 		pbr_material->BRDFLut = Texture::Get("data/brdfLUT.png");
-		pbr_material->emissive_texture = Texture::Get("data/models/helmet/emissive.png");
+		//pbr_material->emissive_texture = NULL;
+		pbr_material->bool_em = FALSE; //lantern no tiene emmisive texture!
+		pbr_material->ao_texture = Texture::Get("data/models/lantern/ao.png");
 
-		SceneNode* pbr_node2 = new SceneNode("BallPBR2", pbr_material, Mesh::Get("data/models/helmet/helmet.obj.mbin"));
+		pbr_material->opacity_texture = Texture::Get("data/models/lantern/opacity.png");
+
+		SceneNode* pbr_node3 = new SceneNode("ObjPBR3", pbr_material, Mesh::Get("data/models/lantern/lantern.obj.mbin"));
+		pbr_node3->model.setScale(0.01, 0.01, 0.01);
 		pbr_material->light = light;
-		pbr_node2->material = pbr_material;
-		pbr_node->material = pbr_material;
-		node_list.push_back(pbr_node2);
-
-
+		pbr_node3->material = pbr_material;
+		//pbr_node->material = pbr_material;
+		node_list.push_back(pbr_node3);
 
 	}
 	
@@ -155,6 +208,7 @@ void Application::renderSkybox()
 	//then we pass this material to the skybox node, and finally push it in the list of nodes.
 	Skybox* skybox_node = new Skybox("Skybox");
 	skybox_node->mesh = Mesh::getCube();
+	//skybox_node->mesh = Mesh::Get("data/meshes/box.ASE.mbin");
 	sh = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
 	SkyboxMaterial* sky_mat = new SkyboxMaterial(sh);
 

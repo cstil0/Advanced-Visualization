@@ -257,8 +257,8 @@ int main(int argc, char **argv)
 	SDL_Init(SDL_INIT_EVERYTHING);
 
 	bool fullscreen = false; //change this to go fullscreen
-	Vector2 size(1280, 720);
-
+	//Vector2 size(1280, 720); // <----------------------------------to change the size
+	Vector2 size(750, 500);
 	if(fullscreen)
 		size = getDesktopSize(0);
 

@@ -6,9 +6,9 @@ varying vec4 v_color;
 
 //Utils uniforms parameters
 uniform sampler2D u_texture;
-uniform vec3 u_camera_pos;
+uniform vec3 u_camera_position;
 uniform vec4 u_color;
-uniform vec3 u_ambient_light;
+
 
 //Lights uniforms parameters
 #define MAX_LIGHTS 10 
@@ -30,7 +30,7 @@ void main()
     // Compute the light equation vectors
     vec3 L = vec3(0.0f);
     vec3 N = normalize(v_normal); 
-    vec3 V = normalize(u_camera_pos - v_world_position);
+    vec3 V = normalize(u_camera_position - v_world_position);
    
     //vec3 H = normalize(V + L);
 
@@ -45,7 +45,7 @@ void main()
     //Using singlepass architecture to accumulate total light factor.
     for (int i = 0; i < MAX_LIGHTS; i++){
         L = normalize(u_light_pos[i] - v_world_position);
-        vec3 R = reflect(L,N);
+        vec3 R = reflect(-L,N);
         diffuse_light += u_diffuse * clamp(dot(L,N), 0.0f, 1.0f) * u_Id[i];
         specular_light += u_specular * pow( clamp(dot(R,V), 0.0, 1.0) , u_shininess) * u_Is[i];
     }

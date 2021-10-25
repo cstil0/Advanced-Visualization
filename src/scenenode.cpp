@@ -70,6 +70,15 @@ void SceneNode::renderInMenu()
 		ImGui::TreePop();
 	}
 
+	//Textures
+	if (!(this->typeOfNode == TYPEOFNODE::LIGHT) && ImGui::TreeNode("Textures"))
+	{
+		int& output = Application::instance->output;
+		ImGui::Combo("Textures", &output, "COMPLETE\0\ALBEDO\0\ROUGHNESS\0\METALNESS\0\NORMAL\0\EMMISIVE\0A_OCC\0LUT");
+
+		ImGui::TreePop();
+	}
+
 	//Geometry
 	if (!(this->typeOfNode == TYPEOFNODE::LIGHT) && mesh && ImGui::TreeNode("Geometry"))
 	{

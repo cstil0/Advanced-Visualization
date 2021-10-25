@@ -86,6 +86,9 @@ public:
 	Texture* mr_texture = NULL;
 	Texture* metalness_texture = NULL;
 	Texture* emissive_texture = NULL;
+	Texture* ao_texture = NULL;
+	Texture* opacity_texture= NULL;
+
 
 	Texture* hdre_level0 = NULL;
 	Texture* hdre_level1 = NULL;
@@ -105,6 +108,7 @@ public:
 	
 	//flags
 	bool bool_met_rou;
+	bool bool_em;
 
 	Light* light = NULL;
 

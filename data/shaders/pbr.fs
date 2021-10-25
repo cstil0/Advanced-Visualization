@@ -15,7 +15,7 @@ varying vec2 v_uv; // texture coordinates
 
 //Utils uniforms
 uniform vec4 u_color;//color of the material, that is the base color
-uniform vec3 u_camera_pos;
+uniform vec3 u_camera_position;
 
 //Lights uniforms parameters
 uniform vec3 u_light_pos;
@@ -30,6 +30,8 @@ uniform sampler2D u_metalness_texture;
 uniform sampler2D u_normalmap_texture;
 uniform sampler2D u_mr_texture; 
 uniform sampler2D u_emissive_texture;
+uniform sampler2D u_opacity_texture;
+uniform sampler2D u_ao_texture;
 uniform sampler2D u_BRDFLut;
 
 //HDRE 
@@ -43,6 +45,7 @@ uniform samplerCube u_texture_prem_4;
 //boolean 
 uniform float u_output;
 uniform bool u_met_rou;
+uniform bool u_bool_em_tex;
 
 //IMGUI factors
 uniform float u_roughness;
@@ -160,7 +163,7 @@ struct PBRStruct
 void computeVectors(inout PBRStruct mat)
 {
 	mat.L = normalize(u_light_pos - v_world_position);
-	mat.V = normalize(u_camera_pos - v_world_position);
+	mat.V = normalize(u_camera_position - v_world_position);
 	vec3 normal = normalize(v_normal); 
 	vec3 normal_pixel = texture2D(u_normalmap_texture, v_uv).xyz;
 	mat.N = perturbNormal(normal, mat.V, v_uv, normal_pixel );
@@ -171,7 +174,9 @@ void computeVectors(inout PBRStruct mat)
 void computeDotProducts(inout PBRStruct mat)
 {
 	mat.NdotH = max(dot(mat.N,mat.H), 0.0f);
-	mat.NdotV = clamp(dot(mat.N,mat.V), 0.1f, 0.9f);
+	// avoid artifacts when sampling the texture and other mathematical errors.
+	//mat.NdotV = clamp(dot(mat.N,mat.V), 0.1f, 0.9f); //sera gran prob si no clampeamos entre 0.01??
+	mat.NdotV = max(dot(mat.N,mat.V), 0.0f);
 	mat.NdotL = max(dot(mat.N,mat.L), 0.0f);
 	mat.LdotH = max(dot(mat.L,mat.H), 0.0f);
 	//mat.LdotV = max(dot(mat.L,mat.V), 0.0f);
@@ -192,7 +197,8 @@ void fillPBRProperties(inout PBRStruct mat)
 		mat.metalness_tex = texture2D(u_metalness_texture, v_uv).x;
 	}
 	
-	mat.roughness = clamp(mat.roughness_tex * u_roughness, 0.1f, 0.9f); //total roughness and clamp it 
+	//mat.roughness = clamp(mat.roughness_tex * u_roughness, 0.1f, 0.9f); //total roughness and clamp it 
+	mat.roughness = mat.roughness_tex * u_roughness; //total roughness and clamp it 	
 	mat.metalness = mat.metalness_tex * u_metalness; //total metalness
 	mat.F0 = mix( vec3(0.04), mat.color, mat.metalness);
 
@@ -276,7 +282,11 @@ vec3 getReflectionColor(vec3 r, float roughness)
 
 vec3 computeSpecularIBL(inout PBRStruct mat){
 	mat.F_RG = FresnelSchlickRoughness( mat.LdotH, mat.F0 , mat.roughness ); 
-	vec2 brdf_coord = vec2( mat.NdotV, mat.roughness);
+	float idx_NdotV = clamp(dot(mat.N,mat.V), 0.09, 0.99); //why no 0.01?
+	float idx_roughness = clamp( mat.roughness_tex * u_roughness, 0.09, 0.99);
+	vec2 brdf_coord = vec2( idx_NdotV, idx_roughness);
+
+	//vec2 brdf_coord = vec2( mat.NdotV, mat.roughness);
 	vec4 brdf2D = texture2D(u_BRDFLut, brdf_coord);// not sure el orden
 
 	vec3 specularSample = getReflectionColor(mat.R, mat.roughness);
@@ -340,6 +350,8 @@ void main()
 	computeBRDF(PBRMat);
 	vec3 direct = PBRMat.f_diffuse + PBRMat.f_specular;
 	vec3 indirect = computeIBL(PBRMat);
+	float ambient_occlusion = texture2D(u_ao_texture, v_uv).x; // ya que son valores de 0 a 1, solo es suff con un canal no??¿¿
+	indirect *= vec3(ambient_occlusion); //apply ao_texture only to indirect light
 
 	// Compute how much light received the pixel
 	vec3 light = vec3(0.0);
@@ -350,24 +362,32 @@ void main()
 	light = toneMapUncharted(light);
 
 	// 5. Any extra texture to apply after tonemapping
-	//apply emmisive tex
-
-	light += gamma_to_linear( texture2D(u_emissive_texture, v_uv).xyz);
-
+	//Apply emmisive tex
+	vec3 emmisive_light = vec3(0.0);
+	if(u_bool_em_tex){
+		emmisive_light = gamma_to_linear( texture2D(u_emissive_texture, v_uv).xyz);
+		light += emmisive_light;
+	}else{
+		float opacity = texture2D(u_opacity_texture, v_uv).x;
+		//PBRMat.color *= vec3(opacity);
+	}
 	//---to debug the textures with diff cases
 	vec4 finalColor = vec4(0.0);
 	if ( u_output == 0.0 ) //complete
 		finalColor = vec4(linear_to_gamma(light), 0.0f);
-		//finalColor = vec4(D);
 	else if ( u_output == 1.0 ) //albedo
-		finalColor = texture2D( u_texture, v_uv );
+		finalColor = vec4(linear_to_gamma(texture2D( u_texture, v_uv ).xyz),1.0); //texture2D( u_texture, v_uv );
 	else if(u_output == 2.0)//roughness
 		finalColor = vec4(PBRMat.roughness_tex);
 	else if(u_output == 3.0)//metalness
 		finalColor = vec4(PBRMat.metalness_tex);
 	else if(u_output == 4.0)//normal
 		finalColor = vec4(PBRMat.N, 1.0);
-	else{ //LUT
+	else if(u_output == 5.0)//emisive
+		finalColor = vec4(emmisive_light, 1.0);
+	else if(u_output == 6.0)//ao
+		finalColor = vec4(ambient_occlusion);		
+	else { //LUT
 		vec2 brdf_coord = vec2( PBRMat.NdotV, PBRMat.roughness);
 		vec4 brdf2D = texture2D(u_BRDFLut, brdf_coord);
 		finalColor = brdf2D;

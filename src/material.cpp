@@ -185,8 +185,7 @@ void SkyboxMaterial::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_color", color);
 	int type_env = Application::instance->type_environment;
 	shader->setUniform("u_output", type_env);
-
-	
+		
 	if (this->panorama_tex)
 		shader->setUniform("u_panorama_tex", panorama_tex, ESkybox::PANORAMA);
 	if (this->pisa_tex)
@@ -241,7 +240,7 @@ PBRMaterial::PBRMaterial(Shader* sh, Texture* tex, Texture* normal, Texture* rou
 	//this->spec_scale = 0.1;
 	//this->reflactance = 0.1;
 	this->bool_met_rou = bool_mr;
-
+	this->bool_em = TRUE;
 
 
 }
@@ -253,7 +252,7 @@ PBRMaterial::~PBRMaterial()
 void PBRMaterial::setUniforms(Camera* camera, Matrix44 model)
 {
 	shader->setUniform("u_viewprojection", camera->viewprojection_matrix);
-	shader->setUniform("u_camera_pos", camera->eye);
+	shader->setUniform("u_camera_position", camera->eye);
 	shader->setUniform("u_model", model);
 	shader->setUniform("u_color", color);
 
@@ -268,7 +267,7 @@ void PBRMaterial::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_metalness", this->metalness);
 	
 	shader->setUniform("u_met_rou", this->bool_met_rou);
-
+	shader->setUniform("u_bool_em_tex", this->bool_em); //exist?
 	if (texture)
 		shader->setTexture("u_texture", texture, EOutput::ALBEDO);
 	if (this->normal_texture)
@@ -277,12 +276,17 @@ void PBRMaterial::setUniforms(Camera* camera, Matrix44 model)
 		shader->setTexture("u_roughness_texture", this->roughness_texture, EOutput::ROUGHNESS);
 	if (this->metalness_texture)
 		shader->setTexture("u_metalness_texture", this->metalness_texture, EOutput::METALNESS);
-	if (this->bool_met_rou && this->mr_texture) {
+	if (this->bool_met_rou && this->mr_texture) 
 		shader->setTexture("u_mr_texture", this->mr_texture, EOutput::METALNESS_ROUGHNESS);
-	}
 	if (this->emissive_texture) {
 		shader->setTexture("u_emissive_texture", this->emissive_texture, EOutput::EMISSIVE);
 	}
+	if (this->opacity_texture) {
+		shader->setTexture("u_opacity_texture", this->opacity_texture, EOutput::OPACITY);
+	}
+	if (this->ao_texture)
+		shader->setTexture("u_ao_texture", this->ao_texture, EOutput::AMBIENT_OCCLUSION);
+
 
 	if (this->hdre_level0)
 		shader->setTexture("u_texture_prem", this->hdre_level0, EOutput::LEVEL0);
@@ -312,9 +316,13 @@ void PBRMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 		//upload uniforms
 		setUniforms(camera, model);
 
+		//glEnable(GL_BLEND); //hay que arreglar esto de opacity map, no esta funcionando...
+		//glEnable(GL_CULL_FACE);
 		//do the draw call
 		mesh->render(GL_TRIANGLES);
 
+		//glDisable(GL_BLEND);
+		//glDisable(GL_CULL_FACE);
 		//disable shader
 		shader->disable();
 	}
@@ -328,8 +336,8 @@ void PBRMaterial::renderInMenu()
 	//ImGui::SliderFloat("Intensity", &this->light->light_intensity, 0.0f, 10.0f);
 	//ImGui::SliderFloat("Specular scale", &this->, 0.0f, 1.0f);
 	//ImGui::SliderFloat("Reflactance", &this->, 0.0f, 1.0f);
-	int &output = Application::instance->output;
-	ImGui::Combo("Output", &output, "COMPLETE\0ALBEDO\0ROUGHNESS\0\METALNESS\0\NORMAL\0\LUT");
+
+	//ImGui::Combo("Output", &Application::instance->output, "COMPLETE\0ALBEDO\0ROUGHNESS\0\METALNESS\0NORMALS\0");
 	//ImGui::Image((void*)(intptr_t)texture->texture_id, ImVec2(w, h));
 	//ImGui::Combo("Output", &output, "ALBEDO\0ROUGHNESS\0\METALNESS\0");
 

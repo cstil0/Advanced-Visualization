@@ -80,19 +80,28 @@ public:
 class PBRMaterial : public StandardMaterial {
 public:
 
+	//Textures
 	Texture* normal_texture = NULL;
 	Texture* roughness_texture = NULL;
-
 	Texture* mr_texture = NULL;
 	Texture* metalness_texture = NULL;
 
-	//int output;
+	Texture* hdre_level0 = NULL;
+	Texture* hdre_level1 = NULL;
+	Texture* hdre_level2 = NULL;
+	Texture* hdre_level3 = NULL;
+	Texture* hdre_level4 = NULL;
+	Texture* hdre_level5 = NULL;
+
+	Texture* BRDFLut = NULL;
+
+
 	// factors
 	float roughness;
 	float metalness;
-	float spec_scale;
-	float reflactance;
-
+	//float spec_scale;
+	//float reflactanc
+	
 	//flags
 	bool bool_met_rou;
 

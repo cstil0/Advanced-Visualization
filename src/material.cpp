@@ -238,9 +238,11 @@ PBRMaterial::PBRMaterial(Shader* sh, Texture* tex, Texture* normal, Texture* rou
 	
 	this->roughness = 0.1;
 	this->metalness = 0.4;
-	this->spec_scale = 0.1;
-	this->reflactance = 0.1;
+	//this->spec_scale = 0.1;
+	//this->reflactance = 0.1;
 	this->bool_met_rou = bool_mr;
+
+
 
 }
 
@@ -278,6 +280,21 @@ void PBRMaterial::setUniforms(Camera* camera, Matrix44 model)
 	if (this->bool_met_rou && this->mr_texture) {
 		shader->setTexture("u_mr_texture", this->mr_texture, EOutput::METALNESS_ROUGHNESS);
 	}
+
+	if (this->hdre_level0)
+		shader->setTexture("u_texture_prem", this->hdre_level0, EOutput::LEVEL0);
+	if (this->hdre_level1)
+		shader->setTexture("u_texture_prem_0", this->hdre_level1, EOutput::LEVEL1);
+	if (this->hdre_level2)
+		shader->setTexture("u_texture_prem_1", this->hdre_level2, EOutput::LEVEL2);
+	if (this->hdre_level3)
+		shader->setTexture("u_texture_prem_2", this->hdre_level3, EOutput::LEVEL3);
+	if (this->hdre_level4)
+		shader->setTexture("u_texture_prem_3", this->hdre_level4, EOutput::LEVEL4);
+	if (this->hdre_level5)
+		shader->setTexture("u_texture_prem_4", this->hdre_level5, EOutput::LEVEL5);
+	if (this->BRDFLut)
+		shader->setTexture("u_BRDFLut", this->BRDFLut, EOutput::BRDFLut);
 }
 
 // crear una funcion de upload textures, en caso que no haya, pues sera blanco
@@ -309,7 +326,7 @@ void PBRMaterial::renderInMenu()
 	//ImGui::SliderFloat("Specular scale", &this->, 0.0f, 1.0f);
 	//ImGui::SliderFloat("Reflactance", &this->, 0.0f, 1.0f);
 	int &output = Application::instance->output;
-	ImGui::Combo("Output", &output, "COMPLETE\0ALBEDO\0ROUGHNESS\0\METALNESS\0\NORMAL\0");
+	ImGui::Combo("Output", &output, "COMPLETE\0ALBEDO\0ROUGHNESS\0\METALNESS\0\NORMAL\0\LUT");
 	//ImGui::Image((void*)(intptr_t)texture->texture_id, ImVec2(w, h));
 	//ImGui::Combo("Output", &output, "ALBEDO\0ROUGHNESS\0\METALNESS\0");
 

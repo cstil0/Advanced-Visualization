@@ -394,7 +394,10 @@ void main()
 	else if(u_output == 6.0)//ao
 		finalColor = vec4(ambient_occlusion);		
 	else { //LUT
-		vec2 brdf_coord = vec2( PBRMat.NdotV, PBRMat.roughness);
+		float idx_NdotV = clamp(dot(PBRMat.N,PBRMat.V), 0.09, 0.99); //why no 0.01?
+		float idx_roughness = clamp( PBRMat.roughness_tex * u_roughness, 0.09, 0.99); /////////////////////////////////////esto dejar asi o anañir al constructor de mat???
+		vec2 brdf_coord = vec2( idx_NdotV, idx_roughness);
+		// vec2 brdf_coord = vec2( PBRMat.NdotV, PBRMat.roughness);
 		vec4 brdf2D = texture2D(u_BRDFLut, brdf_coord);
 		finalColor = brdf2D;
 	}

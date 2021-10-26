@@ -207,7 +207,7 @@ void SkyboxMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 		//We disable the depth test because we want render skybox as the background of the scene
 		// And to avoid objects that are behind the cube if we take into account the Zbuffer
 		glDisable(GL_DEPTH_TEST);
-
+		
 		//do the draw call
 		mesh->render(GL_TRIANGLES);
 
@@ -316,13 +316,16 @@ void PBRMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 		//upload uniforms
 		setUniforms(camera, model);
 
-		//glEnable(GL_BLEND); //hay que arreglar esto de opacity map, no esta funcionando...
+		glEnable(GL_BLEND);
+		glEnable(GL_CULL_FACE); // active cull face to render only one time every pixel
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
 		//glEnable(GL_CULL_FACE);
 		//do the draw call
 		mesh->render(GL_TRIANGLES);
 
-		//glDisable(GL_BLEND);
-		//glDisable(GL_CULL_FACE);
+		glDisable(GL_BLEND);
+		glDisable(GL_CULL_FACE);
 		//disable shader
 		shader->disable();
 	}

@@ -128,7 +128,7 @@ vec3 toneMapUncharted(vec3 color)
 
 struct PBRStruct
 {
-	vec3 color;
+	vec4 color;
 	
 	//properties
 	float roughness;
@@ -185,9 +185,10 @@ void computeDotProducts(inout PBRStruct mat)
 
 void fillPBRProperties(inout PBRStruct mat)
 {
-	mat.color = u_color.xyz;//base color
-	mat.color *= texture2D( u_texture, v_uv ).xyz; 
-	mat.color = gamma_to_linear(mat.color);
+	mat.color = u_color;//base color
+	mat.color *= texture2D( u_texture, v_uv ); 
+	mat.color = vec4(gamma_to_linear(mat.color.xyz), 1.0f);// hemos pasado linear tanto la tex como el u_color del imgui
+
 	if (u_met_rou){
 		mat.roughness_tex = texture2D(u_mr_texture, v_uv).y;
 		mat.metalness_tex = texture2D(u_mr_texture, v_uv).z;
@@ -200,7 +201,7 @@ void fillPBRProperties(inout PBRStruct mat)
 	//mat.roughness = clamp(mat.roughness_tex * u_roughness, 0.1f, 0.9f); //total roughness and clamp it 
 	mat.roughness = mat.roughness_tex * u_roughness; //total roughness and clamp it 	
 	mat.metalness = mat.metalness_tex * u_metalness; //total metalness
-	mat.F0 = mix( vec3(0.04), mat.color, mat.metalness);
+	mat.F0 = mix( vec3(0.04), mat.color.xyz, mat.metalness);
 
 }
 
@@ -241,7 +242,7 @@ float GeometrySmith(const in float NdotV, const in float NdotL, const in float r
 	return G1_v * G1_n;
 }
 
-vec3 BRDFSpecular(float roughness, float metalness, float NdotH, float NdotV, float NdotL, vec3 baseColor, vec3 F0)
+vec3 BRDFSpecular(float roughness, float NdotH, float NdotV, float NdotL, vec3 F0)
 {
 	float D = DistributionGGX(roughness, NdotH);
 
@@ -256,8 +257,8 @@ vec3 BRDFSpecular(float roughness, float metalness, float NdotH, float NdotV, fl
 void computeBRDF(inout PBRStruct mat)
 {
 	//mat.f_diffuse = ((1.0 - mat.metalness) * mat.color) * RECIPROCAL_PI; //since we are doing the linear interpolation with dialectric and conductor material
-	mat.f_diffuse = mix( mat.color, vec3(0.0), mat.metalness) * RECIPROCAL_PI; 
-	mat.f_specular = BRDFSpecular( mat.roughness, mat.metalness, mat.NdotH, mat.NdotV, mat.NdotL, mat.color, mat.F0 );
+	mat.f_diffuse = mix( mat.color.xyz, vec3(0.0), mat.metalness) * RECIPROCAL_PI; 
+	mat.f_specular = BRDFSpecular( mat.roughness, mat.NdotH, mat.NdotV, mat.NdotL, mat.F0 );
 }
 
 //---------------compute IBL-----------------------------
@@ -316,7 +317,7 @@ void main()
 	// 1. Create Material
 	PBRMat = PBRStruct(
 
-						vec3(0.0), //color
+						vec4(0.0), //color
 
 						0.0f, //roughness
 						0.0f, //metalness
@@ -364,17 +365,22 @@ void main()
 	// 5. Any extra texture to apply after tonemapping
 	//Apply emmisive tex
 	vec3 emmisive_light = vec3(0.0);
-	if(u_bool_em_tex){
+	float opacity = 0.0;
+	if(u_bool_em_tex){ // a hack, if there's not em texture, there will be a opacity map
 		emmisive_light = gamma_to_linear( texture2D(u_emissive_texture, v_uv).xyz);
 		light += emmisive_light;
 	}else{
-		float opacity = texture2D(u_opacity_texture, v_uv).x;
-		//PBRMat.color *= vec3(opacity);
+		opacity = texture2D(u_opacity_texture, v_uv).x; // since is the color gray we take the 1º channel
+		//PBRMat.color.a = opacity; //rgba color
+		// if(PBRMat.color.a < 0.1)
+		// 	discard;
 	}
+
 	//---to debug the textures with diff cases
 	vec4 finalColor = vec4(0.0);
 	if ( u_output == 0.0 ) //complete
-		finalColor = vec4(linear_to_gamma(light), 0.0f);
+		finalColor = vec4(linear_to_gamma(light), opacity);
+		// finalColor = vec4(linear_to_gamma(light), PBRMat.color.a );
 	else if ( u_output == 1.0 ) //albedo
 		finalColor = vec4(linear_to_gamma(texture2D( u_texture, v_uv ).xyz),1.0); //texture2D( u_texture, v_uv );
 	else if(u_output == 2.0)//roughness

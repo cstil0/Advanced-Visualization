@@ -319,8 +319,7 @@ void PBRMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 		glEnable(GL_BLEND);
 		glEnable(GL_CULL_FACE); // active cull face to render only one time every pixel
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	
-		//glEnable(GL_CULL_FACE);
+
 		//do the draw call
 		mesh->render(GL_TRIANGLES);
 

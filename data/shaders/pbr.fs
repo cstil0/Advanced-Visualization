@@ -365,7 +365,7 @@ void main()
 	// 5. Any extra texture to apply after tonemapping
 	//Apply emmisive tex
 	vec3 emmisive_light = vec3(0.0);
-	float opacity = 0.0;
+	float opacity = 1.0; //opaco
 	if(u_bool_em_tex){ // a hack, if there's not em texture, there will be a opacity map
 		emmisive_light = gamma_to_linear( texture2D(u_emissive_texture, v_uv).xyz);
 		light += emmisive_light;

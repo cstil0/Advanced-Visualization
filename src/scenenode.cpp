@@ -103,8 +103,7 @@ Light::Light()
 
 
 Light::Light(const char* name)
-{
-	
+{	
 	this->name = name;
 	this->visible_flag = TRUE;
 	this->typeOfNode = (int)TYPEOFNODE::LIGHT;
@@ -138,9 +137,7 @@ void Light::renderInMenu()
 		
 		ImGui::TreePop();
 	}
-
 }
-
 
 Skybox::Skybox()
 {

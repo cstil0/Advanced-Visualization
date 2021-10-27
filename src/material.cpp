@@ -287,19 +287,20 @@ void PBRMaterial::setUniforms(Camera* camera, Matrix44 model)
 	if (this->ao_texture)
 		shader->setTexture("u_ao_texture", this->ao_texture, EOutput::AMBIENT_OCCLUSION);
 
-
-	if (this->hdre_level0)
-		shader->setTexture("u_texture_prem", this->hdre_level0, EOutput::LEVEL0);
-	if (this->hdre_level1)
-		shader->setTexture("u_texture_prem_0", this->hdre_level1, EOutput::LEVEL1);
-	if (this->hdre_level2)
-		shader->setTexture("u_texture_prem_1", this->hdre_level2, EOutput::LEVEL2);
-	if (this->hdre_level3)
-		shader->setTexture("u_texture_prem_2", this->hdre_level3, EOutput::LEVEL3);
-	if (this->hdre_level4)
-		shader->setTexture("u_texture_prem_3", this->hdre_level4, EOutput::LEVEL4);
-	if (this->hdre_level5)
-		shader->setTexture("u_texture_prem_4", this->hdre_level5, EOutput::LEVEL5);
+	// Get skybox node of the environement
+	Skybox* skybox = Application::instance->skybox_node;
+	if (skybox->hdre_level0)
+		shader->setTexture("u_texture_prem", skybox->hdre_level0, EOutput::LEVEL0);
+	if (skybox->hdre_level1)
+		shader->setTexture("u_texture_prem_0", skybox->hdre_level1, EOutput::LEVEL1);
+	if (skybox->hdre_level2)
+		shader->setTexture("u_texture_prem_1", skybox->hdre_level2, EOutput::LEVEL2);
+	if (skybox->hdre_level3)
+		shader->setTexture("u_texture_prem_2", skybox->hdre_level3, EOutput::LEVEL3);
+	if (skybox->hdre_level4)
+		shader->setTexture("u_texture_prem_3", skybox->hdre_level4, EOutput::LEVEL4);
+	if (skybox->hdre_level5)
+		shader->setTexture("u_texture_prem_4", skybox->hdre_level5, EOutput::LEVEL5);
 	if (this->BRDFLut)
 		shader->setTexture("u_BRDFLut", this->BRDFLut, EOutput::BRDFLut);
 }

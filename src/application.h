@@ -40,6 +40,7 @@ public:
 	static Application* instance;
 
 	std::vector< SceneNode* > node_list;
+	Skybox* skybox_node = NULL;
 
 	//window
 	SDL_Window* window;

@@ -89,13 +89,12 @@ public:
 	Texture* ao_texture = NULL;
 	Texture* opacity_texture= NULL;
 
-
-	Texture* hdre_level0 = NULL;
-	Texture* hdre_level1 = NULL;
-	Texture* hdre_level2 = NULL;
-	Texture* hdre_level3 = NULL;
-	Texture* hdre_level4 = NULL;
-	Texture* hdre_level5 = NULL;
+	//Texture* hdre_level0 = NULL;
+	//Texture* hdre_level1 = NULL;
+	//Texture* hdre_level2 = NULL;
+	//Texture* hdre_level3 = NULL;
+	//Texture* hdre_level4 = NULL;
+	//Texture* hdre_level5 = NULL;
 
 	Texture* BRDFLut = NULL;
 

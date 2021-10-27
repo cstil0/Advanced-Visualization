@@ -68,6 +68,13 @@ public:
 class Skybox : public SceneNode {
 public:
 
+	Texture* hdre_level0;
+	Texture* hdre_level1;
+	Texture* hdre_level2;
+	Texture* hdre_level3;
+	Texture* hdre_level4;
+	Texture* hdre_level5;
+
 	Skybox();
 	Skybox(const char* name);
 	~Skybox();

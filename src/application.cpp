@@ -173,12 +173,12 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 		//---
 		pbr_material = new PBRMaterial(sh, color_texture3, normalmap_texture3, roughness_texture3, metalness_texture3, false);
-		pbr_material->hdre_level0 = level0;
-		pbr_material->hdre_level1 = level1;
-		pbr_material->hdre_level2 = level2;
-		pbr_material->hdre_level3 = level3;
-		pbr_material->hdre_level4 = level4;
-		pbr_material->hdre_level5 = level5;
+		skybox_node->hdre_level0 = level0;
+		skybox_node->hdre_level1 = level1;
+		skybox_node->hdre_level2 = level2;
+		skybox_node->hdre_level3 = level3;
+		skybox_node->hdre_level4 = level4;
+		skybox_node->hdre_level5 = level5;
 
 		pbr_material->BRDFLut = Texture::Get("data/brdfLUT.png");
 		//pbr_material->emissive_texture = NULL;
@@ -206,7 +206,7 @@ void Application::renderSkybox()
 	//We first create a skybox node and we need to render it first, since it needs a specific material
 	//We create a SkyboxMaterial to save all its corresponding information (shader, cubemap),  
 	//then we pass this material to the skybox node, and finally push it in the list of nodes.
-	Skybox* skybox_node = new Skybox("Skybox");
+	skybox_node = new Skybox("Skybox");
 	skybox_node->mesh = Mesh::getCube();
 	//skybox_node->mesh = Mesh::Get("data/meshes/box.ASE.mbin");
 	sh = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");

@@ -351,7 +351,7 @@ void main()
 	computeBRDF(PBRMat);
 	vec3 direct = PBRMat.f_diffuse + PBRMat.f_specular;
 	vec3 indirect = computeIBL(PBRMat);
-	float ambient_occlusion = texture2D(u_ao_texture, v_uv).x; // ya que son valores de 0 a 1, solo es suff con un canal no??¿¿
+	float ambient_occlusion = texture2D(u_ao_texture, v_uv).x; 
 	indirect *= vec3(ambient_occlusion); //apply ao_texture only to indirect light
 
 	// Compute how much light received the pixel
@@ -371,18 +371,15 @@ void main()
 		light += emmisive_light;
 	}else{
 		opacity = texture2D(u_opacity_texture, v_uv).x; // since is the color gray we take the 1º channel
-		//PBRMat.color.a = opacity; //rgba color
-		// if(PBRMat.color.a < 0.1)
-		// 	discard;
+		PBRMat.color.a = opacity; //rgba color
 	}
 
 	//---to debug the textures with diff cases
 	vec4 finalColor = vec4(0.0);
 	if ( u_output == 0.0 ) //complete
 		finalColor = vec4(linear_to_gamma(light), opacity);
-		// finalColor = vec4(linear_to_gamma(light), PBRMat.color.a );
 	else if ( u_output == 1.0 ) //albedo
-		finalColor = vec4(linear_to_gamma(texture2D( u_texture, v_uv ).xyz),1.0); //texture2D( u_texture, v_uv );
+		finalColor = vec4(texture2D( u_texture, v_uv ).xyz,1.0); 
 	else if(u_output == 2.0)//roughness
 		finalColor = vec4(PBRMat.roughness_tex);
 	else if(u_output == 3.0)//metalness
@@ -390,14 +387,13 @@ void main()
 	else if(u_output == 4.0)//normal
 		finalColor = vec4(PBRMat.N, 1.0);
 	else if(u_output == 5.0)//emisive
-		finalColor = vec4(emmisive_light, 1.0);
+		finalColor = vec4(linear_to_gamma(emmisive_light), 1.0);
 	else if(u_output == 6.0)//ao
 		finalColor = vec4(ambient_occlusion);		
 	else { //LUT
 		float idx_NdotV = clamp(dot(PBRMat.N,PBRMat.V), 0.09, 0.99); //why no 0.01?
-		float idx_roughness = clamp( PBRMat.roughness_tex * u_roughness, 0.09, 0.99); /////////////////////////////////////esto dejar asi o anañir al constructor de mat???
+		float idx_roughness = clamp( PBRMat.roughness_tex * u_roughness, 0.09, 0.99); 
 		vec2 brdf_coord = vec2( idx_NdotV, idx_roughness);
-		// vec2 brdf_coord = vec2( PBRMat.NdotV, PBRMat.roughness);
 		vec4 brdf2D = texture2D(u_BRDFLut, brdf_coord);
 		finalColor = brdf2D;
 	}

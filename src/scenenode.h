@@ -71,8 +71,8 @@ class Skybox : public SceneNode {
 public:
 
 	enum TYPEOFSKYBOX {
-		PISA,
 		PANORAMA,
+		PISA,
 		BRIDGE
 	};
 

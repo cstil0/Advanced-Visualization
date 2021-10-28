@@ -46,8 +46,8 @@ public:
 	};
 
 	enum TYPEOFSKYBOXIMGUI {
-		PISA,
 		PANORAMA,
+		PISA,
 		BRIDGE
 	};
 
@@ -78,7 +78,7 @@ public:
 	int output;
 	vec3 ambient_light;
 	
-	int type_environment;
+	//int type_environment;
 
 	//some vars
 	static Camera* camera; //our GLOBAL camera

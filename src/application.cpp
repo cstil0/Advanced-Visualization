@@ -37,7 +37,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	mouse_locked = false;
 	scene_exposure = 1;
 	output = 0.0;
-	this->type_environment = 0.0;
+	//this->type_environment = 0.0;
 
 	//define the color of the ambient as a global variable since it is a property of the scene
 	ambient_light.set(0.1, 0.2, 0.3);
@@ -281,8 +281,8 @@ void Application::renderSkybox()
 	skybox_bridge->material = sky_mat_bridge;
 	skybox_bridge->typeOfSkybox = Skybox::TYPEOFSKYBOX::BRIDGE;
 
-	skybox_node = skybox_pisa;
-	typeOfSkybox_ImGUI = Skybox::TYPEOFSKYBOX::PISA;
+	skybox_node = skybox_panorama;
+	typeOfSkybox_ImGUI = Skybox::TYPEOFSKYBOX::PANORAMA;
 	node_list.push_back(skybox_node);
 }
 
@@ -424,12 +424,22 @@ void Application::update(double seconds_elapsed)
 
 	// Update the model according to the imGUI
 	// Node_list[2] corresponds to the principal node IGUAL SE PODRÍA PONER MEJOR
-	if (int(typeOfModel_ImGUI) != int(node_list[2]->typeOfModel)) {
+	if (typeOfModel_ImGUI != node_list[SceneNode::TYPEOFNODE::NODE]->typeOfModel) {
 		//SceneNode* principal_node = node_list[2];
 		// Look for the new node to be rendered
 		for (int i = 0; i < optional_node_list.size(); i++) {
-			if (optional_node_list[i]->typeOfModel == typeOfModel_ImGUI) {
-				node_list[2] = optional_node_list[i];
+			if (optional_node_list[i]->typeOfModel == typeOfModel_ImGUI)
+				node_list[SceneNode::TYPEOFNODE::NODE] = optional_node_list[i];
+		}
+	}
+
+	if (typeOfSkybox_ImGUI != skybox_node->typeOfSkybox) {
+		// Look for the new skybox to be rendered
+		for (int i = 0; i < optional_skybox_list.size(); i++) {
+			if (optional_skybox_list[i]->typeOfSkybox == typeOfSkybox_ImGUI) {
+				// Update the new skybox
+				node_list[SceneNode::TYPEOFNODE::SKYBOX] = (SceneNode*)optional_skybox_list[i];
+				skybox_node = optional_skybox_list[i];
 			}
 		}
 	}

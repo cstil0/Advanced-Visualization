@@ -183,7 +183,8 @@ void SkyboxMaterial::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_camera_position", camera->eye);
 	shader->setUniform("u_model", model);
 	shader->setUniform("u_color", color);
-	int type_env = Application::instance->type_environment;
+	// PARA QUE SE USA ESTO??
+	int type_env = Application::instance->typeOfSkybox_ImGUI;
 	shader->setUniform("u_output", type_env);
 		
 	Skybox* skybox = Application::instance->skybox_node;

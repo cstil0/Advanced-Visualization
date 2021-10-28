@@ -195,6 +195,7 @@ void Application::renderSkybox()
 	// LOAD PISA
 	Skybox* skybox_pisa = new Skybox("Skybox");
 	skybox_pisa->mesh = Mesh::getCube();
+	sh = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
 	SkyboxMaterial* sky_mat_pisa= new SkyboxMaterial(sh);
 
 	HDRE* hdre_pisa= new HDRE();
@@ -217,6 +218,8 @@ void Application::renderSkybox()
 	skybox_pisa->hdre_level4->cubemapFromHDRE(hdre_pisa, 4);
 	skybox_pisa->hdre_level5->cubemapFromHDRE(hdre_pisa, 5);
 
+	sky_mat_pisa->texture = skybox_pisa->hdre_level0;
+
 	skybox_pisa->material = sky_mat_pisa;
 	skybox_pisa->typeOfSkybox = Skybox::TYPEOFSKYBOX::PISA;
 
@@ -224,7 +227,6 @@ void Application::renderSkybox()
 	// LOAD PANORAMA
 	Skybox* skybox_panorama = new Skybox("Skybox");
 	skybox_panorama->mesh = Mesh::getCube();
-	sh = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
 	SkyboxMaterial* sky_mat_panorama = new SkyboxMaterial(sh);
 
 	HDRE* hdre_panorama = new HDRE();
@@ -254,7 +256,6 @@ void Application::renderSkybox()
 	// LOAD BRIDGE
 	Skybox* skybox_bridge = new Skybox("Skybox");
 	skybox_bridge->mesh = Mesh::getCube();
-	sh = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
 	SkyboxMaterial* sky_mat_bridge= new SkyboxMaterial(sh);
 
 	HDRE* hdre_bridge = new HDRE();
@@ -281,6 +282,7 @@ void Application::renderSkybox()
 	skybox_bridge->typeOfSkybox = Skybox::TYPEOFSKYBOX::BRIDGE;
 
 	skybox_node = skybox_pisa;
+	typeOfSkybox_ImGUI = Skybox::TYPEOFSKYBOX::PISA;
 	node_list.push_back(skybox_node);
 }
 

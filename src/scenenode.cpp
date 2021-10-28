@@ -82,8 +82,9 @@ void SceneNode::renderInMenu()
 	//Geometry
 	if (!(this->typeOfNode == TYPEOFNODE::LIGHT) && mesh && ImGui::TreeNode("Geometry"))
 	{
-		bool changed = false;
-		changed |= ImGui::Combo("Mesh", (int*)&mesh_selected, "BASIC\0HELMET\0");
+		//bool changed = false;
+		ImGui::Combo("Mesh", &Application::instance->typeOfModel_ImGUI, "BALL\0HELMET\0LANTERN\0");
+		//changed |= ImGui::Combo("Mesh", (int*)&mesh_selected, "BASIC\0HELMET\0");
 
 		ImGui::TreePop();
 	}

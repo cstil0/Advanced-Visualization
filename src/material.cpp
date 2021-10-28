@@ -186,12 +186,14 @@ void SkyboxMaterial::setUniforms(Camera* camera, Matrix44 model)
 	int type_env = Application::instance->type_environment;
 	shader->setUniform("u_output", type_env);
 		
-	if (this->panorama_tex)
-		shader->setUniform("u_panorama_tex", panorama_tex, ESkybox::PANORAMA);
-	if (this->pisa_tex)
-		shader->setUniform("u_snow_tex", pisa_tex, ESkybox::PISA);
+	Skybox* skybox = Application::instance->skybox_node;
+	if (skybox->hdre_level0)
+		shader->setTexture("u_panorama_tex", skybox->hdre_level0, ESkybox::PANORAMA);
 
-
+	//if (this->level0)
+	//	shader->setUniform("u_panorama_tex", panorama_tex, ESkybox::PANORAMA);
+	//if (this->pisa_tex)
+	//	shader->setUniform("u_snow_tex", pisa_tex, ESkybox::PISA);
 }
 
 void SkyboxMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)

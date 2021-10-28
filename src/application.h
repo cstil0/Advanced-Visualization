@@ -39,8 +39,27 @@ class Application
 public:
 	static Application* instance;
 
+	enum TYPEOFMODELIMGUI {
+		BASIC,
+		HELMET,
+		LANTERN
+	};
+
+	enum TYPEOFSKYBOXIMGUI {
+		PISA,
+		PANORAMA,
+		BRIDGE
+	};
+
+	int typeOfModel_ImGUI;
+	int typeOfSkybox_ImGUI;
+
 	std::vector< SceneNode* > node_list;
+	// List that saves the nodes that can be selected in the imGUI
+	std::vector< SceneNode* > optional_node_list;
 	Skybox* skybox_node = NULL;
+	// List that saves the types of skybox that can be selected in the imGUI
+	std::vector< Skybox* > optional_skybox_list;
 
 	//window
 	SDL_Window* window;

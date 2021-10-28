@@ -60,14 +60,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		//renderReflection();
 		
 
-		Texture* color_texture = Texture::Get("data/models/basic/albedo.png");
-		Texture* normalmap_texture = Texture::Get("data/models/basic/normal.png");
-		Texture* roughness_texture = Texture::Get("data/models/basic/roughness.png");
-		Texture* metalness_texture = Texture::Get("data/models/basic/metalness.png");
 
-		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/pbr.fs");
-		
-		PBRMaterial* pbr_material = new PBRMaterial(sh, color_texture, normalmap_texture, roughness_texture, metalness_texture, false);
 		
 		//create a light
 		int numb_lights = 1;
@@ -82,20 +75,13 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 			node_list.push_back(light);
 		}
 
-		SceneNode* pbr_node = new SceneNode("OBjectPBR", pbr_material, Mesh::Get("data/models/ball/sphere.obj.mbin"));
 		
 		//pbr_node->material = pbr_material;
-		pbr_material->light = light;
 		//node_list.push_back(pbr_node);
 
 		//----second object
 		
-		//Texture* color_texture2 = Texture::Get("data/models/helmet/albedo.png");
-		//Texture* normalmap_texture2 = Texture::Get("data/models/helmet/normal.png");
-		//Texture* mr_texture = Texture::Get("data/models/helmet/roughness.png");
-		////Texture* e_texture = Texture::Get("data/models/helmet/emissive.png");
 
-		//sh = Shader::Get("data/shaders/basic.vs", "data/shaders/pbr.fs");
 
 		////---
 
@@ -122,78 +108,77 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		////Texture* BRDFLut = Texture::Get("data/brdfLUT.png");
 
 		////---
-		//pbr_material = new PBRMaterial(sh, color_texture2, normalmap_texture2, NULL, NULL, true, mr_texture);
-		//pbr_material->hdre_level0 = level0;
-		//pbr_material->hdre_level1 = level1;
-		//pbr_material->hdre_level2 = level2;
-		//pbr_material->hdre_level3 = level3;
-		//pbr_material->hdre_level4 = level4;
-		//pbr_material->hdre_level5 = level5;
 
-		//pbr_material->BRDFLut = Texture::Get("data/brdfLUT.png");
-		//pbr_material->emissive_texture = Texture::Get("data/models/helmet/emissive.png");
-		//pbr_material->ao_texture = Texture::Get("data/models/helmet/ao.png");
-
-
-		//SceneNode* pbr_node2 = new SceneNode("BallPBR2", pbr_material, Mesh::Get("data/models/helmet/helmet.obj.mbin"));
-		//pbr_material->light = light;
-		//pbr_node2->material = pbr_material;
-		//pbr_node->material = pbr_material;
-		//node_list.push_back(pbr_node2);
 
 		//---3 object!!!!
+		Texture* BRDFLut = Texture::Get("data/brdfLUT.png");
 
-		Texture* color_texture3 = Texture::Get("data/models/lantern/albedo.png");
-		Texture* normalmap_texture3 = Texture::Get("data/models/lantern/normal.png");
-		Texture* roughness_texture3 = Texture::Get("data/models/lantern/roughness.png");
-		Texture* metalness_texture3 = Texture::Get("data/models/lantern/metalness.png");
+		// LOAD BALL
+		Texture* ball_color_texture = Texture::Get("data/models/ball/albedo.png");
+		Texture* ball_normalmap_texture = Texture::Get("data/models/ball/normal.png");
+		Texture* ball_roughness_texture = Texture::Get("data/models/ball/roughness.png");
+		Texture* ball_metalness_texture = Texture::Get("data/models/ball/metalness.png");
 
 		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/pbr.fs");
 
+		PBRMaterial* ball_material = new PBRMaterial(sh, ball_color_texture, ball_normalmap_texture, ball_roughness_texture, ball_metalness_texture, false);
+		ball_material->BRDFLut = BRDFLut;
+		SceneNode* ball_node = new SceneNode("OBjectPBR", ball_material, Mesh::Get("data/models/ball/sphere.obj.mbin"));
+		ball_material->light = light;
+		ball_node->typeOfModel = SceneNode::TYPEOFMODEL::BASIC;
 
-		HDRE* hdre = new HDRE();
-		if (hdre->load("data/environments/panorama.hdre"))
-			hdre = HDRE::Get("data/environments/panorama.hdre");
+		optional_node_list.push_back(ball_node);
 
-		Texture* level0 = new Texture();
-		Texture* level1 = new Texture();
-		Texture* level2 = new Texture();
-		Texture* level3 = new Texture();
-		Texture* level4 = new Texture();
-		Texture* level5 = new Texture();
 
-		level0->cubemapFromHDRE(hdre, 0);
-		level1->cubemapFromHDRE(hdre, 1);
-		level2->cubemapFromHDRE(hdre, 2);
-		level3->cubemapFromHDRE(hdre, 3);
-		level4->cubemapFromHDRE(hdre, 4);
-		level5->cubemapFromHDRE(hdre, 5);
+		// LOAD HELMET
 
-		//Texture* BRDFLut = Texture::Get("data/brdfLUT.png");
+		Texture* helmet_color_texture = Texture::Get("data/models/helmet/albedo.png");
+		Texture* helmet_normalmap_texture = Texture::Get("data/models/helmet/normal.png");
+		Texture* helmet_mr_texture = Texture::Get("data/models/helmet/roughness.png");
+		Texture* helmet_e_texture = Texture::Get("data/models/helmet/emissive.png");
 
-		//---
-		pbr_material = new PBRMaterial(sh, color_texture3, normalmap_texture3, roughness_texture3, metalness_texture3, false);
-		skybox_node->hdre_level0 = level0;
-		skybox_node->hdre_level1 = level1;
-		skybox_node->hdre_level2 = level2;
-		skybox_node->hdre_level3 = level3;
-		skybox_node->hdre_level4 = level4;
-		skybox_node->hdre_level5 = level5;
+		PBRMaterial* helmet_material = new PBRMaterial(sh, helmet_color_texture, helmet_normalmap_texture, NULL, NULL, true, helmet_mr_texture);
 
-		pbr_material->BRDFLut = Texture::Get("data/brdfLUT.png");
-		//pbr_material->emissive_texture = NULL;
-		pbr_material->bool_em = FALSE; //lantern no tiene emmisive texture!
-		pbr_material->ao_texture = Texture::Get("data/models/lantern/ao.png");
+		helmet_material->BRDFLut = BRDFLut;
+		helmet_material->emissive_texture = Texture::Get("data/models/helmet/emissive.png");
+		helmet_material->ao_texture = Texture::Get("data/models/helmet/ao.png");
 
-		pbr_material->opacity_texture = Texture::Get("data/models/lantern/opacity.png");
 
-		SceneNode* pbr_node3 = new SceneNode("ObjPBR3", pbr_material, Mesh::Get("data/models/lantern/lantern.obj.mbin"));
-		pbr_node3->model.setScale(0.01, 0.01, 0.01);
-		pbr_material->light = light;
-		pbr_node3->material = pbr_material;
+		SceneNode* helmet_node = new SceneNode("BallPBR2", helmet_material, Mesh::Get("data/models/helmet/helmet.obj.mbin"));
+		helmet_material->light = light;
+		helmet_node->material = helmet_material;
+		helmet_node->material = helmet_material;
+		helmet_node->typeOfModel = SceneNode::TYPEOFMODEL::HELMET;
+		optional_node_list.push_back(helmet_node);
+
+
+		// LOAD LANTERN
+		Texture* lantern_color_texture = Texture::Get("data/models/lantern/albedo.png");
+		Texture* lantern_normalmap_texture = Texture::Get("data/models/lantern/normal.png");
+		Texture* lantern_roughness_texture = Texture::Get("data/models/lantern/roughness.png");
+		Texture* lantern_metalness_texture = Texture::Get("data/models/lantern/metalness.png");
+
+		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/pbr.fs");
+
+		PBRMaterial* lantern_material = new PBRMaterial(sh, lantern_color_texture, lantern_normalmap_texture, lantern_roughness_texture, lantern_metalness_texture, false);
+		lantern_material->BRDFLut = BRDFLut;
+		lantern_material->bool_em = FALSE; //lantern no tiene emmisive texture!
+		lantern_material->ao_texture = Texture::Get("data/models/lantern/ao.png");
+
+		lantern_material->opacity_texture = Texture::Get("data/models/lantern/opacity.png");
+
+		SceneNode* lantern_node = new SceneNode("ObjPBR3", lantern_material, Mesh::Get("data/models/lantern/lantern.obj.mbin"));
+		lantern_node->model.setScale(0.01, 0.01, 0.01);
+		lantern_material->light = light;
+		lantern_node->material = lantern_material;
 		//pbr_node->material = pbr_material;
-		node_list.push_back(pbr_node3);
+		lantern_node->typeOfModel = SceneNode::TYPEOFMODEL::LANTERN;
+		optional_node_list.push_back(lantern_node);
 
+		// Guardamos un puntero que se irá actualizando segun el imGUI
+		SceneNode* current_node = lantern_node;
+		typeOfModel_ImGUI = SceneNode::TYPEOFMODEL::LANTERN;
+		node_list.push_back(lantern_node);
 	}
 	
 	//hide the cursor
@@ -206,34 +191,96 @@ void Application::renderSkybox()
 	//We first create a skybox node and we need to render it first, since it needs a specific material
 	//We create a SkyboxMaterial to save all its corresponding information (shader, cubemap),  
 	//then we pass this material to the skybox node, and finally push it in the list of nodes.
-	skybox_node = new Skybox("Skybox");
-	skybox_node->mesh = Mesh::getCube();
-	//skybox_node->mesh = Mesh::Get("data/meshes/box.ASE.mbin");
+
+	// LOAD PISA
+	Skybox* skybox_pisa = new Skybox("Skybox");
+	skybox_pisa->mesh = Mesh::getCube();
+	SkyboxMaterial* sky_mat_pisa= new SkyboxMaterial(sh);
+
+	HDRE* hdre_pisa= new HDRE();
+	if (hdre_pisa->load("data/environments/pisa.hdre"))
+		hdre_pisa = HDRE::Get("data/environments/pisa.hdre");
+
+	skybox_pisa->typeOfNode = SceneNode::TYPEOFNODE::SKYBOX;
+
+	skybox_pisa->hdre_level0 = new Texture();
+	skybox_pisa->hdre_level1 = new Texture();
+	skybox_pisa->hdre_level2 = new Texture();
+	skybox_pisa->hdre_level3 = new Texture();
+	skybox_pisa->hdre_level4 = new Texture();
+	skybox_pisa->hdre_level5 = new Texture();
+
+	skybox_pisa->hdre_level0->cubemapFromHDRE(hdre_pisa, 0);
+	skybox_pisa->hdre_level1->cubemapFromHDRE(hdre_pisa, 1);
+	skybox_pisa->hdre_level2->cubemapFromHDRE(hdre_pisa, 2);
+	skybox_pisa->hdre_level3->cubemapFromHDRE(hdre_pisa, 3);
+	skybox_pisa->hdre_level4->cubemapFromHDRE(hdre_pisa, 4);
+	skybox_pisa->hdre_level5->cubemapFromHDRE(hdre_pisa, 5);
+
+	skybox_pisa->material = sky_mat_pisa;
+	skybox_pisa->typeOfSkybox = Skybox::TYPEOFSKYBOX::PISA;
+
+
+	// LOAD PANORAMA
+	Skybox* skybox_panorama = new Skybox("Skybox");
+	skybox_panorama->mesh = Mesh::getCube();
 	sh = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
-	SkyboxMaterial* sky_mat = new SkyboxMaterial(sh);
+	SkyboxMaterial* sky_mat_panorama = new SkyboxMaterial(sh);
 
-	Texture* cubemap_texture = new Texture();
-	//sHDRELoaded* hdre = new map<std::string, HDRE*>; HDRE manager???
+	HDRE* hdre_panorama = new HDRE();
+	if(hdre_panorama->load("data/environments/panorama.hdre"))
+		hdre_panorama = HDRE::Get("data/environments/panorama.hdre");
 
-	HDRE* hdre = new HDRE();
-	if(hdre->load("data/environments/panorama.hdre"))
-		hdre = HDRE::Get("data/environments/panorama.hdre");
-	//load parorama tex
-	cubemap_texture->cubemapFromHDRE(hdre, 0.0); //level 0
-	sky_mat->panorama_tex = cubemap_texture;
-	
-	//load snow tex
-	//Texture* cubemap_texture2 = new Texture();
-	//cubemap_texture2->cubemapFromImages("data/environments/snow");
-	HDRE* hdre2 = new HDRE();
-	if (hdre2->load("data/environments/pisa.hdre"))
-		hdre2 = HDRE::Get("data/environments/pisa.hdre");
-	
-	Texture* cubemap_texture2 = new Texture();
-	cubemap_texture2->cubemapFromHDRE(hdre2, 0.0); //level 0
-	sky_mat->pisa_tex = cubemap_texture2;
+	skybox_panorama->typeOfNode = SceneNode::TYPEOFNODE::SKYBOX;
 
-	skybox_node->material = sky_mat;
+	skybox_panorama->hdre_level0 = new Texture();
+	skybox_panorama->hdre_level1 = new Texture();
+	skybox_panorama->hdre_level2 = new Texture();
+	skybox_panorama->hdre_level3 = new Texture();
+	skybox_panorama->hdre_level4 = new Texture();
+	skybox_panorama->hdre_level5 = new Texture();
+
+	skybox_panorama->hdre_level0->cubemapFromHDRE(hdre_panorama, 0);
+	skybox_panorama->hdre_level1->cubemapFromHDRE(hdre_panorama, 1);
+	skybox_panorama->hdre_level2->cubemapFromHDRE(hdre_panorama, 2);
+	skybox_panorama->hdre_level3->cubemapFromHDRE(hdre_panorama, 3);
+	skybox_panorama->hdre_level4->cubemapFromHDRE(hdre_panorama, 4);
+	skybox_panorama->hdre_level5->cubemapFromHDRE(hdre_panorama, 5);
+
+	skybox_panorama->material = sky_mat_panorama;
+	skybox_panorama->typeOfSkybox = Skybox::TYPEOFSKYBOX::PANORAMA;
+
+
+	// LOAD BRIDGE
+	Skybox* skybox_bridge = new Skybox("Skybox");
+	skybox_bridge->mesh = Mesh::getCube();
+	sh = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
+	SkyboxMaterial* sky_mat_bridge= new SkyboxMaterial(sh);
+
+	HDRE* hdre_bridge = new HDRE();
+	if (hdre_bridge->load("data/environments/san_giuseppe_bridge.hdre"))
+		hdre_bridge = HDRE::Get("data/environments/san_giuseppe_bridge.hdre");
+
+	skybox_bridge->typeOfNode = SceneNode::TYPEOFNODE::SKYBOX;
+
+	skybox_bridge->hdre_level0 = new Texture();
+	skybox_bridge->hdre_level1 = new Texture();
+	skybox_bridge->hdre_level2 = new Texture();
+	skybox_bridge->hdre_level3 = new Texture();
+	skybox_bridge->hdre_level4 = new Texture();
+	skybox_bridge->hdre_level5 = new Texture();
+
+	skybox_bridge->hdre_level0->cubemapFromHDRE(hdre_bridge, 0);
+	skybox_bridge->hdre_level1->cubemapFromHDRE(hdre_bridge, 1);
+	skybox_bridge->hdre_level2->cubemapFromHDRE(hdre_bridge, 2);
+	skybox_bridge->hdre_level3->cubemapFromHDRE(hdre_bridge, 3);
+	skybox_bridge->hdre_level4->cubemapFromHDRE(hdre_bridge, 4);
+	skybox_bridge->hdre_level5->cubemapFromHDRE(hdre_bridge, 5);
+
+	skybox_bridge->material = sky_mat_bridge;
+	skybox_bridge->typeOfSkybox = Skybox::TYPEOFSKYBOX::BRIDGE;
+
+	skybox_node = skybox_pisa;
 	node_list.push_back(skybox_node);
 }
 
@@ -373,11 +420,23 @@ void Application::update(double seconds_elapsed)
 	if (mouse_locked)
 		Input::centerMouse();
 
+	// Update the model according to the imGUI
+	// Node_list[2] corresponds to the principal node IGUAL SE PODRÍA PONER MEJOR
+	if (int(typeOfModel_ImGUI) != int(node_list[2]->typeOfModel)) {
+		//SceneNode* principal_node = node_list[2];
+		// Look for the new node to be rendered
+		for (int i = 0; i < optional_node_list.size(); i++) {
+			if (optional_node_list[i]->typeOfModel == typeOfModel_ImGUI) {
+				node_list[2] = optional_node_list[i];
+			}
+		}
+	}
+
+	// Same with skybox
+
 	// Update skybox center position according to the camera position
 	if(node_list[SceneNode::TYPEOFNODE::SKYBOX]->typeOfNode == (int)SceneNode::TYPEOFNODE::SKYBOX )
 		node_list[SceneNode::TYPEOFNODE::SKYBOX]->model.setTranslation(camera->eye.x, camera->eye.y, camera->eye.z);
-
-
 }
 
 //Keyboard event handler (sync input)

@@ -15,17 +15,19 @@ public:
 	// Used to identify which type of node it is
 	enum TYPEOFNODE {
 		SKYBOX,
-		NODE,
-		LIGHT
+		LIGHT,
+		NODE
 	};
 	
 	enum TYPEOFMODEL {
 		BASIC,
-		HELMET
+		HELMET,
+		LANTERN
 	};
 
 	static unsigned int lastNameId;
 	int typeOfNode;
+	int typeOfModel;
 
 	SceneNode();
 	SceneNode(const char* name, Material* material, Mesh* mesh);
@@ -39,7 +41,7 @@ public:
 	Matrix44 model;
 
 	bool visible_flag;
-	int typeOfMesh;
+	int typeOfMesh; // ESTO LO USAMOS?
 
 	virtual void render(Camera* camera);
 	virtual void renderWireframe(Camera* camera);
@@ -67,6 +69,14 @@ public:
 
 class Skybox : public SceneNode {
 public:
+
+	enum TYPEOFSKYBOX {
+		PISA,
+		PANORAMA,
+		BRIDGE
+	};
+
+	int typeOfSkybox;
 
 	Texture* hdre_level0;
 	Texture* hdre_level1;

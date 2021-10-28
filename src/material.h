@@ -108,6 +108,8 @@ public:
 	//flags
 	bool bool_met_rou;
 	bool bool_em;
+	bool bool_opacity;
+	bool bool_ao;
 
 	Light* light = NULL;
 

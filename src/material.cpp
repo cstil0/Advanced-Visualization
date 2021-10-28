@@ -183,13 +183,10 @@ void SkyboxMaterial::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_camera_position", camera->eye);
 	shader->setUniform("u_model", model);
 	shader->setUniform("u_color", color);
-	// PARA QUE SE USA ESTO??
-	int type_env = Application::instance->typeOfSkybox_ImGUI;
-	shader->setUniform("u_output", type_env);
 		
 	Skybox* skybox = Application::instance->skybox_node;
 	if (skybox->hdre_level0)
-		shader->setTexture("u_panorama_tex", skybox->hdre_level0, ESkybox::PANORAMA);
+		shader->setTexture("u_environment_tex", skybox->hdre_level0, ESkybox::PANORAMA);
 
 	//if (this->level0)
 	//	shader->setUniform("u_panorama_tex", panorama_tex, ESkybox::PANORAMA);
@@ -243,9 +240,9 @@ PBRMaterial::PBRMaterial(Shader* sh, Texture* tex, Texture* normal, Texture* rou
 	//this->spec_scale = 0.1;
 	//this->reflactance = 0.1;
 	this->bool_met_rou = bool_mr;
-	this->bool_em = TRUE;
-
-
+	this->bool_em = FALSE;
+	this->bool_opacity = FALSE;
+	this->bool_ao = FALSE;
 }
 
 PBRMaterial::~PBRMaterial()
@@ -270,7 +267,9 @@ void PBRMaterial::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_metalness", this->metalness);
 	
 	shader->setUniform("u_met_rou", this->bool_met_rou);
-	shader->setUniform("u_bool_em_tex", this->bool_em); //exist?
+	shader->setUniform("u_bool_em_tex", this->bool_em);
+	shader->setUniform("u_bool_op_tex", this->bool_opacity);
+	shader->setUniform("u_bool_ao_tex", this->bool_ao);
 	if (texture)
 		shader->setTexture("u_texture", texture, EOutput::ALBEDO);
 	if (this->normal_texture)

@@ -46,6 +46,8 @@ uniform samplerCube u_texture_prem_4;
 uniform float u_output;
 uniform bool u_met_rou;
 uniform bool u_bool_em_tex;
+uniform bool u_bool_op_tex;
+uniform bool u_bool_ao_tex;
 
 //IMGUI factors
 uniform float u_roughness;
@@ -351,8 +353,11 @@ void main()
 	computeBRDF(PBRMat);
 	vec3 direct = PBRMat.f_diffuse + PBRMat.f_specular;
 	vec3 indirect = computeIBL(PBRMat);
-	float ambient_occlusion = texture2D(u_ao_texture, v_uv).x; 
-	indirect *= vec3(ambient_occlusion); //apply ao_texture only to indirect light
+	float ambient_occlusion = 0.0f;
+	if (u_bool_ao_tex){
+		ambient_occlusion = texture2D(u_ao_texture, v_uv).x; 
+		indirect *= vec3(ambient_occlusion); //apply ao_texture only to indirect light
+	}
 
 	// Compute how much light received the pixel
 	vec3 light = vec3(0.0);
@@ -369,7 +374,8 @@ void main()
 	if(u_bool_em_tex){ // a hack, if there's not em texture, there will be a opacity map
 		emmisive_light = gamma_to_linear( texture2D(u_emissive_texture, v_uv).xyz);
 		light += emmisive_light;
-	}else{
+	}
+	if(u_bool_op_tex){ 
 		opacity = texture2D(u_opacity_texture, v_uv).x; // since is the color gray we take the 1º channel
 		PBRMat.color.a = opacity; //rgba color
 	}

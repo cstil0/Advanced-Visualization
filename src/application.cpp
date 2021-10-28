@@ -53,7 +53,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 	{
 		
-		renderSkybox();
+		loadSkybox_Panorama();
 
 		//renderPhongEquation();
 
@@ -76,77 +76,86 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		Texture* BRDFLut = Texture::Get("data/brdfLUT.png");
 
 		// LOAD BALL
-		Texture* ball_color_texture = Texture::Get("data/models/ball/albedo.png");
-		Texture* ball_normalmap_texture = Texture::Get("data/models/ball/normal.png");
-		Texture* ball_roughness_texture = Texture::Get("data/models/ball/roughness.png");
-		Texture* ball_metalness_texture = Texture::Get("data/models/ball/metalness.png");
-
-		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/pbr.fs");
-
-		PBRMaterial* ball_material = new PBRMaterial(sh, ball_color_texture, ball_normalmap_texture, ball_roughness_texture, ball_metalness_texture, false, NULL);
-		ball_material->BRDFLut = BRDFLut;
-		SceneNode* ball_node = new SceneNode("BallPBR", ball_material, Mesh::Get("data/models/ball/sphere.obj.mbin"));
-		ball_material->light = light;
-		ball_node->typeOfModel = SceneNode::TYPEOFMODEL::BASIC;
-		ball_node->material = ball_material;
-		optional_node_list.push_back(ball_node);
-
-		// LOAD HELMET
-		Texture* helmet_color_texture = Texture::Get("data/models/helmet/albedo.png");
-		Texture* helmet_normalmap_texture = Texture::Get("data/models/helmet/normal.png");
-		Texture* helmet_mr_texture = Texture::Get("data/models/helmet/roughness.png");
-		Texture* helmet_e_texture = Texture::Get("data/models/helmet/emissive.png");
-
-		PBRMaterial* helmet_material = new PBRMaterial(sh, helmet_color_texture, helmet_normalmap_texture, NULL, NULL, true, helmet_mr_texture);
-
-		helmet_material->BRDFLut = BRDFLut;
-		helmet_material->bool_ao = TRUE; // Activate ao texture
-		helmet_material->ao_texture = Texture::Get("data/models/helmet/ao.png");
-		helmet_material->bool_em = TRUE;// Activate emissive texture
-		helmet_material->emissive_texture = Texture::Get("data/models/helmet/emissive.png");
-
-		SceneNode* helmet_node = new SceneNode("HelmetPBR2", helmet_material, Mesh::Get("data/models/helmet/helmet.obj.mbin"));
-		helmet_material->light = light;
-		helmet_node->material = helmet_material;
-		helmet_node->material = helmet_material;
-		helmet_node->typeOfModel = SceneNode::TYPEOFMODEL::HELMET;
-		optional_node_list.push_back(helmet_node);
-
-
-		// LOAD LANTERN
-		Texture* lantern_color_texture = Texture::Get("data/models/lantern/albedo.png");
-		Texture* lantern_normalmap_texture = Texture::Get("data/models/lantern/normal.png");
-		Texture* lantern_roughness_texture = Texture::Get("data/models/lantern/roughness.png");
-		Texture* lantern_metalness_texture = Texture::Get("data/models/lantern/metalness.png");
-
-		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/pbr.fs");
-
-		PBRMaterial* lantern_material = new PBRMaterial(sh, lantern_color_texture, lantern_normalmap_texture, lantern_roughness_texture, lantern_metalness_texture, false);
-		lantern_material->BRDFLut = BRDFLut;
-		lantern_material->bool_ao = TRUE; // Activate ao texture
-		lantern_material->ao_texture = Texture::Get("data/models/lantern/ao.png");
-		lantern_material->bool_opacity = TRUE;// Activate opacity texture
-		lantern_material->opacity_texture = Texture::Get("data/models/lantern/opacity.png");
-
-		SceneNode* lantern_node = new SceneNode("LanternPBR3", lantern_material, Mesh::Get("data/models/lantern/lantern.obj.mbin"));
-		lantern_node->model.setScale(0.01, 0.01, 0.01);
-		lantern_material->light = light;
-		lantern_node->material = lantern_material;
-		//pbr_node->material = pbr_material;
-		lantern_node->typeOfModel = SceneNode::TYPEOFMODEL::LANTERN;
-		optional_node_list.push_back(lantern_node);
+		loadBall(light, BRDFLut);
+		loadHelmet(light, BRDFLut);
+		loadLantern(light, BRDFLut);
 
 		// Guardamos un puntero que se irá actualizando segun el imGUI
-		SceneNode* current_node = lantern_node;
-		typeOfModel_ImGUI = SceneNode::TYPEOFMODEL::LANTERN;
-		node_list.push_back(lantern_node);
+		SceneNode* current_node = optional_node_list[0];
+		typeOfModel_ImGUI = optional_node_list[0]->typeOfModel;
+		node_list.push_back(current_node);
+
 	}
 	
 	//hide the cursor
 	SDL_ShowCursor(!mouse_locked); //hide or show the mouse
 }
 
-void Application::renderSkybox()
+void Application::loadBall(Light* light, Texture* BRDFLut){
+	Texture* ball_color_texture = Texture::Get("data/models/ball/albedo.png");
+	Texture* ball_normalmap_texture = Texture::Get("data/models/ball/normal.png");
+	Texture* ball_roughness_texture = Texture::Get("data/models/ball/roughness.png");
+	Texture* ball_metalness_texture = Texture::Get("data/models/ball/metalness.png");
+
+	sh = Shader::Get("data/shaders/basic.vs", "data/shaders/pbr.fs");
+
+	PBRMaterial* ball_material = new PBRMaterial(sh, ball_color_texture, ball_normalmap_texture, ball_roughness_texture, ball_metalness_texture, false, NULL);
+	ball_material->BRDFLut = BRDFLut;
+	SceneNode* ball_node = new SceneNode("BallPBR", ball_material, Mesh::Get("data/models/ball/sphere.obj.mbin"));
+	ball_material->light = light;
+	ball_node->typeOfModel = SceneNode::TYPEOFMODEL::BASIC;
+	ball_node->material = ball_material;
+	optional_node_list.push_back(ball_node);
+}
+
+void Application::loadHelmet(Light* light, Texture* BRDFLut) {
+	Texture* helmet_color_texture = Texture::Get("data/models/helmet/albedo.png");
+	Texture* helmet_normalmap_texture = Texture::Get("data/models/helmet/normal.png");
+	Texture* helmet_mr_texture = Texture::Get("data/models/helmet/roughness.png");
+	Texture* helmet_e_texture = Texture::Get("data/models/helmet/emissive.png");
+
+	PBRMaterial* helmet_material = new PBRMaterial(sh, helmet_color_texture, helmet_normalmap_texture, NULL, NULL, true, helmet_mr_texture);
+
+	helmet_material->BRDFLut = BRDFLut;
+	helmet_material->bool_ao = TRUE; // Activate ao texture
+	helmet_material->ao_texture = Texture::Get("data/models/helmet/ao.png");
+	helmet_material->bool_em = TRUE;// Activate emissive texture
+	helmet_material->emissive_texture = Texture::Get("data/models/helmet/emissive.png");
+
+	SceneNode* helmet_node = new SceneNode("HelmetPBR2", helmet_material, Mesh::Get("data/models/helmet/helmet.obj.mbin"));
+	helmet_material->light = light;
+	helmet_node->material = helmet_material;
+	helmet_node->material = helmet_material;
+	helmet_node->typeOfModel = SceneNode::TYPEOFMODEL::HELMET;
+	optional_node_list.push_back(helmet_node);
+}
+
+void Application::loadLantern(Light* light, Texture* BRDFLut) {
+	Texture* lantern_color_texture = Texture::Get("data/models/lantern/albedo.png");
+	Texture* lantern_normalmap_texture = Texture::Get("data/models/lantern/normal.png");
+	Texture* lantern_roughness_texture = Texture::Get("data/models/lantern/roughness.png");
+	Texture* lantern_metalness_texture = Texture::Get("data/models/lantern/metalness.png");
+
+	sh = Shader::Get("data/shaders/basic.vs", "data/shaders/pbr.fs");
+
+	PBRMaterial* lantern_material = new PBRMaterial(sh, lantern_color_texture, lantern_normalmap_texture, lantern_roughness_texture, lantern_metalness_texture, false);
+	lantern_material->BRDFLut = BRDFLut;
+	lantern_material->bool_ao = TRUE; // Activate ao texture
+	lantern_material->ao_texture = Texture::Get("data/models/lantern/ao.png");
+	lantern_material->bool_opacity = TRUE;// Activate opacity texture
+	lantern_material->opacity_texture = Texture::Get("data/models/lantern/opacity.png");
+
+	SceneNode* lantern_node = new SceneNode("LanternPBR3", lantern_material, Mesh::Get("data/models/lantern/lantern.obj.mbin"));
+	lantern_node->model.setScale(0.01, 0.01, 0.01);
+	lantern_material->light = light;
+	lantern_node->material = lantern_material;
+	//pbr_node->material = pbr_material;
+	lantern_node->typeOfModel = SceneNode::TYPEOFMODEL::LANTERN;
+	optional_node_list.push_back(lantern_node);
+}
+
+
+void Application::loadSkybox_Panorama()
 {
 	//---SkyboxNode---
 	//We first create a skybox node and we need to render it first, since it needs a specific material
@@ -401,6 +410,7 @@ void Application::update(double seconds_elapsed)
 		}
 	}
 
+	// Same with skybox
 	if (typeOfSkybox_ImGUI != skybox_node->typeOfSkybox) {
 		// Look for the new skybox to be rendered
 		for (int i = 0; i < optional_skybox_list.size(); i++) {
@@ -414,8 +424,6 @@ void Application::update(double seconds_elapsed)
 			}
 		}
 	}
-
-	// Same with skybox
 
 	// Update skybox center position according to the camera position
 	if(node_list[SceneNode::TYPEOFNODE::SKYBOX]->typeOfNode == (int)SceneNode::TYPEOFNODE::SKYBOX )

@@ -101,8 +101,11 @@ public:
 	void onResize(int width, int height);
 	void onFileChanged(const char* filename);
 
-	//functions to render in the scene
-	void renderSkybox();
+	//functions to create nodes in the scene
+	void loadBall(Light* light, Texture* BRDFLUT);
+	void loadHelmet(Light* light, Texture* BRDFLUT);
+	void loadLantern(Light* light, Texture* BRDFLUT);
+	void loadSkybox_Panorama();
 	void renderPhongEquation();
 	void renderReflection();
 };

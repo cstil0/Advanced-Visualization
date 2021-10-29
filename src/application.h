@@ -105,7 +105,9 @@ public:
 	void loadBall(Light* light, Texture* BRDFLUT);
 	void loadHelmet(Light* light, Texture* BRDFLUT);
 	void loadLantern(Light* light, Texture* BRDFLUT);
+	void loadSkybox_Pisa();
 	void loadSkybox_Panorama();
+	void loadSkybox_Bridge();
 	void renderPhongEquation();
 	void renderReflection();
 };

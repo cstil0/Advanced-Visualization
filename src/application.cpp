@@ -37,7 +37,6 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	mouse_locked = false;
 	scene_exposure = 1;
 	output = 0.0;
-	//this->type_environment = 0.0;
 
 	//define the color of the ambient as a global variable since it is a property of the scene
 	ambient_light.set(0.1, 0.2, 0.3);
@@ -52,14 +51,11 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	camera->setPerspective(45.f,window_width/(float)window_height,0.1f,10000.f); //set the projection, we want to be perspective
 
 	{
-		
+		// Load the different environments that we can choose in the imGUI
+		loadSkybox_Pisa();
 		loadSkybox_Panorama();
+		loadSkybox_Bridge();
 
-		//renderPhongEquation();
-
-		//renderReflection();
-		
-		
 		//create a light
 		int numb_lights = 1;
 		Light* light = new Light();
@@ -75,7 +71,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 		Texture* BRDFLut = Texture::Get("data/brdfLUT.png");
 
-		// LOAD BALL
+		// Load the different models that we can choose in the imGUI
 		loadBall(light, BRDFLut);
 		loadHelmet(light, BRDFLut);
 		loadLantern(light, BRDFLut);
@@ -85,6 +81,11 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		typeOfModel_ImGUI = optional_node_list[0]->typeOfModel;
 		node_list.push_back(current_node);
 
+		// Functions used 
+		//renderPhongEquation();
+
+		//renderReflection();
+		
 	}
 	
 	//hide the cursor
@@ -123,6 +124,7 @@ void Application::loadHelmet(Light* light, Texture* BRDFLut) {
 	helmet_material->emissive_texture = Texture::Get("data/models/helmet/emissive.png");
 
 	SceneNode* helmet_node = new SceneNode("HelmetPBR2", helmet_material, Mesh::Get("data/models/helmet/helmet.obj.mbin"));
+	helmet_node->model.setScale(2.0f, 2.0f, 2.0f);
 	helmet_material->light = light;
 	helmet_node->material = helmet_material;
 	helmet_node->material = helmet_material;
@@ -146,7 +148,7 @@ void Application::loadLantern(Light* light, Texture* BRDFLut) {
 	lantern_material->opacity_texture = Texture::Get("data/models/lantern/opacity.png");
 
 	SceneNode* lantern_node = new SceneNode("LanternPBR3", lantern_material, Mesh::Get("data/models/lantern/lantern.obj.mbin"));
-	lantern_node->model.setScale(0.01, 0.01, 0.01);
+	lantern_node->model.setScale(0.05, 0.05, 0.05);
 	lantern_material->light = light;
 	lantern_node->material = lantern_material;
 	//pbr_node->material = pbr_material;
@@ -154,21 +156,13 @@ void Application::loadLantern(Light* light, Texture* BRDFLut) {
 	optional_node_list.push_back(lantern_node);
 }
 
-
-void Application::loadSkybox_Panorama()
-{
-	//---SkyboxNode---
-	//We first create a skybox node and we need to render it first, since it needs a specific material
-	//We create a SkyboxMaterial to save all its corresponding information (shader, cubemap),  
-	//then we pass this material to the skybox node, and finally push it in the list of nodes.
-
-	// LOAD PISA
+void Application::loadSkybox_Pisa() {
 	Skybox* skybox_pisa = new Skybox("Skybox");
 	skybox_pisa->mesh = Mesh::getCube();
 	sh = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
-	SkyboxMaterial* sky_mat_pisa= new SkyboxMaterial(sh);
+	SkyboxMaterial* sky_mat_pisa = new SkyboxMaterial(sh);
 
-	HDRE* hdre_pisa= new HDRE();
+	HDRE* hdre_pisa = new HDRE();
 	if (hdre_pisa->load("data/environments/pisa.hdre"))
 		hdre_pisa = HDRE::Get("data/environments/pisa.hdre");
 
@@ -194,9 +188,15 @@ void Application::loadSkybox_Panorama()
 	skybox_pisa->material = sky_mat_pisa;
 	optional_skybox_list.push_back(skybox_pisa);
 	skybox_pisa->typeOfSkybox = Skybox::TYPEOFSKYBOX::PISA;
+}
 
+void Application::loadSkybox_Panorama()
+{
+	//---SkyboxNode---
+	//We first create a skybox node and we need to render it first, since it needs a specific material
+	//We create a SkyboxMaterial to save all its corresponding information (shader, cubemap),  
+	//then we pass this material to the skybox node, and finally push it in the list of nodes.
 
-	// LOAD PANORAMA
 	Skybox* skybox_panorama = new Skybox("Skybox");
 	skybox_panorama->mesh = Mesh::getCube();
 	SkyboxMaterial* sky_mat_panorama = new SkyboxMaterial(sh);
@@ -226,9 +226,9 @@ void Application::loadSkybox_Panorama()
 	skybox_panorama->material = sky_mat_panorama;
 	optional_skybox_list.push_back(skybox_panorama);
 	skybox_panorama->typeOfSkybox = Skybox::TYPEOFSKYBOX::PANORAMA;
+}
 
-
-	// LOAD BRIDGE
+void Application::loadSkybox_Bridge() {
 	Skybox* skybox_bridge = new Skybox("Skybox");
 	skybox_bridge->mesh = Mesh::getCube();
 	SkyboxMaterial* sky_mat_bridge = new SkyboxMaterial(sh);

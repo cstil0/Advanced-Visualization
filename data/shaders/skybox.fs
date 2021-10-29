@@ -47,7 +47,7 @@ void main()
 	vec4 color = vec4(0.0);
  	color = textureCube( u_environment_tex, direction );
 	color = vec4(toneMapUncharted(color.xyz), 1.0f);
-    color = vec4(linear_to_gamma(color), 1.0f);
+    color = vec4(linear_to_gamma(color.xyz), 1.0f);
 
 	gl_FragColor = color;
 }

@@ -313,6 +313,7 @@ void PBRMaterial::setTextures()
 	if (this->BRDFLut)
 		shader->setTexture("u_BRDFLut", this->BRDFLut, EOutput::BRDFLut);
 }
+
 void PBRMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 {
 	if (mesh && shader)

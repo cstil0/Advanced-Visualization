@@ -499,7 +499,7 @@ Texture* Texture::getBlackTexture()
 	static Texture* black = NULL;
 	if (black)
 		return black;
-	const Uint8 data[3] = { 0,0,0 };
+	const Uint8 data[4] = { 0,0,0,0 };
 	black = new Texture(1, 1, GL_RGB, GL_UNSIGNED_BYTE, true, (Uint8*)data);
 	return black;
 }
@@ -509,7 +509,7 @@ Texture* Texture::getWhiteTexture()
 	static Texture* w = NULL;
 	if (w)
 		return w;
-	const Uint8 data[3] = { 255,255,255 };
+	const Uint8 data[4] = { 255,255,255,255 };
 	w = new Texture(1,1, GL_RGB, GL_UNSIGNED_BYTE, true, (Uint8*)data);
 	return w;
 }

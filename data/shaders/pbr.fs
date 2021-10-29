@@ -396,15 +396,15 @@ void main()
 	else if ( u_output == 1.0 ) //albedo
 		finalColor = vec4(texture2D( u_texture, v_uv ).xyz,1.0); 
 	else if(u_output == 2.0)//roughness
-		finalColor = vec4(PBRMat.roughness_tex);
+		finalColor = vec4(vec3(PBRMat.roughness_tex),1.0);
 	else if(u_output == 3.0)//metalness
-		finalColor = vec4(PBRMat.metalness_tex);
+		finalColor = vec4(vec3(PBRMat.metalness_tex),1.0);
 	else if(u_output == 4.0)//normal
 		finalColor = vec4(PBRMat.N, 1.0);
 	else if(u_output == 5.0)//emisive
 		finalColor = vec4(linear_to_gamma(emmisive_light), 1.0);
 	else if(u_output == 6.0)//ao
-		finalColor = vec4(ambient_occlusion);		
+		finalColor = vec4(vec3(ambient_occlusion),1.0);		
 	else { //LUT
 		float idx_NdotV = clamp(dot(PBRMat.N,PBRMat.V), 0.09, 0.99); //why no 0.01?
 		float idx_roughness = clamp( PBRMat.roughness_tex * u_roughness, 0.09, 0.99); 

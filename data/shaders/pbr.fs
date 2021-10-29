@@ -289,8 +289,8 @@ vec3 getReflectionColor(vec3 r, float roughness)
 
 void computeSpecularIBL(inout MaterialStruct mat, inout LightStruct light){
 	mat.F_RG = FresnelSchlickRoughness( mat.LdotH, mat.F0 , mat.roughness ); 
-	float idx_NdotV = clamp(dot(mat.N,mat.V), 0.01, 0.09); //why no 0.01?
-	float idx_roughness = clamp( mat.roughness_tex * u_roughness, 0.01, 0.09);
+	float idx_NdotV = clamp(dot(mat.N,mat.V), 0.01, 0.99); //why no 0.01?
+	float idx_roughness = clamp( mat.roughness_tex * u_roughness, 0.01, 0.99);
 
 	vec2 brdf_coord = vec2( idx_NdotV, idx_roughness);
 
@@ -364,10 +364,10 @@ void main()
 	vec3 direct = PBRLight.direct_diffuse + PBRLight.direct_specular;
 	vec3 indirect = computeIBL(PBRMat, PBRLight);
 	float ambient_occlusion = 0.0f;
-	if (u_bool_ao_tex){
-		ambient_occlusion = texture2D(u_ao_texture, v_uv).x; 
-		indirect *= vec3(ambient_occlusion); //apply ao_texture only to indirect light
-	}
+	// if (u_bool_ao_tex){
+	ambient_occlusion = texture2D(u_ao_texture, v_uv).x; 
+	indirect *= vec3(ambient_occlusion); //apply ao_texture only to indirect light
+	// }
 
 	// Compute how much light received the pixel
 	vec3 light = vec3(0.0);

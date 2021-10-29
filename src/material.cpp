@@ -286,6 +286,7 @@ void PBRMaterial::setTextures()
 		shader->setTexture("u_metalness_texture", this->metalness_texture, EOutput::METALNESS);
 	if (this->bool_met_rou && this->mr_texture)
 		shader->setTexture("u_mr_texture", this->mr_texture, EOutput::METALNESS_ROUGHNESS);
+
 	if (this->emissive_texture)
 		shader->setTexture("u_emissive_texture", this->emissive_texture, EOutput::EMISSIVE);
 	else
@@ -316,6 +317,7 @@ void PBRMaterial::setTextures()
 	if (this->BRDFLut)
 		shader->setTexture("u_BRDFLut", this->BRDFLut, EOutput::BRDFLut);
 }
+
 void PBRMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 {
 	if (mesh && shader)

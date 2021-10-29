@@ -58,16 +58,11 @@ public:
 	~PhongMaterial();
 
 	void setUniforms(Camera* camera, Matrix44 model);
-	//void render(Mesh* mesh, Matrix44 model, Camera* camera);
 	void renderInMenu();
 };
 
 class SkyboxMaterial : public StandardMaterial {
 public:
-
-	//Texture* panorama_tex = NULL;
-	//Texture* pisa_tex = NULL;
-
 	SkyboxMaterial();
 	SkyboxMaterial(Shader* sh);
 	~SkyboxMaterial();
@@ -89,23 +84,13 @@ public:
 	Texture* ao_texture = NULL;
 	Texture* opacity_texture= NULL;
 
-	//Texture* hdre_level0 = NULL;
-	//Texture* hdre_level1 = NULL;
-	//Texture* hdre_level2 = NULL;
-	//Texture* hdre_level3 = NULL;
-	//Texture* hdre_level4 = NULL;
-	//Texture* hdre_level5 = NULL;
-
 	Texture* BRDFLut = NULL;
-
 
 	// factors
 	float roughness;
 	float metalness;
-	//float spec_scale;
-	//float reflactanc
 	
-	//flags
+	//flags to know if the textures are active
 	bool bool_met_rou;
 	bool bool_em;
 	bool bool_opacity;

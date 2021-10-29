@@ -100,10 +100,7 @@ void renderGUI(SDL_Window* window, Application * game)
 		ImGui::Text(getGPUStats().c_str());					   // Display some text (you can use a format strings too)
 		
 		if (ImGui::TreeNode("Scene")) {
-			//ImGui::DragFloat("Exposure", &Application::instance->scene_exposure, 0.01f,-2, 2);
-			//ImGui::Combo("Output", &Application::instance->output, "COMPLETE\0ALBEDO\0ROUGHNESS\0\METALNESS\0NORMALS\0");
 			ImGui::Combo("Environment", &Application::instance->typeOfSkybox_ImGUI, "PANORAMA\0PISA\0SAN GIUSEPPE BRIDGE\0");
-			//ImGui::ColorEdit3("Ambient Light", (float*)&Application::instance->ambient_light);
 			ImGui::TreePop();
 
 		}

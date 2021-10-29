@@ -82,24 +82,19 @@ void SceneNode::renderInMenu()
 	//Geometry
 	if (!(this->typeOfNode == TYPEOFNODE::LIGHT) && mesh && ImGui::TreeNode("Geometry"))
 	{
-		//bool changed = false;
 		ImGui::Combo("Mesh", &Application::instance->typeOfModel_ImGUI, "BALL\0HELMET\0LANTERN\0");
-		//changed |= ImGui::Combo("Mesh", (int*)&mesh_selected, "BASIC\0HELMET\0");
-
 		ImGui::TreePop();
 	}
 }
 
 Light::Light()
 {
-	
 	this->visible_flag = TRUE;
 	this->name = std::string("Light " + std::to_string(lastNameId++));
 	this->typeOfNode = (int)TYPEOFNODE::LIGHT;
 	this->diffuse_intensity.set(1.0, 1.0, 1.0);
 	this->specular_intensity.set(1.0f, 1.0f, 1.0f);
 	this->light_intensity = 2.5;
-
 }
 
 
@@ -129,13 +124,9 @@ void Light::renderInMenu()
 
 	int numLight = 0;
 	
-	if (ImGui::TreeNode("Light intensities") ) 
+	if (ImGui::TreeNode("Light intensity") ) 
 	{
 		ImGui::SliderFloat("Intensity", &this->light_intensity, 0.0f, 10.0f);
-		// and if we use phong ...
-		//ImGui::ColorEdit3("diffuse_intensity", (float*)&this->diffuse_intensity);
-		//ImGui::ColorEdit3("specular_intensity", (float*)&this->specular_intensity);
-		
 		ImGui::TreePop();
 	}
 }

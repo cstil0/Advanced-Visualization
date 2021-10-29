@@ -86,9 +86,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 		// Functions used in the phong lab
 		//renderPhongEquation();
-
 		//renderReflection();
-		
 	}
 	
 	//hide the cursor
@@ -123,6 +121,7 @@ void Application::loadHelmet(Light* light, Texture* BRDFLut) {
 	Texture* helmet_mr_texture = Texture::Get("data/models/helmet/roughness.png");
 	Texture* helmet_e_texture = Texture::Get("data/models/helmet/emissive.png");
 
+	// Create material
 	PBRMaterial* helmet_material = new PBRMaterial(sh, helmet_color_texture, helmet_normalmap_texture, NULL, NULL, true, helmet_mr_texture);
 
 	helmet_material->BRDFLut = BRDFLut;
@@ -131,16 +130,22 @@ void Application::loadHelmet(Light* light, Texture* BRDFLut) {
 	helmet_material->bool_em = TRUE;// Activate emissive texture
 	helmet_material->emissive_texture = Texture::Get("data/models/helmet/emissive.png");
 
+	// Create the node
 	SceneNode* helmet_node = new SceneNode("HelmetPBR2", helmet_material, Mesh::Get("data/models/helmet/helmet.obj.mbin"));
 	helmet_node->model.setScale(2.0f, 2.0f, 2.0f);
+
+	// Add the direct light to the material
 	helmet_material->light = light;
 	helmet_node->material = helmet_material;
 	helmet_node->material = helmet_material;
 	helmet_node->typeOfModel = SceneNode::TYPEOFMODEL::HELMET;
+
+	// Add the node to the list of possible nodes that can be chosen in the imGUI
 	optional_node_list.push_back(helmet_node);
 }
 
 void Application::loadLantern(Light* light, Texture* BRDFLut) {
+	// Load textures
 	Texture* lantern_color_texture = Texture::Get("data/models/lantern/albedo.png");
 	Texture* lantern_normalmap_texture = Texture::Get("data/models/lantern/normal.png");
 	Texture* lantern_roughness_texture = Texture::Get("data/models/lantern/roughness.png");
@@ -148,6 +153,7 @@ void Application::loadLantern(Light* light, Texture* BRDFLut) {
 
 	sh = Shader::Get("data/shaders/basic.vs", "data/shaders/pbr.fs");
 
+	// Create the material
 	PBRMaterial* lantern_material = new PBRMaterial(sh, lantern_color_texture, lantern_normalmap_texture, lantern_roughness_texture, lantern_metalness_texture, false);
 	lantern_material->BRDFLut = BRDFLut;
 	lantern_material->bool_ao = TRUE; // Activate ao texture
@@ -155,12 +161,15 @@ void Application::loadLantern(Light* light, Texture* BRDFLut) {
 	lantern_material->bool_opacity = TRUE;// Activate opacity texture
 	lantern_material->opacity_texture = Texture::Get("data/models/lantern/opacity.png");
 
+	// Create the node
 	SceneNode* lantern_node = new SceneNode("LanternPBR3", lantern_material, Mesh::Get("data/models/lantern/lantern.obj.mbin"));
 	lantern_node->model.setScale(0.05, 0.05, 0.05);
+	// Add the direct light to the material
 	lantern_material->light = light;
 	lantern_node->material = lantern_material;
-	//pbr_node->material = pbr_material;
 	lantern_node->typeOfModel = SceneNode::TYPEOFMODEL::LANTERN;
+
+	// Add the node to the list of possible nodes that can be chosen in the imGUI
 	optional_node_list.push_back(lantern_node);
 }
 
@@ -170,6 +179,7 @@ void Application::loadSkybox_Pisa() {
 	sh = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
 	SkyboxMaterial* sky_mat_pisa = new SkyboxMaterial(sh);
 
+	// Load the HDRE textures
 	HDRE* hdre_pisa = new HDRE();
 	if (hdre_pisa->load("data/environments/pisa.hdre"))
 		hdre_pisa = HDRE::Get("data/environments/pisa.hdre");
@@ -194,21 +204,18 @@ void Application::loadSkybox_Pisa() {
 	sky_mat_pisa->texture = skybox_pisa->hdre_level0;
 
 	skybox_pisa->material = sky_mat_pisa;
+	// Add the skybox to the list of possible environments that can be chosen in the imGUI
 	optional_skybox_list.push_back(skybox_pisa);
 	skybox_pisa->typeOfSkybox = Skybox::TYPEOFSKYBOX::PISA;
 }
 
 void Application::loadSkybox_Panorama()
 {
-	//---SkyboxNode---
-	//We first create a skybox node and we need to render it first, since it needs a specific material
-	//We create a SkyboxMaterial to save all its corresponding information (shader, cubemap),  
-	//then we pass this material to the skybox node, and finally push it in the list of nodes.
-
 	Skybox* skybox_panorama = new Skybox("Skybox");
 	skybox_panorama->mesh = Mesh::getCube();
 	SkyboxMaterial* sky_mat_panorama = new SkyboxMaterial(sh);
 
+	// Load HDRE textures
 	HDRE* hdre_panorama = new HDRE();
 	if(hdre_panorama->load("data/environments/panorama.hdre"))
 		hdre_panorama = HDRE::Get("data/environments/panorama.hdre");
@@ -229,10 +236,12 @@ void Application::loadSkybox_Panorama()
 	skybox_panorama->hdre_level4->cubemapFromHDRE(hdre_panorama, 4);
 	skybox_panorama->hdre_level5->cubemapFromHDRE(hdre_panorama, 5);
 
+	// Set the principal texture to the skybox
 	sky_mat_panorama->texture = skybox_panorama->hdre_level0;
 
 	skybox_panorama->material = sky_mat_panorama;
 	optional_skybox_list.push_back(skybox_panorama);
+	// Add the skybox to the list of possible environments that can be chosen in the imGUI
 	skybox_panorama->typeOfSkybox = Skybox::TYPEOFSKYBOX::PANORAMA;
 }
 
@@ -241,6 +250,7 @@ void Application::loadSkybox_Bridge() {
 	skybox_bridge->mesh = Mesh::getCube();
 	SkyboxMaterial* sky_mat_bridge = new SkyboxMaterial(sh);
 
+	// Load HDRE textures
 	HDRE* hdre_bridge = new HDRE();
 	if (hdre_bridge->load("data/environments/san_giuseppe_bridge.hdre"))
 		hdre_bridge = HDRE::Get("data/environments/san_giuseppe_bridge.hdre");
@@ -261,6 +271,7 @@ void Application::loadSkybox_Bridge() {
 	skybox_bridge->hdre_level4->cubemapFromHDRE(hdre_bridge, 4);
 	skybox_bridge->hdre_level5->cubemapFromHDRE(hdre_bridge, 5);
 
+	// Set the principal texture to the skybox
 	sky_mat_bridge->texture = skybox_bridge->hdre_level0;
 
 	skybox_bridge->material = sky_mat_bridge;
@@ -269,6 +280,7 @@ void Application::loadSkybox_Bridge() {
 
 	skybox_node = skybox_bridge;
 	typeOfSkybox_ImGUI = Skybox::TYPEOFSKYBOX::BRIDGE;
+	// Add the skybox to the list of possible environments that can be chosen in the imGUI
 	node_list.push_back(skybox_node);
 }
 

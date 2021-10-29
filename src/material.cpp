@@ -12,7 +12,6 @@ StandardMaterial::StandardMaterial()
 StandardMaterial::StandardMaterial(Shader* sh, Texture* tex)
 {
 	this->color = vec4(1.f, 1.f, 1.f, 1.f);
-	
 	this->shader = sh;
 	this->texture = tex;
 }
@@ -92,7 +91,6 @@ void WireframeMaterial::render(Mesh* mesh, Matrix44 model, Camera * camera)
 
 PhongMaterial::PhongMaterial()
 {
-	
 	this->color.set(0.7f, 0.7f, 0.2f, 0.f); //ambient material color
 	this->specular.set(1.0f, 1.0f, 0.0f);
 	this->diffuse.set(0.0f, 0.0f, 1.0f);
@@ -153,7 +151,6 @@ void PhongMaterial::setUniforms(Camera* camera, Matrix44 model)
 
 void PhongMaterial::renderInMenu()
 {
-
 	ImGui::ColorEdit3("Color A. Material", (float*)&this->color); // Edit 3 floats representing a color
 	ImGui::ColorEdit3("Specular", (float*)&this->specular);
 	ImGui::ColorEdit3("Diffuse", (float*)&this->diffuse);
@@ -170,7 +167,6 @@ SkyboxMaterial::SkyboxMaterial()
 SkyboxMaterial::SkyboxMaterial( Shader* sh )
 {
 	this->shader = sh;
-	//this->texture = tex;
 }
 
 SkyboxMaterial::~SkyboxMaterial()
@@ -183,10 +179,10 @@ void SkyboxMaterial::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_camera_position", camera->eye);
 	shader->setUniform("u_model", model);
 	shader->setUniform("u_color", color);
-		
+
 	Skybox* skybox = Application::instance->skybox_node;
 	if (skybox->hdre_level0)
-		shader->setTexture("u_environment_tex", skybox->hdre_level0, ESkybox::PANORAMA);
+		shader->setTexture("u_environment_tex", skybox->hdre_level0, 0);
 }
 
 void SkyboxMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
@@ -199,7 +195,7 @@ void SkyboxMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 		//upload uniforms
 		setUniforms(camera, model);
 		
-		//We disable the depth test because we want render skybox as the background of the scene
+		// We disable the depth test because we want render skybox as the background of the scene
 		// And to avoid objects that are behind the cube if we take into account the Zbuffer
 		glDisable(GL_DEPTH_TEST);
 		
@@ -232,8 +228,7 @@ PBRMaterial::PBRMaterial(Shader* sh, Texture* tex, Texture* normal, Texture* rou
 	
 	this->roughness = 0.1;
 	this->metalness = 0.4;
-	//this->spec_scale = 0.1;
-	//this->reflactance = 0.1;
+
 	this->bool_met_rou = bool_mr;
 	this->bool_em = FALSE;
 	this->bool_opacity = FALSE;
@@ -269,10 +264,9 @@ void PBRMaterial::setUniforms(Camera* camera, Matrix44 model)
 	setTextures();
 }
 
-
-// crear una funcion de upload textures, en caso que no haya, pues sera blanco
 void PBRMaterial::setTextures()
 {
+	// Generate black and white textures in case a texture is not active
 	Texture* black_tex = Texture::getBlackTexture();
 	Texture* white_tex = Texture::getWhiteTexture();
 
@@ -286,20 +280,23 @@ void PBRMaterial::setTextures()
 		shader->setTexture("u_metalness_texture", this->metalness_texture, EOutput::METALNESS);
 	if (this->bool_met_rou && this->mr_texture)
 		shader->setTexture("u_mr_texture", this->mr_texture, EOutput::METALNESS_ROUGHNESS);
+	// If emissive texture is not active we use the black one because it will not add any extra light
 	if (this->emissive_texture)
 		shader->setTexture("u_emissive_texture", this->emissive_texture, EOutput::EMISSIVE);
 	else
 		shader->setTexture("u_emissive_texture", black_tex, EOutput::EMISSIVE);
+	// If opacity texture is not active we use the white one because it will make the material completely opaque
 	if (this->opacity_texture)
 		shader->setTexture("u_opacity_texture", this->opacity_texture, EOutput::OPACITY);
 	else
 		shader->setTexture("u_opacity_texture", white_tex, EOutput::OPACITY);
+	// If ambient occlusion texture is not active we use the white one because it will not create any extra shadow
 	if (this->ao_texture)
 		shader->setTexture("u_ao_texture", this->ao_texture, EOutput::AMBIENT_OCCLUSION);
 	else
 		shader->setTexture("u_ao_texture", white_tex, EOutput::AMBIENT_OCCLUSION);
 
-	// Get skybox node of the environement
+	// Get skybox node of the environement and load its HDRE textures
 	Skybox* skybox = Application::instance->skybox_node;
 	if (skybox->hdre_level0)
 		shader->setTexture("u_texture_prem", skybox->hdre_level0, EOutput::LEVEL0);
@@ -345,12 +342,4 @@ void PBRMaterial::renderInMenu()
 	ImGui::ColorEdit3("Base Color", color.v); // Edit 3 floats representing a color
 	ImGui::SliderFloat("Roughness",&this->roughness, 0.0f, 1.0f);
 	ImGui::SliderFloat("Metalness", &this->metalness, 0.0f, 1.0f);
-	//ImGui::SliderFloat("Intensity", &this->light->light_intensity, 0.0f, 10.0f);
-	//ImGui::SliderFloat("Specular scale", &this->, 0.0f, 1.0f);
-	//ImGui::SliderFloat("Reflactance", &this->, 0.0f, 1.0f);
-
-	//ImGui::Combo("Output", &Application::instance->output, "COMPLETE\0ALBEDO\0ROUGHNESS\0\METALNESS\0NORMALS\0");
-	//ImGui::Image((void*)(intptr_t)texture->texture_id, ImVec2(w, h));
-	//ImGui::Combo("Output", &output, "ALBEDO\0ROUGHNESS\0\METALNESS\0");
-
 }

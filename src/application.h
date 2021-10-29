@@ -10,6 +10,7 @@
 #include "utils.h"
 #include "scenenode.h"
 
+// Used for the slot when passing the uniforms to the shader
 enum EOutput {
 	COMPLETE,
 	ALBEDO,
@@ -29,22 +30,19 @@ enum EOutput {
 	BRDFLut
 };
 
-enum ESkybox {
-	PANORAMA,
-	PISA
-
-};
 class Application
 {
 public:
 	static Application* instance;
 
+	// Selected model in the imGUI
 	enum TYPEOFMODELIMGUI {
 		BASIC,
 		HELMET,
 		LANTERN
 	};
 
+	// Selected skybox in the imGUI
 	enum TYPEOFSKYBOXIMGUI {
 		PANORAMA,
 		PISA,
@@ -55,10 +53,10 @@ public:
 	int typeOfSkybox_ImGUI;
 
 	std::vector< SceneNode* > node_list;
-	// List that saves the nodes that can be selected in the imGUI
+	// List with the nodes that can be selected in the imGUI
 	std::vector< SceneNode* > optional_node_list;
 	Skybox* skybox_node = NULL;
-	// List that saves the types of skybox that can be selected in the imGUI
+	// List with the types of skybox that can be selected in the imGUI
 	std::vector< Skybox* > optional_skybox_list;
 
 	//window
@@ -80,7 +78,7 @@ public:
 	
 	//some vars
 	static Camera* camera; //our GLOBAL camera
-	bool mouse_locked; //tells if the mouse is locked (not seen)
+	bool mouse_locked; //tells if the mouse is locked
 
 	Application( int window_width, int window_height, SDL_Window* window );
 

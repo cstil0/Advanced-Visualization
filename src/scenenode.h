@@ -12,6 +12,7 @@ class Light;
 
 class SceneNode {
 public:
+
 	// Used to identify which type of node it is
 	enum TYPEOFNODE {
 		SKYBOX,
@@ -19,6 +20,7 @@ public:
 		NODE
 	};
 	
+	// Used to identify which kind of mesh it have
 	enum TYPEOFMODEL {
 		BASIC,
 		HELMET,
@@ -41,7 +43,6 @@ public:
 	Matrix44 model;
 
 	bool visible_flag;
-	int typeOfMesh; // ESTO LO USAMOS?
 
 	virtual void render(Camera* camera);
 	virtual void renderWireframe(Camera* camera);
@@ -70,6 +71,7 @@ public:
 class Skybox : public SceneNode {
 public:
 
+	// Used to identify the type of environment
 	enum TYPEOFSKYBOX {
 		PANORAMA,
 		PISA,
@@ -78,6 +80,7 @@ public:
 
 	int typeOfSkybox;
 
+	// HDRE
 	Texture* hdre_level0;
 	Texture* hdre_level1;
 	Texture* hdre_level2;

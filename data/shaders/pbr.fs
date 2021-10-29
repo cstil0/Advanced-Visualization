@@ -126,9 +126,9 @@ vec3 toneMapUncharted(vec3 color)
     return color * whiteScale;
 }
 
-//---------------PBRStruct struct-----------------------------
+//---------------MaterialStruct struct-----------------------------
 
-struct PBRStruct
+struct MaterialStruct
 {
 	vec4 color;
 	
@@ -153,16 +153,20 @@ struct PBRStruct
 
 	vec3 F0;
 	vec3 F_RG;
-	vec3 f_diffuse;
-	vec3 f_specular;
-
-
 }PBRMat;
 
+struct LightStruct{
+	vec3 direct_diffuse;
+	vec3 direct_specular;
+
+	vec3 indirect_diffuse;
+	vec3 indirect_specular;
+
+}PBRLight;
 
 //---------------Fill PBR Materials Functions-----------------------------
 
-void computeVectors(inout PBRStruct mat)
+void computeVectors(inout MaterialStruct mat)
 {
 	mat.L = normalize(u_light_pos - v_world_position);
 	mat.V = normalize(u_camera_position - v_world_position);
@@ -173,7 +177,7 @@ void computeVectors(inout PBRStruct mat)
 	mat.R = reflect(-mat.V, mat.N);
 } 
 
-void computeDotProducts(inout PBRStruct mat)
+void computeDotProducts(inout MaterialStruct mat)
 {
 	mat.NdotH = max(dot(mat.N,mat.H), 0.0f);
 	// avoid artifacts when sampling the texture and other mathematical errors.
@@ -185,7 +189,7 @@ void computeDotProducts(inout PBRStruct mat)
 
 }
 
-void fillPBRProperties(inout PBRStruct mat)
+void fillPBRProperties(inout MaterialStruct mat)
 {
 	mat.color = u_color;//base color
 	mat.color *= texture2D( u_texture, v_uv ); 
@@ -256,11 +260,11 @@ vec3 BRDFSpecular(float roughness, float NdotH, float NdotV, float NdotL, vec3 F
 }
 
 
-void computeBRDF(inout PBRStruct mat)
+void computeBRDF(inout MaterialStruct mat, inout LightStruct light)
 {
 	//mat.f_diffuse = ((1.0 - mat.metalness) * mat.color) * RECIPROCAL_PI; //since we are doing the linear interpolation with dialectric and conductor material
-	mat.f_diffuse = mix( mat.color.xyz, vec3(0.0), mat.metalness) * RECIPROCAL_PI; 
-	mat.f_specular = BRDFSpecular( mat.roughness, mat.NdotH, mat.NdotV, mat.NdotL, mat.F0 );
+	light.direct_diffuse = mix( mat.color.xyz, vec3(0.0), mat.metalness) * RECIPROCAL_PI; 
+	light.direct_specular = BRDFSpecular( mat.roughness, mat.NdotH, mat.NdotV, mat.NdotL, mat.F0 );
 }
 
 //---------------compute IBL-----------------------------
@@ -283,7 +287,7 @@ vec3 getReflectionColor(vec3 r, float roughness)
 	return color.rgb;
 }
 
-vec3 computeSpecularIBL(inout PBRStruct mat){
+void computeSpecularIBL(inout MaterialStruct mat, inout LightStruct light){
 	mat.F_RG = FresnelSchlickRoughness( mat.LdotH, mat.F0 , mat.roughness ); 
 	float idx_NdotV = clamp(dot(mat.N,mat.V), 0.09, 0.99); //why no 0.01?
 	float idx_roughness = clamp( mat.roughness_tex * u_roughness, 0.09, 0.99);
@@ -295,29 +299,28 @@ vec3 computeSpecularIBL(inout PBRStruct mat){
 	vec3 specularSample = getReflectionColor(mat.R, mat.roughness);
 	vec3 specularBRDF = mat.F_RG * brdf2D.x + brdf2D.y;
 	vec3 specularIBL = specularSample * specularBRDF;
-	return specularIBL;
+	light.indirect_specular = specularIBL;
 }
 
-vec3 computeDiffuseIBL(inout PBRStruct mat){
+void computeDiffuseIBL(inout MaterialStruct mat, inout LightStruct light){
 	vec3 diffuseSample = getReflectionColor(mat.N, 1.0f); //less roughness = 1
-	vec3 diffuseColor = mat.f_diffuse;
+	vec3 diffuseColor = light.direct_specular;
 	vec3 diffuseIBL = diffuseSample * diffuseColor;
 	diffuseIBL *= (1 - mat.F_RG);
-	return diffuseIBL;
+	light.indirect_diffuse = diffuseIBL;
 }
 
-vec3 computeIBL (inout PBRStruct mat){
-	vec3 specularIBL = computeSpecularIBL(mat);
-	vec3 diffuseIBL = computeDiffuseIBL(mat);
-	return specularIBL + diffuseIBL;
-	 
+vec3 computeIBL (inout MaterialStruct mat, inout LightStruct light){
+	computeSpecularIBL(mat, light);
+	computeDiffuseIBL(mat, light);
+	return light.indirect_specular + light.indirect_diffuse	;
 }
 
 
 void main()
 {
 	// 1. Create Material
-	PBRMat = PBRStruct(
+	PBRMat = MaterialStruct(
 
 						vec4(0.0), //color
 
@@ -339,7 +342,13 @@ void main()
 						
 						
 						vec3(0.0f), //F0
-						vec3(0.0f), 
+						vec3(0.0f)
+						);
+
+	PBRLight = LightStruct(
+						vec3(0.0f),
+						vec3(0.0f),
+
 						vec3(0.0f),
 						vec3(0.0f)
 						);
@@ -350,9 +359,9 @@ void main()
 	fillPBRProperties(PBRMat);
 
 	// 3. Shade (Direct + Indirect)
-	computeBRDF(PBRMat);
-	vec3 direct = PBRMat.f_diffuse + PBRMat.f_specular;
-	vec3 indirect = computeIBL(PBRMat);
+	computeBRDF(PBRMat, PBRLight);
+	vec3 direct = PBRLight.direct_diffuse + PBRLight.direct_specular;
+	vec3 indirect = computeIBL(PBRMat, PBRLight);
 	float ambient_occlusion = 0.0f;
 	if (u_bool_ao_tex){
 		ambient_occlusion = texture2D(u_ao_texture, v_uv).x; 
@@ -371,7 +380,7 @@ void main()
 	//Apply emmisive tex
 	vec3 emmisive_light = vec3(0.0);
 	float opacity = 1.0; //opaco
-	if(u_bool_em_tex){ // a hack, if there's not em texture, there will be a opacity map
+	if(u_bool_em_tex){// a hack, if there's not em texture, there will be a opacity map
 		emmisive_light = gamma_to_linear( texture2D(u_emissive_texture, v_uv).xyz);
 		light += emmisive_light;
 	}

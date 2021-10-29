@@ -118,6 +118,7 @@ public:
 	~PBRMaterial();
 
 	void setUniforms(Camera* camera, Matrix44 model);
+	void setTextures();
 	void render(Mesh* mesh, Matrix44 model, Camera* camera);
 	void renderInMenu();
 };

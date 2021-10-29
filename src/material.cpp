@@ -265,6 +265,19 @@ void PBRMaterial::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_bool_em_tex", this->bool_em);
 	shader->setUniform("u_bool_op_tex", this->bool_opacity);
 	shader->setUniform("u_bool_ao_tex", this->bool_ao);
+
+	setTextures();
+	
+
+}
+
+
+// crear una funcion de upload textures, en caso que no haya, pues sera blanco
+void PBRMaterial::setTextures()
+{
+	Texture* black_tex = Texture::getBlackTexture();
+	Texture* white_tex = Texture::getWhiteTexture();
+
 	if (texture)
 		shader->setTexture("u_texture", texture, EOutput::ALBEDO);
 	if (this->normal_texture)
@@ -273,16 +286,20 @@ void PBRMaterial::setUniforms(Camera* camera, Matrix44 model)
 		shader->setTexture("u_roughness_texture", this->roughness_texture, EOutput::ROUGHNESS);
 	if (this->metalness_texture)
 		shader->setTexture("u_metalness_texture", this->metalness_texture, EOutput::METALNESS);
-	if (this->bool_met_rou && this->mr_texture) 
+	if (this->bool_met_rou && this->mr_texture)
 		shader->setTexture("u_mr_texture", this->mr_texture, EOutput::METALNESS_ROUGHNESS);
-	if (this->emissive_texture) {
+	if (this->emissive_texture)
 		shader->setTexture("u_emissive_texture", this->emissive_texture, EOutput::EMISSIVE);
-	}
-	if (this->opacity_texture) {
+	//else
+	//	shader->setTexture("u_emissive_texture", black_tex, EOutput::EMISSIVE);
+	if (this->opacity_texture)
 		shader->setTexture("u_opacity_texture", this->opacity_texture, EOutput::OPACITY);
-	}
+	else
+		shader->setTexture("u_opacity_texture", white_tex, EOutput::OPACITY);
 	if (this->ao_texture)
 		shader->setTexture("u_ao_texture", this->ao_texture, EOutput::AMBIENT_OCCLUSION);
+	else
+		shader->setTexture("u_ao_texture", white_tex, EOutput::AMBIENT_OCCLUSION);
 
 	// Get skybox node of the environement
 	Skybox* skybox = Application::instance->skybox_node;
@@ -301,9 +318,6 @@ void PBRMaterial::setUniforms(Camera* camera, Matrix44 model)
 	if (this->BRDFLut)
 		shader->setTexture("u_BRDFLut", this->BRDFLut, EOutput::BRDFLut);
 }
-
-// crear una funcion de upload textures, en caso que no haya, pues sera blanco
-
 void PBRMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 {
 	if (mesh && shader)

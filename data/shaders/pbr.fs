@@ -289,8 +289,9 @@ vec3 getReflectionColor(vec3 r, float roughness)
 
 void computeSpecularIBL(inout MaterialStruct mat, inout LightStruct light){
 	mat.F_RG = FresnelSchlickRoughness( mat.LdotH, mat.F0 , mat.roughness ); 
-	float idx_NdotV = clamp(dot(mat.N,mat.V), 0.09, 0.99); //why no 0.01?
-	float idx_roughness = clamp( mat.roughness_tex * u_roughness, 0.09, 0.99);
+	float idx_NdotV = clamp(dot(mat.N,mat.V), 0.01, 0.09); //why no 0.01?
+	float idx_roughness = clamp( mat.roughness_tex * u_roughness, 0.01, 0.09);
+
 	vec2 brdf_coord = vec2( idx_NdotV, idx_roughness);
 
 	//vec2 brdf_coord = vec2( mat.NdotV, mat.roughness);
@@ -304,7 +305,7 @@ void computeSpecularIBL(inout MaterialStruct mat, inout LightStruct light){
 
 void computeDiffuseIBL(inout MaterialStruct mat, inout LightStruct light){
 	vec3 diffuseSample = getReflectionColor(mat.N, 1.0f); //less roughness = 1
-	vec3 diffuseColor = light.direct_specular;
+	vec3 diffuseColor = mix( mat.color.xyz, vec3(0.0), mat.metalness) * RECIPROCAL_PI; ;
 	vec3 diffuseIBL = diffuseSample * diffuseColor;
 	diffuseIBL *= (1 - mat.F_RG);
 	light.indirect_diffuse = diffuseIBL;
@@ -380,14 +381,14 @@ void main()
 	//Apply emmisive tex
 	vec3 emmisive_light = vec3(0.0);
 	float opacity = 1.0; //opaco
-	if(u_bool_em_tex){// a hack, if there's not em texture, there will be a opacity map
-		emmisive_light = gamma_to_linear( texture2D(u_emissive_texture, v_uv).xyz);
-		light += emmisive_light;
-	}
-	if(u_bool_op_tex){ 
-		opacity = texture2D(u_opacity_texture, v_uv).x; // since is the color gray we take the 1º channel
-		PBRMat.color.a = opacity; //rgba color
-	}
+	// if(u_bool_em_tex){// a hack, if there's not em texture, there will be a opacity map
+	emmisive_light = gamma_to_linear( texture2D(u_emissive_texture, v_uv).xyz);
+	light += emmisive_light;
+	// }
+	// if(u_bool_op_tex){ 
+	opacity = texture2D(u_opacity_texture, v_uv).x; // since is the color gray we take the 1º channel
+	PBRMat.color.a = opacity; //rgba color
+	// }
 
 	//---to debug the textures with diff cases
 	vec4 finalColor = vec4(0.0);
@@ -406,8 +407,8 @@ void main()
 	else if(u_output == 6.0)//ao
 		finalColor = vec4(vec3(ambient_occlusion),1.0);		
 	else { //LUT
-		float idx_NdotV = clamp(dot(PBRMat.N,PBRMat.V), 0.09, 0.99); //why no 0.01?
-		float idx_roughness = clamp( PBRMat.roughness_tex * u_roughness, 0.09, 0.99); 
+		float idx_NdotV = clamp(dot(PBRMat.N,PBRMat.V), 0.01, 0.99);
+		float idx_roughness = clamp( PBRMat.roughness_tex * u_roughness, 0.01, 0.99); 
 		vec2 brdf_coord = vec2( idx_NdotV, idx_roughness);
 		vec4 brdf2D = texture2D(u_BRDFLut, brdf_coord);
 		finalColor = brdf2D;

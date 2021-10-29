@@ -267,8 +267,6 @@ void PBRMaterial::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_bool_ao_tex", this->bool_ao);
 
 	setTextures();
-	
-
 }
 
 
@@ -290,8 +288,8 @@ void PBRMaterial::setTextures()
 		shader->setTexture("u_mr_texture", this->mr_texture, EOutput::METALNESS_ROUGHNESS);
 	if (this->emissive_texture)
 		shader->setTexture("u_emissive_texture", this->emissive_texture, EOutput::EMISSIVE);
-	//else
-	//	shader->setTexture("u_emissive_texture", black_tex, EOutput::EMISSIVE);
+	else
+		shader->setTexture("u_emissive_texture", black_tex, EOutput::EMISSIVE);
 	if (this->opacity_texture)
 		shader->setTexture("u_opacity_texture", this->opacity_texture, EOutput::OPACITY);
 	else

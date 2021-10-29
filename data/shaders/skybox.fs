@@ -39,6 +39,14 @@ vec3 toneMapUncharted(vec3 color)
     return color * whiteScale;
 }
 
+const float GAMMA = 2.2;
+const float INV_GAMMA = 1.0 / GAMMA;
+
+// gamma
+vec3 linear_to_gamma(vec3 color)
+{
+	return pow(color, vec3(INV_GAMMA));
+}
 
 void main()
 {

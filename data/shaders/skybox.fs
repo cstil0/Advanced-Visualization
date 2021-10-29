@@ -1,3 +1,6 @@
+const float GAMMA = 2.2;
+const float INV_GAMMA = 1.0 / GAMMA;
+
 varying vec3 v_position;
 varying vec3 v_world_position;
 varying vec3 v_normal;
@@ -10,6 +13,12 @@ uniform samplerCube u_environment_tex;
 
 uniform vec3 u_camera_position;
 uniform float u_output;
+
+// gamma
+vec3 linear_to_gamma(vec3 color)
+{
+	return pow(color, vec3(INV_GAMMA));
+}
 
 vec3 toneMapUncharted2Impl(vec3 color)
 {
@@ -39,6 +48,7 @@ void main()
 	vec4 color = vec4(0.0);
  	color = textureCube( u_environment_tex, direction );
 	color = vec4(toneMapUncharted(color.xyz), 1.0f);
+    color = vec4(linear_to_gamma(color), 1.0f);
 
 	gl_FragColor = color;
 }

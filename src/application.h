@@ -78,8 +78,6 @@ public:
 	int output;
 	vec3 ambient_light;
 	
-	//int type_environment;
-
 	//some vars
 	static Camera* camera; //our GLOBAL camera
 	bool mouse_locked; //tells if the mouse is locked (not seen)

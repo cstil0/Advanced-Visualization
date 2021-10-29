@@ -76,12 +76,15 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		loadHelmet(light, BRDFLut);
 		loadLantern(light, BRDFLut);
 
-		// Guardamos un puntero que se irá actualizando segun el imGUI
+		// Save a pointer that will update according to the option selected in the imGUI
 		SceneNode* current_node = optional_node_list[0];
+		// Update the selected option of the imGUI
 		typeOfModel_ImGUI = optional_node_list[0]->typeOfModel;
+		// Add the current node to the rendering list of nodes
 		node_list.push_back(current_node);
 
-		// Functions used 
+
+		// Functions used in the phong lab
 		//renderPhongEquation();
 
 		//renderReflection();
@@ -93,6 +96,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 }
 
 void Application::loadBall(Light* light, Texture* BRDFLut){
+	// Load textures
 	Texture* ball_color_texture = Texture::Get("data/models/ball/albedo.png");
 	Texture* ball_normalmap_texture = Texture::Get("data/models/ball/normal.png");
 	Texture* ball_roughness_texture = Texture::Get("data/models/ball/roughness.png");
@@ -100,16 +104,20 @@ void Application::loadBall(Light* light, Texture* BRDFLut){
 
 	sh = Shader::Get("data/shaders/basic.vs", "data/shaders/pbr.fs");
 
+	// Create material
 	PBRMaterial* ball_material = new PBRMaterial(sh, ball_color_texture, ball_normalmap_texture, ball_roughness_texture, ball_metalness_texture, false, NULL);
 	ball_material->BRDFLut = BRDFLut;
 	SceneNode* ball_node = new SceneNode("BallPBR", ball_material, Mesh::Get("data/models/ball/sphere.obj.mbin"));
+	// Add the direct light to the material
 	ball_material->light = light;
 	ball_node->typeOfModel = SceneNode::TYPEOFMODEL::BASIC;
 	ball_node->material = ball_material;
+	// Add the node to the possible nodes that can be selected in the imGUI
 	optional_node_list.push_back(ball_node);
 }
 
 void Application::loadHelmet(Light* light, Texture* BRDFLut) {
+	// Load textures
 	Texture* helmet_color_texture = Texture::Get("data/models/helmet/albedo.png");
 	Texture* helmet_normalmap_texture = Texture::Get("data/models/helmet/normal.png");
 	Texture* helmet_mr_texture = Texture::Get("data/models/helmet/roughness.png");

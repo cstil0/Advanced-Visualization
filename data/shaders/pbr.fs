@@ -170,7 +170,7 @@ void computeVectors(inout MaterialStruct mat)
 {
 	mat.L = normalize(u_light_pos - v_world_position);
 	mat.V = normalize(u_camera_position - v_world_position);
-	vec3 normal = normalize(v_normal); 
+	vec3 normal = normalize(v_normal);
 	vec3 normal_pixel = texture2D(u_normalmap_texture, v_uv).xyz;
 	mat.N = perturbNormal(normal, mat.V, v_uv, normal_pixel );
 	mat.H = normalize(mat.V + mat.L);

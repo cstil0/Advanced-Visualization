@@ -34,36 +34,25 @@ uniform bool u_met_rou;
 uniform float u_roughness;
 uniform float u_metalness;
 
-struct matStruct {
-    vec4 ambientColor ;
-    vec4 diffuseColor ;
-} newMaterial;
 
-struct PBRStruct
+struct PBRMat
 {
-	vec4 color;
-	
 	//properties
 	float roughness;
 	float metalness;
-	float roughness_tex;
-	float metalness_tex;
+
+	float F;
+	float G;
+	float D;
 
 	//vectors
 	vec3 N;
-	vec3 V;
 	vec3 L;
 	vec3 H;
 	vec3 R;
-
-	float NdotH ;
-	float NdotV ;
-	float NdotL ;
-
-	vec3 f_diffuse;
-	vec3 f_specular;
-
-}PBRMat;
+	vec3 V;
+	
+};
 
 //---------------Get Normalmap functions-----------------------------
 mat3 cotangent_frame(vec3 N, vec3 p, vec2 uv){
@@ -97,8 +86,8 @@ vec3 perturbNormal( vec3 N, vec3 V, vec2 texcoord, vec3 normal_pixel ){
 	return normalize(TBN * normal_pixel);
 }
 
-//---------------functions for Specular BRDF-----------------------------
-// BSDF: bidirectional scattering distribution function
+//---------------functions for Specular BRDP-----------------------------
+
 float DistributionGGX(const in float roughness, const in float NdotH)
 {
 	float alpha = roughness*roughness;
@@ -133,12 +122,12 @@ float GeometrySmith(const in float NdotV, const in float NdotL, const in float r
 	return G1_v * G1_n;
 }
 
-vec3 BRDFSpecular(float roughness, float metalness, float NdotH, float NdotV, float NdotL, vec3 baseColor)
+vec3 BRDFSpecular(float roughness, float metalness, float NdotH, float LdotN, float NdotV, float NdotL, vec3 baseColor)
 {
 	float D = DistributionGGX(roughness, NdotH);
 
 	vec3 F0 = mix( vec3(0.04), baseColor, metalness);
-	vec3 F = FresnelSchlick( NdotL, F0 ); //same NdotL right????????
+	vec3 F = FresnelSchlick( LdotN, F0 ); 
 
 	float G = GeometrySmith(NdotV, NdotL, roughness);
 	
@@ -148,179 +137,106 @@ vec3 BRDFSpecular(float roughness, float metalness, float NdotH, float NdotV, fl
 
 //---------------compute Vectors-----------------------------
 
-void computeVectors(inout PBRStruct mat)
-{
-	mat.L = normalize(u_light_pos - v_world_position);
-	mat.V = normalize(u_camera_pos - v_world_position);
-	vec3 normal = normalize(v_normal); 
-	vec3 normal_pixel = texture2D(u_normalmap_texture, v_uv).xyz;
-	mat.N = perturbNormal(normal, mat.V, v_uv, normal_pixel );
-	mat.H = normalize(mat.V + mat.L);
-	mat.R = reflect(mat.L, mat.N);
-} 
-
-void computeDotProducts(inout PBRStruct mat)
-{
-	mat.NdotH = max(dot(mat.N,mat.H), 0.0f);
-	mat.NdotV = max(dot(mat.N,mat.V), 0.0f);
-	//float VdotH = max(dot(V,H), 0.0f);
-	mat.NdotL = max(dot(mat.N,mat.L), 0.0f);
-	//float LdotN = max(dot(L,N), 0.0f);
-}
-
-void fillPBRProperties(inout PBRStruct mat)
-{
-	mat.color = u_color;
-	mat.color *= texture2D( u_texture, v_uv ); //base color
-	//roughness_tex = 0.0;
-	//float metalness_tex = 0.0;
-	if (u_met_rou){
-		mat.roughness_tex = texture2D(u_mr_texture, v_uv).y;
-		mat.metalness_tex = texture2D(u_mr_texture, v_uv).z;
-	}
-	else{
-		mat.roughness_tex = texture2D(u_roughness_texture, v_uv).x;
-		mat.metalness_tex = texture2D(u_metalness_texture, v_uv).x;
-	}
-	
-	mat.roughness = mat.roughness_tex * u_roughness; //total roughnesss
-	mat.metalness = mat.metalness_tex * u_metalness; //total metalness
-}
-
-void computeBRDF(inout PBRStruct mat)
-{
-	// vec4 colorMat = mat.color;
-	mat.f_diffuse = ((1.0 - mat.metalness) * mat.color.xyz) / PI; //since we are doing the linear interpolation with dialectric and conductor material
-	//vec3 f_diffuse = mix( vec3(0.0), color.xyz, metalness) / PI; 
-	// mat.f_diffuse = colorMat.xyz
-	mat.f_specular = BRDFSpecular( mat.roughness, mat.metalness, mat.NdotH, mat.NdotV, mat.NdotL, mat.color.xyz );
-}
-
-//-----
-void test(inout matStruct mat)
-{
-	mat.ambientColor = vec4(u_light_color, 1.0);
-	mat.diffuseColor = u_color;
-}
-
+// vec3 computeVectors(vec3 u_light_pos, vec3 v_world_position, vec3 u_camera_pos, vec3 v_normal, sampler2D u_normalmap_texture, vec2 uv)
+// {
+// 	vec3 L = normalize(u_light_pos - v_world_position);
+// 	vec3 V = normalize(u_camera_pos - v_world_position);
+// 	vec3 normal = normalize(v_normal); 
+// 	vec3 normal_pixel = texture2D(u_normalmap_texture, uv).xyz;
+// 	vec3 N = perturbNormal(normal, V, uv, normal_pixel );
+// 	vec3 H = normalize(V + L);
+// 	vec3 R = reflect(L, N);
+// 	return L,V,N,H,R;
+// } 
 
 void main()
 {
-	// vec2 uv = v_uv;
-	// vec4 color = u_color;
-
-	// 1. Create Material
-	PBRMat = PBRStruct(
-
-						vec4(0.0),
-
-						0.0f, //roughness
-						0.0f, //metalness
-						0.0f,
-						0.0f,
-
-						vec3(0.0f), //vectors
-						vec3(0.0f),
-						vec3(0.0f),
-						vec3(0.0f),
-						vec3(0.0f),
-						
-						0.0f, //dot products
-						0.0f,
-						0.0f,
-						
-						vec3(0.0f),
-						vec3(0.0f)
-						);
-
-	// 2. Fill Material
-	computeVectors(PBRMat);
-	computeDotProducts(PBRMat);
-	fillPBRProperties(PBRMat);
-
-	// vec3 L = normalize(u_light_pos - v_world_position);
-	// vec3 V = normalize(u_camera_pos - v_world_position);
-	// vec3 normal = normalize(v_normal); 
-	// vec3 normal_pixel = texture2D(u_normalmap_texture, uv).xyz;
-	// vec3 N = perturbNormal(normal, V, uv, normal_pixel );
-	// vec3 H = normalize( V + L);
-	// vec3 R = reflect(-L, N);
-
-	// float NdotH = max(dot(N,H), 0.0f);
-	// float NdotV = max(dot(N,V), 0.0f);
-	// //float VdotH = max(dot(V,H), 0.0f);
-	// float NdotL = max(dot(N,L), 0.0f);
-	// //float LdotN = max(dot(L,N), 0.0f); 
-	
-	// // textures:
-	// color *= texture2D( u_texture, uv ); //base color
-	// float roughness_tex = 0.0;
-	// float metalness_tex = 0.0;
-	// if (u_met_rou){
-	// 	roughness_tex = texture2D(u_mr_texture, uv).y;
-	// 	metalness_tex = texture2D(u_mr_texture, uv).z;
-	// }
-	// else{
-	// 	roughness_tex = texture2D(u_roughness_texture, uv).x;
-	// 	metalness_tex = texture2D(u_metalness_texture, uv).x;
-	// }
-	
-	// float roughness = roughness_tex * u_roughness; //total roughnesss
-	// float metalness = metalness_tex * u_metalness; //total metalness
-
-
-	// 3. Shade (Direct + Indirect)
-
-	computeBRDF(PBRMat);
+	vec2 uv = v_uv;
+	vec4 color = u_color;
+	// vec3 L,V,N,H,R = computeVectors(u_light_pos, v_world_position, u_camera_pos, v_normal, u_normalmap_texture, uv);
 	
 
-	// vec3 f_diffuse = ((1.0 - metalness) * color.xyz) / PI; //since we are doing the linear interpolation with dialectric and conductor material
-	// //vec3 f_diffuse = mix( vec3(0.0), color.xyz, metalness) / PI; 
+	// Compute the light equation vectors
+	vec3 L = normalize(u_light_pos - v_world_position);
+	vec3 V = normalize(u_camera_pos - v_world_position);
+	vec3 normal = normalize(v_normal); 
+	vec3 normal_pixel = texture2D(u_normalmap_texture, uv).xyz;
+	vec3 N = perturbNormal(normal, V, uv, normal_pixel );
+	vec3 H = normalize( V + L);
+	vec3 R = reflect(-L, N);
 
-	// vec3 f_specular = BRDFSpecular( roughness, metalness, NdotH, LdotN, NdotV, NdotL, color.xyz );
+	float NdotH = max(dot(N,H), 0.0f);
+	float NdotV = max(dot(N,V), 0.0f);
+	float VdotH = max(dot(V,H), 0.0f);
+	float NdotL = max(dot(N,L), 0.0f);
+	float LdotN = max(dot(L,N), 0.0f); 
 	
-	// //-----------dubug
-	// // float D = DistributionGGX(roughness, NdotH);
-	// // vec3 F0 = mix( vec3(0.04), color.xyz, metalness);
-	// // vec3 F = FresnelSchlick( LdotN, F0 );
-	// // float G = GeometrySmith(NdotV, NdotL, roughness);
+	// textures:
+	color *= texture2D( u_texture, uv ); //base color
+	float roughness_tex = 0.0;
+	float metalness_tex = 0.0;
+	if (u_met_rou){
+		roughness_tex = texture2D(u_mr_texture, uv).y;
+		metalness_tex = texture2D(u_mr_texture, uv).z;
+	}
+	else{
+		roughness_tex = texture2D(u_roughness_texture, uv).x;
+		metalness_tex = texture2D(u_metalness_texture, uv).x;
+	}
 	
-	vec3 direct = PBRMat.f_diffuse + PBRMat.f_specular;
+	float roughness = roughness_tex * u_roughness; //total roughnesss
+	float metalness = metalness_tex * u_metalness; //total metalness
 
-	// //compute how much light received the pixel
+
+	// BSDF: bidirectional scattering distribution function
+	vec3 f_diffuse = ((1.0 - metalness) * color.xyz) / PI; //since we are doing the linear interpolation with dialectric and conductor material
+	//vec3 f_diffuse = mix( vec3(0.0), color.xyz, metalness) / PI; 
+
+	vec3 f_specular = BRDFSpecular( roughness, metalness, NdotH, LdotN, NdotV, NdotL, color.xyz );
+	
+	//-----------dubug
+	// float D = DistributionGGX(roughness, NdotH);
+	// vec3 F0 = mix( vec3(0.04), color.xyz, metalness);
+	// vec3 F = FresnelSchlick( LdotN, F0 );
+	// float G = GeometrySmith(NdotV, NdotL, roughness);
+	
+	vec3 direct = f_diffuse + f_specular;
+	//vec3 direct = f_diffuse ;
+
+	//compute how much light received the pixel
 	vec3 light = vec3(0.0);
-	// //light += u_ambient_light; -> preguntar si fuese NECESARIO!
+	//light += u_ambient_light; -> preguntar si fuese NECESARIO!
 
-	light += direct * PBRMat.NdotL * u_light_color * u_light_intensity;
+	light += direct * NdotL * u_light_color * u_light_intensity;
 
 	//---to debug the textures
-	vec4 finalColor = vec4(0.0);
-
 	if ( u_output == 0.0 ) //complete
-		finalColor = vec4(light, 1.0);
+		color = vec4(light, 1.0);
 	else if ( u_output == 1.0 ) //albedo
-		finalColor = texture2D( u_texture, v_uv );
+		color = texture2D( u_texture, uv );
 	else if(u_output == 2.0)//roughness
-		finalColor = vec4(PBRMat.roughness_tex);
+		color = vec4(roughness_tex);
 	else if(u_output == 3.0)//metalness
-		finalColor = vec4(PBRMat.metalness_tex);
+		color = vec4(metalness_tex);
 	else
-		finalColor = vec4(PBRMat.N, 1.0);
+		color = vec4(N, 1.0);
 
 	//gl_FragColor = color;
 	//gl_FragColor = vec4(G);
 	//gl_FragColor = vec4(G*NdotL);
 	// gl_FragColor = vec4(light, 1.0);
 
+	gl_FragColor = color;
+	// gl_FragColor = vec4(F,1.0);
 
-	newMaterial = matStruct(vec4(0.0),vec4(0.0));
+	// 1. Create Material
+	// ...
+	
+	// 2. Fill Material
+	// ...
 
-	test(newMaterial);					
-							
-	gl_FragColor = finalColor;
-	// gl_FragColor = vec4(PBRMat.f_diffuse, 1.0);
-
-
+	// 3. Shade (Direct + Indirect)
+	// ...
 
 	// 4. Apply Tonemapping
 	// ...

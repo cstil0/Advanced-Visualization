@@ -99,8 +99,13 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		SceneNode* pbr_node2 = new SceneNode("BallPBR2", pbr_material, Mesh::Get("data/models/helmet/helmet.obj.mbin"));
 		pbr_material->light = light;
 		pbr_node2->material = pbr_material;
+<<<<<<< HEAD
 
 		node_list.push_back(pbr_node2);
+=======
+		//pbr_node2->model.translate(6.0, 0.0, 0.0);
+		//node_list.push_back(pbr_node2);
+>>>>>>> parent of 8c6c927 (use of Struct in the shader and improve the organization)
 
 	}
 	

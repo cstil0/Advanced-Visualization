@@ -18,11 +18,6 @@ public:
 		NODE,
 		LIGHT
 	};
-	
-	enum TYPEOFMODEL {
-		BASIC,
-		HELMET
-	};
 
 	static unsigned int lastNameId;
 	int typeOfNode;
@@ -39,7 +34,6 @@ public:
 	Matrix44 model;
 
 	bool visible_flag;
-	int typeOfMesh;
 
 	virtual void render(Camera* camera);
 	virtual void renderWireframe(Camera* camera);

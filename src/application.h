@@ -19,11 +19,6 @@ enum EOutput {
 	METALNESS_ROUGHNESS
 };
 
-enum ESkybox {
-	PANORAMA,
-	SNOW
-
-};
 class Application
 {
 public:
@@ -48,7 +43,6 @@ public:
 	int output;
 	vec3 ambient_light;
 	
-	int type_environment;
 
 	//some vars
 	static Camera* camera; //our GLOBAL camera

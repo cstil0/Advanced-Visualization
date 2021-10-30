@@ -47,10 +47,12 @@ public:
 class PhongMaterial : public StandardMaterial {
 public:
 
+	
 	vec3 specular;
 	vec3 diffuse;
 	float shininess;
 	
+
 	std::vector <Light*> light_list;
 
 	PhongMaterial();
@@ -65,11 +67,8 @@ public:
 class SkyboxMaterial : public StandardMaterial {
 public:
 
-	Texture* panorama_tex = NULL;
-	Texture* snow_tex = NULL;
-
 	SkyboxMaterial();
-	SkyboxMaterial(Shader* sh);
+	SkyboxMaterial(Shader* sh, Texture* tex);
 	~SkyboxMaterial();
 
 	void setUniforms(Camera* camera, Matrix44 model);
@@ -92,6 +91,8 @@ public:
 	float metalness;
 	float spec_scale;
 	float reflactance;
+
+	
 
 	//flags
 	bool bool_met_rou;

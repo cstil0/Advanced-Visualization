@@ -36,7 +36,6 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	mouse_locked = false;
 	scene_exposure = 1;
 	output = 0.0;
-	this->type_environment = 0.0;
 
 	//define the color of the ambient as a global variable since it is a property of the scene
 	ambient_light.set(0.1, 0.2, 0.3);
@@ -52,7 +51,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 	{
 		
-		renderSkybox();
+		//renderSkybox();
 
 		//renderPhongEquation();
 
@@ -63,6 +62,12 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		Texture* normalmap_texture = Texture::Get("data/models/basic/normal.png");
 		Texture* roughness_texture = Texture::Get("data/models/basic/roughness.png");
 		Texture* metalness_texture = Texture::Get("data/models/basic/metalness.png");
+
+		/*Texture* color_texture = Texture::Get("data/models/bench/albedo.png");
+		Texture* normalmap_texture = Texture::Get("data/models/bench/normal.png");
+		Texture* roughness_texture = Texture::Get("data/models/bench/roughness.png");
+		Texture* metalness_texture = Texture::Get("data/models/bench/metalness.png");*/
+
 
 		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/pbr.fs");
 		
@@ -76,21 +81,26 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 			StandardMaterial* l_mat = new StandardMaterial();
 			light->material = l_mat;
+			//light->model.translate(-2 + 4 * i, 5* i, 2 * i);
 			light->model.translate(-0.4, 1.9, 2.0);
+
 			light->model.scale(0.1, 0.1, 0.1);
 			node_list.push_back(light);
 		}
 
-		SceneNode* pbr_node = new SceneNode("OBjectPBR", pbr_material, Mesh::Get("data/models/ball/sphere.obj.mbin"));
+		SceneNode* pbr_node = new SceneNode("BallPBR", pbr_material, Mesh::Get("data/models/ball/sphere.obj.mbin"));
 		
 		pbr_node->material = pbr_material;
 		pbr_material->light = light;
-		node_list.push_back(pbr_node);
+		//node_list.push_back(pbr_node);
 
 		//----second object
 		
+
 		color_texture = Texture::Get("data/models/helmet/albedo.png");
 		normalmap_texture = Texture::Get("data/models/helmet/normal.png");
+		//roughness_texture = Texture::Get("data/models/bench/roughness.png");
+		//metalness_texture = Texture::Get("data/models/bench/metalness.png");
 		Texture* mr_texture = Texture::Get("data/models/helmet/roughness.png");
 
 		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/pbr.fs");
@@ -99,7 +109,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		SceneNode* pbr_node2 = new SceneNode("BallPBR2", pbr_material, Mesh::Get("data/models/helmet/helmet.obj.mbin"));
 		pbr_material->light = light;
 		pbr_node2->material = pbr_material;
-
+		//pbr_node2->model.translate(6.0, 0.0, 0.0);
 		node_list.push_back(pbr_node2);
 
 		//pbr_node2->model.translate(6.0, 0.0, 0.0);
@@ -121,21 +131,12 @@ void Application::renderSkybox()
 	//We create a SkyboxMaterial to save all its corresponding information (shader, cubemap),  
 	//then we pass this material to the skybox node, and finally push it in the list of nodes.
 	Skybox* skybox_node = new Skybox("Skybox");
-	skybox_node->mesh = Mesh::getCube();
 	sh = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
-	SkyboxMaterial* sky_mat = new SkyboxMaterial(sh);
-
 	Texture* cubemap_texture = new Texture();
-	HDRE* hdre = HDRE::Get("data/environments/panorama.hdre");
-	//load parorama tex
-	cubemap_texture->cubemapFromHDRE(hdre, 0); //level 0
-	sky_mat->panorama_tex = cubemap_texture;
-	
-	//load snow tex
-	Texture* cubemap_texture2 = new Texture();
-	cubemap_texture2->cubemapFromImages("data/environments/snow");
-	sky_mat->snow_tex = cubemap_texture2;
-		
+	cubemap_texture->cubemapFromImages("data/environments/snow");
+	skybox_node->mesh = Mesh::getCube();
+
+	SkyboxMaterial* sky_mat = new SkyboxMaterial(sh, cubemap_texture);
 	skybox_node->material = sky_mat;
 	node_list.push_back(skybox_node);
 }
@@ -279,7 +280,6 @@ void Application::update(double seconds_elapsed)
 	// Update skybox center position according to the camera position
 	if(node_list[SceneNode::TYPEOFNODE::SKYBOX]->typeOfNode == (int)SceneNode::TYPEOFNODE::SKYBOX )
 		node_list[SceneNode::TYPEOFNODE::SKYBOX]->model.setTranslation(camera->eye.x, camera->eye.y, camera->eye.z);
-
 
 }
 

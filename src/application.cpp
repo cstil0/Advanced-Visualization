@@ -125,9 +125,7 @@ void Application::loadHelmet(Light* light, Texture* BRDFLut) {
 	PBRMaterial* helmet_material = new PBRMaterial(sh, helmet_color_texture, helmet_normalmap_texture, NULL, NULL, true, helmet_mr_texture);
 
 	helmet_material->BRDFLut = BRDFLut;
-	helmet_material->bool_ao = TRUE; // Activate ao texture
 	helmet_material->ao_texture = Texture::Get("data/models/helmet/ao.png");
-	helmet_material->bool_em = TRUE;// Activate emissive texture
 	helmet_material->emissive_texture = Texture::Get("data/models/helmet/emissive.png");
 
 	// Create the node
@@ -156,9 +154,7 @@ void Application::loadLantern(Light* light, Texture* BRDFLut) {
 	// Create the material
 	PBRMaterial* lantern_material = new PBRMaterial(sh, lantern_color_texture, lantern_normalmap_texture, lantern_roughness_texture, lantern_metalness_texture, false);
 	lantern_material->BRDFLut = BRDFLut;
-	lantern_material->bool_ao = TRUE; // Activate ao texture
 	lantern_material->ao_texture = Texture::Get("data/models/lantern/ao.png");
-	lantern_material->bool_opacity = TRUE;// Activate opacity texture
 	lantern_material->opacity_texture = Texture::Get("data/models/lantern/opacity.png");
 
 	// Create the node

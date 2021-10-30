@@ -92,9 +92,6 @@ public:
 	
 	//flags to know if the textures are active
 	bool bool_met_rou;
-	bool bool_em;
-	bool bool_opacity;
-	bool bool_ao;
 
 	Light* light = NULL;
 

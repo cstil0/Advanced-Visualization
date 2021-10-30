@@ -230,9 +230,6 @@ PBRMaterial::PBRMaterial(Shader* sh, Texture* tex, Texture* normal, Texture* rou
 	this->metalness = 0.4;
 
 	this->bool_met_rou = bool_mr;
-	this->bool_em = FALSE;
-	this->bool_opacity = FALSE;
-	this->bool_ao = FALSE;
 }
 
 PBRMaterial::~PBRMaterial()
@@ -257,9 +254,6 @@ void PBRMaterial::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_metalness", this->metalness);
 	
 	shader->setUniform("u_met_rou", this->bool_met_rou);
-	shader->setUniform("u_bool_em_tex", this->bool_em);
-	shader->setUniform("u_bool_op_tex", this->bool_opacity);
-	shader->setUniform("u_bool_ao_tex", this->bool_ao);
 
 	setTextures();
 }

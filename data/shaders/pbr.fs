@@ -381,10 +381,11 @@ void main()
 	// 5. Any extra texture to apply after tonemapping
 	//Apply emmisive tex
 	vec3 emmisive_light = vec3(0.0);
-	float opacity = 1.0; //opaco
 	emmisive_light = gamma_to_linear( texture2D(u_emissive_texture, v_uv).xyz);
 	light += emmisive_light;
-	opacity = texture2D(u_opacity_texture, v_uv).x; // since is the color gray we take the 1º channel
+	float opacity = 1.0; //opaque
+	// since  the color is in greyscale we take the 1º channel
+	opacity = texture2D(u_opacity_texture, v_uv).x;
 	PBRMat.color.a = opacity; //rgba color
 
 	//---to debug the textures with diff cases

@@ -46,7 +46,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 	// Create camera
 	camera = new Camera();
-	camera->lookAt(Vector3(5.f, 5.f, 5.f), Vector3(0.f, 0.0f, 0.f), Vector3(0.f, 1.f, 0.f));
+	camera->lookAt(Vector3(-0.076, 0.263, 3.718), Vector3(0.f, 0.0f, 0.f), Vector3(0.f, 1.f, 0.f));
 	camera->setPerspective(45.f,window_width/(float)window_height,0.1f,10000.f); //set the projection, we want to be perspective
 
 	{

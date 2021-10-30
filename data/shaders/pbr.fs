@@ -226,8 +226,8 @@ void main()
 	//gl_FragColor = vec4(G*NdotL);
 	// gl_FragColor = vec4(light, 1.0);
 
-	gl_FragColor = color;
-	// gl_FragColor = vec4(F,1.0);
+	// gl_FragColor = color;
+	gl_FragColor = vec4(f_diffuse,1.0);
 
 	// 1. Create Material
 	// ...

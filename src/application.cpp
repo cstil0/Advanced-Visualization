@@ -51,7 +51,8 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	camera->setPerspective(45.f,window_width/(float)window_height,0.1f,10000.f); //set the projection, we want to be perspective
 
 	{
-		// Load the different environments that we can choose in the imGUI
+		// Load the different environments that we can choose in the ImGUI
+		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
 		loadSkybox_Pisa();
 		loadSkybox_Panorama();
 		loadSkybox_Bridge();
@@ -71,7 +72,8 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 		Texture* BRDFLut = Texture::Get("data/brdfLUT.png");
 
-		// Load the different models that we can choose in the imGUI
+		// Load the different models that we can choose in the ImGUI
+		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/pbr.fs");
 		loadBall(light, BRDFLut);
 		loadHelmet(light, BRDFLut);
 		loadLantern(light, BRDFLut);
@@ -99,8 +101,6 @@ void Application::loadBall(Light* light, Texture* BRDFLut){
 	Texture* ball_normalmap_texture = Texture::Get("data/models/ball/normal.png");
 	Texture* ball_roughness_texture = Texture::Get("data/models/ball/roughness.png");
 	Texture* ball_metalness_texture = Texture::Get("data/models/ball/metalness.png");
-
-	sh = Shader::Get("data/shaders/basic.vs", "data/shaders/pbr.fs");
 
 	// Create material
 	PBRMaterial* ball_material = new PBRMaterial(sh, ball_color_texture, ball_normalmap_texture, ball_roughness_texture, ball_metalness_texture, false, NULL);
@@ -172,7 +172,6 @@ void Application::loadLantern(Light* light, Texture* BRDFLut) {
 void Application::loadSkybox_Pisa() {
 	Skybox* skybox_pisa = new Skybox("Skybox");
 	skybox_pisa->mesh = Mesh::getCube();
-	sh = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
 	SkyboxMaterial* sky_mat_pisa = new SkyboxMaterial(sh);
 
 	// Load the HDRE textures

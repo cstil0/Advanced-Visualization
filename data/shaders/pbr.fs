@@ -1,8 +1,6 @@
-
-//utilis definitions
+//macro definitions
 #define PI 3.14159265359
 #define RECIPROCAL_PI 0.3183098861837697
-
 const float GAMMA = 2.2;
 const float INV_GAMMA = 1.0 / GAMMA;
 
@@ -147,8 +145,7 @@ struct MaterialStruct
 	float NdotH ;
 	float NdotV ;
 	float NdotL ;
-	float LdotH ; 
-	//float LdotV ;
+	float VdotH ; 
 
 	vec3 F0;
 	vec3 F_RG;
@@ -179,16 +176,16 @@ void computeVectors(inout MaterialStruct mat)
 void computeDotProducts(inout MaterialStruct mat)
 {
 	mat.NdotH = max(dot(mat.N,mat.H), 0.0f);
-	// avoid artifacts when sampling the texture and other mathematical errors.
 	mat.NdotV = max(dot(mat.N,mat.V), 0.0f);
 	mat.NdotL = max(dot(mat.N,mat.L), 0.0f);
-	mat.LdotH = max(dot(mat.L,mat.H), 0.0f);
+	mat.VdotH = max(dot(mat.V,mat.H), 0.0f);
 
 }
 
 void fillPBRProperties(inout MaterialStruct mat)
 {
-	mat.color = u_color;//base color
+	// Take into account ImGUI color and albedo texture
+	mat.color = u_color;
 	mat.color *= texture2D( u_texture, v_uv ); 
 	// Gamma corresction
 	mat.color = vec4(gamma_to_linear(mat.color.xyz), 1.0f);
@@ -202,7 +199,7 @@ void fillPBRProperties(inout MaterialStruct mat)
 		mat.metalness_tex = texture2D(u_metalness_texture, v_uv).x;
 	}
 	
-	// Total roughness and metalness taking the imGUI factor
+	// Total roughness and metalness taking the ImGUI factor
 	mat.roughness = mat.roughness_tex * u_roughness;	
 	mat.metalness = mat.metalness_tex * u_metalness;
 	mat.F0 = mix( vec3(0.04), mat.color.xyz, mat.metalness);
@@ -286,13 +283,12 @@ vec3 getReflectionColor(vec3 r, float roughness)
 }
 
 void computeSpecularIBL(inout MaterialStruct mat, inout LightStruct light){
-	mat.F_RG = FresnelSchlickRoughness( mat.LdotH, mat.F0 , mat.roughness ); 
+	mat.F_RG = FresnelSchlickRoughness( mat.VdotH, mat.F0 , mat.roughness ); 
 	// Clamp to avoid artifacts in the extremes
 	float idx_NdotV = clamp(dot(mat.N,mat.V), 0.01, 0.09);
 	float idx_roughness = clamp( mat.roughness_tex * u_roughness, 0.01, 0.09);
 
 	vec2 brdf_coord = vec2( idx_NdotV, idx_roughness);
-
 	vec4 brdf2D = texture2D(u_BRDFLut, brdf_coord);
 
 	vec3 specularSample = getReflectionColor(mat.R, mat.roughness);
@@ -366,6 +362,8 @@ void main()
 	computeBRDF(PBRMat, PBRLight);
 	vec3 direct = PBRLight.direct_diffuse + PBRLight.direct_specular;
 	vec3 indirect = computeIBL(PBRMat, PBRLight);
+
+	// Apply AO texture
 	float ambient_occlusion = 0.0f;
 	ambient_occlusion = texture2D(u_ao_texture, v_uv).x; 
 	indirect *= vec3(ambient_occlusion); //apply ao_texture only to indirect light
@@ -383,8 +381,9 @@ void main()
 	vec3 emmisive_light = vec3(0.0);
 	emmisive_light = gamma_to_linear( texture2D(u_emissive_texture, v_uv).xyz);
 	light += emmisive_light;
+	// Apply opacity texture
 	float opacity = 1.0; //opaque
-	// since  the color is in greyscale we take the 1º channel
+	// since  the color is in greyscale we take the 1st channel
 	opacity = texture2D(u_opacity_texture, v_uv).x;
 	PBRMat.color.a = opacity; //rgba color
 
@@ -413,5 +412,4 @@ void main()
 	}
 
 	gl_FragColor = finalColor;
-
 }

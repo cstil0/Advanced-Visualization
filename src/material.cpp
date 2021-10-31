@@ -245,14 +245,12 @@ void PBRMaterial::setUniforms(Camera* camera, Matrix44 model)
 
 	shader->setUniform("u_light_pos", light->model.getTranslation());
 	shader->setUniform("u_ambient_light", Application::instance->ambient_light);
-	shader->setUniform("u_light_color", light->material->color.xyz ); //falta poner para el phong
-	shader->setUniform("u_light_intensity", light->light_intensity); //falta poner para el phong
-
+	shader->setUniform("u_light_color", light->material->color.xyz );
+	shader->setUniform("u_light_intensity", light->light_intensity);
 
 	shader->setUniform("u_output", Application::instance->output);
 	shader->setUniform("u_roughness", this->roughness);
 	shader->setUniform("u_metalness", this->metalness);
-	
 	shader->setUniform("u_met_rou", this->bool_met_rou);
 
 	setTextures();
@@ -274,6 +272,7 @@ void PBRMaterial::setTextures()
 		shader->setTexture("u_metalness_texture", this->metalness_texture, EOutput::METALNESS);
 	if (this->bool_met_rou && this->mr_texture)
 		shader->setTexture("u_mr_texture", this->mr_texture, EOutput::METALNESS_ROUGHNESS);
+	
 	// If emissive texture is not active we use the black one because it will not add any extra light
 	if (this->emissive_texture)
 		shader->setTexture("u_emissive_texture", this->emissive_texture, EOutput::EMISSIVE);
@@ -318,6 +317,7 @@ void PBRMaterial::render(Mesh* mesh, Matrix44 model, Camera* camera)
 		//upload uniforms
 		setUniforms(camera, model);
 
+		// Flags used to apply oppacity map
 		glEnable(GL_BLEND);
 		glEnable(GL_CULL_FACE); // active cull face to render only one time every pixel
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

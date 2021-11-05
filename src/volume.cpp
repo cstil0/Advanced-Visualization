@@ -3,6 +3,7 @@
 
 #include "extra/pvmparser.h"
 #include "extra/PerlinNoise.hpp"
+#include "texture.h" // declare .h as minimum as posible. Since there need it, we declare on there.
 
 Volume::Volume() {
 	width = height = depth = 0;

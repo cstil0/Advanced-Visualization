@@ -4,8 +4,6 @@
 
 #include "includes.h"
 #include "framework.h"
-#include "texture.h"
-//class Image;//??
 
 //Class to represent a volume
 class Volume

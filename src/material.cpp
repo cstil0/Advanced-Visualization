@@ -338,3 +338,4 @@ void PBRMaterial::renderInMenu()
 	ImGui::SliderFloat("Roughness",&this->roughness, 0.0f, 1.0f);
 	ImGui::SliderFloat("Metalness", &this->metalness, 0.0f, 1.0f);
 }
+

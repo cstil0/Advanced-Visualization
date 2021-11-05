@@ -285,8 +285,8 @@ vec3 getReflectionColor(vec3 r, float roughness)
 void computeSpecularIBL(inout MaterialStruct mat, inout LightStruct light){
 	mat.F_RG = FresnelSchlickRoughness( mat.VdotH, mat.F0 , mat.roughness ); 
 	// Clamp to avoid artifacts in the extremes
-	float idx_NdotV = clamp(dot(mat.N,mat.V), 0.01, 0.09);
-	float idx_roughness = clamp( mat.roughness_tex * u_roughness, 0.01, 0.09);
+	float idx_NdotV = clamp(dot(mat.N,mat.V), 0.01, 0.99);
+	float idx_roughness = clamp( mat.roughness_tex * u_roughness, 0.01, 0.99);
 
 	vec2 brdf_coord = vec2( idx_NdotV, idx_roughness);
 	vec4 brdf2D = texture2D(u_BRDFLut, brdf_coord);

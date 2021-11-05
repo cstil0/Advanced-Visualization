@@ -106,4 +106,16 @@ public:
 };
 
 
+// crear subclass de volumetric <----------------------------------------
+//class StandardMaterial : public Material {
+//public:
+//
+//	StandardMaterial();
+//	StandardMaterial(Shader* sh, Texture* tex);
+//	~StandardMaterial();
+//
+//	void setUniforms(Camera* camera, Matrix44 model);
+//	void render(Mesh* mesh, Matrix44 model, Camera* camera);
+//	void renderInMenu();
+};
 #endif

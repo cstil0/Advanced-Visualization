@@ -109,6 +109,63 @@ bool Volume::loadPVM(const char* filename){
 	return true;
 }
 
+
+
+bool Volume::loadPNG(const char* filename, unsigned int rows, unsigned int columns) {
+	long time = getTime();
+	std::cout << " + Volume loading: " << filename << " ... ";
+	Image* image = NULL;
+	std::string str = filename;
+	std::string ext = str.substr(str.size() - 4, 4);
+
+	image = new Image();
+	bool found = false;
+
+	if (ext == ".tga" || ext == ".TGA")
+		found = image->loadTGA(filename);
+	else if (ext == ".png" || ext == ".PNG")
+		found = image->loadPNG(filename, true);
+	else
+	{
+		std::cout << "[ERROR]: Unsupported Volume format" << std::endl;
+		return false; //unsupported file type
+	}
+
+	if (!found) //file not found
+	{
+		std::cout << " [ERROR]: Volume not found " << std::endl;
+		return false;
+	}
+
+	//Dimensions + Resize From the Image or constants
+	width = image->width / columns;
+	height = image->height / rows;
+	depth = rows * columns;
+
+	widthSpacing = heightSpacing = depthSpacing = 1.0; //No way to know from image
+
+	voxelBytes = 1;
+	voxelChannels = 1;
+	voxelType = 0;
+
+	resize(width, height, depth, voxelChannels, voxelBytes);
+
+	for (unsigned int i = 0; i < image->width * image->height; i++) {
+		unsigned int x = i % width;
+		unsigned int r = (i / image->width);
+		unsigned int y = r % height;
+		unsigned int C = (i - r * image->width) / width;
+		unsigned int R = (r / height);
+		unsigned int z = (columns - C - 1) + R * columns;
+		data[x + (y * width) + (z * width * height)] = image->data[i * 4];
+	}
+
+	delete image;
+
+	std::cout << "[OK] Size: " << width << "x" << height << "x" << depth << " Time: " << (getTime() - time) * 0.001 << "sec" << std::endl;
+	return true;
+}
+
 unsigned int Volume::getTextureFormat(){
 	unsigned int format = GL_RED;
 	switch (voxelChannels) {

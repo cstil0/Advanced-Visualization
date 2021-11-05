@@ -51,45 +51,18 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	camera->setPerspective(45.f,window_width/(float)window_height,0.1f,10000.f); //set the projection, we want to be perspective
 
 	{
-		// Load the different environments that we can choose in the ImGUI
-		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
-		loadSkybox_Pisa();
-		loadSkybox_Panorama();
-		loadSkybox_Bridge();
 
-		//create a light
-		int numb_lights = 1;
-		Light* light = new Light();
-		for (int i = 0; i < numb_lights; i++) {
-			light->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
+		Volume* volume = new Volume();
+		volume->loadPNG("data/volumes/teapot_16_16.png", 16, 16);
 
-			StandardMaterial* l_mat = new StandardMaterial();
-			light->material = l_mat;
-			light->model.translate(-0.4, 1.9, 2.0);
-			light->model.scale(0.1, 0.1, 0.1);
-			node_list.push_back(light);
-		}
-
-		Texture* BRDFLut = Texture::Get("data/brdfLUT.png");
-
-		// Load the different models that we can choose in the ImGUI
-		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/pbr.fs");
-		loadBall(light, BRDFLut);
-		loadHelmet(light, BRDFLut);
-		loadLantern(light, BRDFLut);
-
-		// Save a pointer that will update according to the option selected in the imGUI
-		SceneNode* current_node = optional_node_list[0];
-		// Update the selected option of the imGUI
-		typeOfModel_ImGUI = optional_node_list[0]->typeOfModel;
-		// Add the current node to the rendering list of nodes
-		node_list.push_back(current_node);
-
-
-		// Functions used in the phong lab
+		//Functions used in the phong lab
 		//renderPhongEquation();
 		//renderReflection();
+		
+		//Function used in the pbr lab
+		//renderPBR();
 	}
+
 	
 	//hide the cursor
 	SDL_ShowCursor(!mouse_locked); //hide or show the mouse
@@ -356,7 +329,43 @@ void Application::renderReflection()
 
 }
 
+void Application::renderPBR() 
+{
+	// Load the different environments that we can choose in the ImGUI
+	sh = Shader::Get("data/shaders/basic.vs", "data/shaders/skybox.fs");
+	loadSkybox_Pisa();
+	loadSkybox_Panorama();
+	loadSkybox_Bridge();
 
+	//create a light
+	int numb_lights = 1;
+	Light* light = new Light();
+	for (int i = 0; i < numb_lights; i++) {
+		light->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
+
+		StandardMaterial* l_mat = new StandardMaterial();
+		light->material = l_mat;
+		light->model.translate(-0.4, 1.9, 2.0);
+		light->model.scale(0.1, 0.1, 0.1);
+		node_list.push_back(light);
+	}
+
+	Texture* BRDFLut = Texture::Get("data/brdfLUT.png");
+
+	// Load the different models that we can choose in the ImGUI
+	sh = Shader::Get("data/shaders/basic.vs", "data/shaders/pbr.fs");
+	loadBall(light, BRDFLut);
+	loadHelmet(light, BRDFLut);
+	loadLantern(light, BRDFLut);
+
+	// Save a pointer that will update according to the option selected in the imGUI
+	SceneNode* current_node = optional_node_list[0];
+	// Update the selected option of the imGUI
+	typeOfModel_ImGUI = optional_node_list[0]->typeOfModel;
+	// Add the current node to the rendering list of nodes
+	node_list.push_back(current_node);
+
+}
 //what to do when the image has to be draw
 void Application::render(void)
 {

@@ -106,6 +106,8 @@ public:
 	void loadSkybox_Bridge();
 	void renderPhongEquation();
 	void renderReflection();
+
+	void renderPBR();
 };
 
 

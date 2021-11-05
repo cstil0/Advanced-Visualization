@@ -11,6 +11,7 @@
 #include <string>
 #include <cassert>
 
+//forward decleration
 class Shader;
 class FBO;
 class Texture;

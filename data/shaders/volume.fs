@@ -26,7 +26,7 @@ void main(){
 	vec3 curr2tex_coord = vec3(0.0f);
 
     // Ray loop
-    for(int=0; i<MAX_ITERATIONS; i++){
+    for(int i=0; i<MAX_ITERATIONS; i++){
         // 2. Volume sampling
 		// Convert to texture coord
 		curr2tex_coord = (curr_sample_point + 1.0f)/2; // si no funciona poner vec3

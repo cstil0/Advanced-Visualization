@@ -339,3 +339,51 @@ void PBRMaterial::renderInMenu()
 	ImGui::SliderFloat("Metalness", &this->metalness, 0.0f, 1.0f);
 }
 
+VolumeMaterial::VolumeMaterial()
+{
+}
+
+VolumeMaterial::VolumeMaterial(Shader* sh, Texture* tex)
+{
+	this->shader = sh;
+	this->texture = tex;
+}
+
+VolumeMaterial::~VolumeMaterial()
+{
+}
+
+void VolumeMaterial::setUniforms(Camera* camera, Matrix44 model, Matrix44 inverse_model)
+{
+	shader->setUniform("u_viewprojection", camera->viewprojection_matrix);
+	shader->setUniform("u_camera_position", camera->eye);
+	shader->setUniform("u_model", model);
+	shader->setUniform("u_inverse_model", inverse_model);
+	shader->setUniform("u_color", color);
+
+	shader->setUniform("u_length_step", length_step);
+	if (texture)
+		shader->setTexture("u_texture", texture, 0);
+}
+
+void VolumeMaterial::render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, Camera* camera)
+{
+	if (mesh && shader)
+	{
+		//enable shader
+		shader->enable();
+
+		//upload uniforms
+		setUniforms(camera, model, inverse_model);
+
+		//do the draw call
+		mesh->render(GL_TRIANGLES);
+
+		//disable shader
+		shader->disable();
+	}
+}
+
+void VolumeMaterial::renderInMenu()
+{
+}

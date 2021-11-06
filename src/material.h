@@ -105,17 +105,18 @@ public:
 	void renderInMenu();
 };
 
+class VolumeMaterial : public StandardMaterial {
+public:
+	//Vector3 first_sample;
+	float length_step;
+	//Vector3 direction_vector; // no se si es buena idea guardarlo aquí
 
-// crear subclass de volumetric <----------------------------------------
-//class StandardMaterial : public Material {
-//public:
-//
-//	StandardMaterial();
-//	StandardMaterial(Shader* sh, Texture* tex);
-//	~StandardMaterial();
-//
-//	void setUniforms(Camera* camera, Matrix44 model);
-//	void render(Mesh* mesh, Matrix44 model, Camera* camera);
-//	void renderInMenu();
+	VolumeMaterial();
+	VolumeMaterial(Shader* sh, Texture* tex);
+	~VolumeMaterial();
+
+	void setUniforms(Camera* camera, Matrix44 model, Matrix44 inverse_model);
+	void render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, Camera* camera);
+	void renderInMenu();
 };
 #endif

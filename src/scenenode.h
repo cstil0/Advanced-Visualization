@@ -9,6 +9,7 @@
 #include "material.h"
 
 class Light;
+class Volume;
 
 class SceneNode {
 public:
@@ -17,7 +18,8 @@ public:
 	enum TYPEOFNODE {
 		SKYBOX,
 		LIGHT,
-		NODE
+		NODE,
+		VOLUME
 	};
 	
 	// Used to identify which kind of mesh it have
@@ -91,6 +93,20 @@ public:
 	Skybox();
 	Skybox(const char* name);
 	~Skybox();
+
+	void render(Camera* camera);
+	void renderInMenu();
+};
+
+class VolumeNode : public SceneNode {
+public:
+	Matrix44 inverse_model;
+	VolumeMaterial* volume_material; // Para acceder al inverse model desde setUniform -- quizá se puede buscar otra forma
+	Volume* volume; // Util si queremos escalar en ImGUI
+
+	VolumeNode();
+	VolumeNode(const char* name);
+	~VolumeNode();
 
 	void render(Camera* camera);
 	void renderInMenu();

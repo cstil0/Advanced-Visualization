@@ -160,4 +160,29 @@ void Skybox::renderInMenu()
 	ImGui::Checkbox("Visible", &visible_flag);
 }
 
+VolumeNode::VolumeNode()
+{
+}
 
+VolumeNode::VolumeNode(const char* name)
+{
+	this->name = name;
+	this->typeOfNode = TYPEOFNODE::VOLUME;
+	Matrix44 inv_m_aux = model;
+	inv_m_aux.inverse();
+	this->inverse_model = inv_m_aux;
+}
+
+VolumeNode::~VolumeNode()
+{
+}
+
+void VolumeNode::render(Camera* camera)
+{
+	if (material && visible_flag)
+		volume_material->render(mesh, model, inverse_model, camera);
+}
+
+void VolumeNode::renderInMenu()
+{
+}

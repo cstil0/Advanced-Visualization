@@ -179,7 +179,7 @@ VolumeNode::~VolumeNode()
 
 void VolumeNode::render(Camera* camera)
 {
-	if (material && visible_flag)
+	if (volume_material && visible_flag)
 		volume_material->render(mesh, model, inverse_model, camera);
 }
 

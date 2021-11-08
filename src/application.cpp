@@ -38,7 +38,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	scene_exposure = 1;
 	output = 0.0;
 
-	app_mode = APPMODE::PBR;
+	app_mode = APPMODE::VOLUME;
 
 	//define the color of the ambient as a global variable since it is a property of the scene
 	ambient_light.set(0.1, 0.2, 0.3);
@@ -57,12 +57,13 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 			sh = Shader::Get("data/shaders/basic.vs", "data/shaders/volume.fs");
 
 			Volume* volume = new Volume();
+			//volume->loadPVM("data/volumes/Orange.pvm");
 			volume->loadPNG("data/volumes/teapot_16_16.png", 16, 16);
 			Texture* tex3d = new Texture();
 			tex3d->create3DFromVolume(volume, GL_CLAMP_TO_EDGE);
 
 			VolumeMaterial* vol_material = new VolumeMaterial(sh, tex3d);
-			vol_material->length_step = 1.0f;
+			vol_material->length_step = 0.1f;
 
 			VolumeNode* vol_node = new VolumeNode("Volume Node");
 
@@ -70,7 +71,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 			vol_node->volume_material = vol_material;
 
 			vol_node->mesh = Mesh::getCube();
-			vol_node->model.scale(volume->width, volume->height, volume->depth); // NO ESTAMOS MUY SEGURAS DE ESTO PERO CLARA CREE QUE EL CUBO TIENE QUE CONTENER EL VOLUMEN
+			//vol_node->model.scale(volume->width, volume->height, volume->depth); // NO ESTAMOS MUY SEGURAS DE ESTO PERO CLARA CREE QUE EL CUBO TIENE QUE CONTENER EL VOLUMEN
 
 			node_list.push_back(vol_node);
 		}
@@ -80,7 +81,6 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 			renderPhongEquation();
 			renderReflection();
 		}
-
 		
 		//Function used in the pbr lab
 		else if (app_mode == APPMODE::PBR){

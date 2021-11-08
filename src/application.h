@@ -49,8 +49,15 @@ public:
 		BRIDGE
 	};
 
+	enum APPMODE {
+		PHONG,
+		PBR,
+		VOLUME
+	};
+
 	int typeOfModel_ImGUI;
 	int typeOfSkybox_ImGUI;
+	int app_mode;
 
 	std::vector< SceneNode* > node_list;
 	// List with the nodes that can be selected in the imGUI

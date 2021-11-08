@@ -38,6 +38,8 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	scene_exposure = 1;
 	output = 0.0;
 
+	app_mode = APPMODE::PBR;
+
 	//define the color of the ambient as a global variable since it is a property of the scene
 	ambient_light.set(0.1, 0.2, 0.3);
 
@@ -51,31 +53,39 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	camera->setPerspective(45.f,window_width/(float)window_height,0.1f,10000.f); //set the projection, we want to be perspective
 
 	{
-		sh = Shader::Get("data/shaders/basic.vs", "data/shaders/volume.fs");
+		if (app_mode == APPMODE::VOLUME) {
+			sh = Shader::Get("data/shaders/basic.vs", "data/shaders/volume.fs");
 
-		Volume* volume = new Volume();
-		volume->loadPNG("data/volumes/teapot_16_16.png", 16, 16);
-		Texture* tex3d = new Texture();
-		tex3d->create3DFromVolume(volume, GL_CLAMP_TO_EDGE);
+			Volume* volume = new Volume();
+			volume->loadPNG("data/volumes/teapot_16_16.png", 16, 16);
+			Texture* tex3d = new Texture();
+			tex3d->create3DFromVolume(volume, GL_CLAMP_TO_EDGE);
 
-		VolumeMaterial* vol_material = new VolumeMaterial(sh, tex3d);
-		vol_material->length_step = 1.0f;
+			VolumeMaterial* vol_material = new VolumeMaterial(sh, tex3d);
+			vol_material->length_step = 1.0f;
 
-		VolumeNode* vol_node = new VolumeNode("Volume Node");
+			VolumeNode* vol_node = new VolumeNode("Volume Node");
 
-		vol_node->volume = volume;
-		vol_node->volume_material = vol_material;
+			vol_node->volume = volume;
+			vol_node->volume_material = vol_material;
 
-		vol_node->mesh = Mesh::getCube();
-		vol_node->model.scale(volume->width, volume->height, volume->depth); // NO ESTAMOS MUY SEGURAS DE ESTO PERO CLARA CREE QUE EL CUBO TIENE QUE CONTENER EL VOLUMEN
+			vol_node->mesh = Mesh::getCube();
+			vol_node->model.scale(volume->width, volume->height, volume->depth); // NO ESTAMOS MUY SEGURAS DE ESTO PERO CLARA CREE QUE EL CUBO TIENE QUE CONTENER EL VOLUMEN
+
+			node_list.push_back(vol_node);
+		}
 		
-		node_list.push_back(vol_node);
 		//Functions used in the phong lab
-		//renderPhongEquation();
-		//renderReflection();
+		if (app_mode == APPMODE::PHONG) {
+			renderPhongEquation();
+			renderReflection();
+		}
+
 		
 		//Function used in the pbr lab
-		//renderPBR();
+		else if (app_mode == APPMODE::PBR){
+			renderPBR();
+		}
 	}
 
 	
@@ -438,31 +448,33 @@ void Application::update(double seconds_elapsed)
 	if (mouse_locked)
 		Input::centerMouse();
 
-	// Update the model according to the imGUI
-	// Node_list[2] corresponds to the principal node IGUAL SE PODRÍA PONER MEJOR
-	//if (typeOfModel_ImGUI != node_list[SceneNode::TYPEOFNODE::NODE]->typeOfModel) {
-	//	//SceneNode* principal_node = node_list[2];
-	//	// Look for the new node to be rendered
-	//	for (int i = 0; i < optional_node_list.size(); i++) {
-	//		if (optional_node_list[i]->typeOfModel == typeOfModel_ImGUI)
-	//			node_list[SceneNode::TYPEOFNODE::NODE] = optional_node_list[i];
-	//	}
-	//}
+	if (app_mode == APPMODE::PBR) {
+		 //Update the model according to the imGUI
+		 //Node_list[2] corresponds to the principal node IGUAL SE PODRÍA PONER MEJOR
+		if (typeOfModel_ImGUI != node_list[SceneNode::TYPEOFNODE::NODE]->typeOfModel) {
+			//SceneNode* principal_node = node_list[2];
+			// Look for the new node to be rendered
+			for (int i = 0; i < optional_node_list.size(); i++) {
+				if (optional_node_list[i]->typeOfModel == typeOfModel_ImGUI)
+					node_list[SceneNode::TYPEOFNODE::NODE] = optional_node_list[i];
+			}
+		}
 
-	// Same with skybox
-	//if (typeOfSkybox_ImGUI != skybox_node->typeOfSkybox) {
-	//	// Look for the new skybox to be rendered
-	//	for (int i = 0; i < optional_skybox_list.size(); i++) {
-	//		if (optional_skybox_list[i]->typeOfSkybox == typeOfSkybox_ImGUI) {
-	//			// Update the new skybox
-	//			if (typeOfSkybox_ImGUI == 2) {
-	//				int s = 0;
-	//			}
-	//			node_list[SceneNode::TYPEOFNODE::SKYBOX] = (SceneNode*)optional_skybox_list[i];
-	//			skybox_node = optional_skybox_list[i];
-	//		}
-	//	}
-	//}
+		// Same with skybox
+		if (typeOfSkybox_ImGUI != skybox_node->typeOfSkybox) {
+			// Look for the new skybox to be rendered
+			for (int i = 0; i < optional_skybox_list.size(); i++) {
+				if (optional_skybox_list[i]->typeOfSkybox == typeOfSkybox_ImGUI) {
+					// Update the new skybox
+					if (typeOfSkybox_ImGUI == 2) {
+						int s = 0;
+					}
+					node_list[SceneNode::TYPEOFNODE::SKYBOX] = (SceneNode*)optional_skybox_list[i];
+					skybox_node = optional_skybox_list[i];
+				}
+			}
+		}
+	}
 
 	// Update skybox center position according to the camera position
 	if(node_list[SceneNode::TYPEOFNODE::SKYBOX]->typeOfNode == (int)SceneNode::TYPEOFNODE::SKYBOX )

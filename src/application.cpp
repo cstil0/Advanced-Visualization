@@ -57,8 +57,8 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 			sh = Shader::Get("data/shaders/basic.vs", "data/shaders/volume.fs");
 
 			Volume* volume = new Volume();
-			//volume->loadPVM("data/volumes/Orange.pvm");
-			volume->loadPNG("data/volumes/teapot_16_16.png", 16, 16);
+			volume->loadPVM("data/volumes/Orange.pvm");
+			//volume->loadPNG("data/volumes/teapot_16_16.png", 16, 16);
 			Texture* tex3d = new Texture();
 			tex3d->create3DFromVolume(volume, GL_CLAMP_TO_EDGE);
 
@@ -69,9 +69,10 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 			vol_node->volume = volume;
 			vol_node->volume_material = vol_material;
+			//vol_node->material = vol_material;
 
 			vol_node->mesh = Mesh::getCube();
-			//vol_node->model.scale(volume->width, volume->height, volume->depth); // NO ESTAMOS MUY SEGURAS DE ESTO PERO CLARA CREE QUE EL CUBO TIENE QUE CONTENER EL VOLUMEN
+			//vol_node->model.scale(volume->width, volume->height, volume->depth);                  // NO ESTAMOS MUY SEGURAS DE ESTO PERO CLARA CREE QUE EL CUBO TIENE QUE CONTENER EL VOLUMEN
 
 			node_list.push_back(vol_node);
 		}
@@ -448,7 +449,21 @@ void Application::update(double seconds_elapsed)
 	if (mouse_locked)
 		Input::centerMouse();
 
-	if (app_mode == APPMODE::PBR) {
+	// Update the inverse model matrix
+	if (app_mode == APPMODE::VOLUME) {
+		for (int i = 0; i < node_list.size(); i++)
+		{
+			if (node_list[i]->typeOfNode == SceneNode::TYPEOFNODE::NODE) {
+				VolumeNode* volume_node = (VolumeNode*)node_list[i];
+				Matrix44 inv_m_aux = volume_node->model;
+				inv_m_aux.inverse();
+				volume_node->inverse_model = inv_m_aux;
+				node_list[i] = volume_node;
+			}
+		}
+	}
+
+	else if (app_mode == APPMODE::PBR) {
 		 //Update the model according to the imGUI
 		 //Node_list[2] corresponds to the principal node IGUAL SE PODRÍA PONER MEJOR
 		if (typeOfModel_ImGUI != node_list[SceneNode::TYPEOFNODE::NODE]->typeOfModel) {

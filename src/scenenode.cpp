@@ -179,10 +179,32 @@ VolumeNode::~VolumeNode()
 
 void VolumeNode::render(Camera* camera)
 {
-	if (volume_material && visible_flag)
+	if (volume_material && visible_flag) {
 		volume_material->render(mesh, model, inverse_model, camera);
+	}
+	else if (material && visible_flag) {
+		// Downcast
+		VolumeMaterial* volume_mat = (VolumeMaterial*)&material;
+		volume_mat->render(mesh, model, inverse_model, camera);
+	}
 }
 
 void VolumeNode::renderInMenu()
 {
+	if (!(this->typeOfNode == TYPEOFNODE::VOLUME)) {
+		ImGui::Checkbox("Visible", &visible_flag);
+	}
+
+	//Model edit
+	if (ImGui::TreeNode("Model"))
+	{
+		float matrixTranslation[3], matrixRotation[3], matrixScale[3];
+		ImGuizmo::DecomposeMatrixToComponents(model.m, matrixTranslation, matrixRotation, matrixScale);
+		ImGui::DragFloat3("Position", matrixTranslation, 0.1f);
+		ImGui::DragFloat3("Rotation", matrixRotation, 0.1f);
+		ImGui::DragFloat3("Scale", matrixScale, 0.1f);
+		ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, model.m);
+
+		ImGui::TreePop();
+	}
 }

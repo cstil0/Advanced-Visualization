@@ -347,6 +347,7 @@ VolumeMaterial::VolumeMaterial(Shader* sh, Texture* tex)
 {
 	this->shader = sh;
 	this->texture = tex;
+	this->brightness = 1.0f;
 }
 
 VolumeMaterial::~VolumeMaterial()
@@ -362,6 +363,8 @@ void VolumeMaterial::setUniforms(Camera* camera, Matrix44 model, Matrix44 invers
 	shader->setUniform("u_color", color);
 
 	shader->setUniform("u_length_step", length_step);
+	shader->setUniform("u_brightness", this->brightness);
+
 	if (texture)
 		shader->setTexture("u_texture", texture, 0);
 }
@@ -386,4 +389,7 @@ void VolumeMaterial::render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, 
 
 void VolumeMaterial::renderInMenu()
 {
+	ImGui::SliderFloat("Length Step", &this->length_step, 0.0f, 1.0f);
+	ImGui::SliderFloat("Brightness", &this->brightness, 0.0f, 50.0f);
+
 }

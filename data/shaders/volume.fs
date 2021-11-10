@@ -1,4 +1,4 @@
-#define MAX_ITERATIONS 100
+#define MAX_ITERATIONS 1
 
 varying vec3 v_position; //position in local coords
 varying vec3 v_world_position; //position in world coord
@@ -18,27 +18,27 @@ void main(){
 
     float d = 0.0f;
 
-    vec3 camera_pos_local = (vec4(u_camera_position, 1.0f)*u_inverse_model).xyz; // En teoria si es un punto ponemos 1 y si es vector 0, pero estaria bien preguntarlo
-	vec3 ray_dir = normalize(camera_pos_local-v_position);
+    vec3 camera_pos_local = (u_inverse_model * vec4(u_camera_position, 1.0f)   ).xyz; // En teoria si es un punto ponemos 1 y si es vector 0, pero estaria bien preguntarlo
+	vec3 ray_dir = normalize(camera_pos_local - v_position);
 	vec3 first_sample = v_position;
 	vec3 curr_sample_point = first_sample;
 	vec3 step_vector = (first_sample + ray_dir) * u_length_step;
 
 	vec4 final_color = vec4(0.0f);
 	vec3 curr2tex_coord = vec3(0.0f);
-
+    vec4 sample_color = vec4(0.0f);
     // Ray loop
     for(int i=0; i<MAX_ITERATIONS; i++){
         // 2. Volume sampling
 		// Convert to texture coord
 		curr2tex_coord = (curr_sample_point + 1.0f)/2; // si no funciona poner vec3
-        d += texture3D(u_texture, curr2tex_coord).x;
+        d = texture3D(u_texture, curr2tex_coord).x;
 
         // 3. Classification
-        vec4 sample_color = vec4(d,d,d,d);
+        sample_color = vec4(d,d,d,d);
 
         // 4. Composition
-		sample_color.rgb *= sample_color.a;
+		// sample_color.rgb *= sample_color.a;
         final_color += u_length_step * (1.0 - final_color.a) * sample_color;
 
         // 5. Next sample
@@ -55,6 +55,6 @@ void main(){
 
     //7. Final color
     //...   
-    gl_FragColor = vec4(d,d,d, 1.0f);
-    // gl_FragColor = final_color;
+    // gl_FragColor = vec4(d,d,d, 1.0f);
+    gl_FragColor = final_color;
 }

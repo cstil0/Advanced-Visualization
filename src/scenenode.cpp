@@ -185,4 +185,14 @@ void VolumeNode::render(Camera* camera)
 
 void VolumeNode::renderInMenu()
 {
+	if (this->volume_material && ImGui::TreeNode("Volumetric_Sets")) 
+	{
+		volume_material->renderInMenu();
+		//	ImGui::TreePop();
+	}
 }
+//if (material && ImGui::TreeNode("Material"))
+//{
+//	material->renderInMenu();
+//	ImGui::TreePop();
+//}

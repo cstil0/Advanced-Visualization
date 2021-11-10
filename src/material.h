@@ -109,6 +109,7 @@ class VolumeMaterial : public StandardMaterial {
 public:
 	//Vector3 first_sample;
 	float length_step;
+	float brightness;
 	//Vector3 direction_vector; // no se si es buena idea guardarlo aquí
 
 	VolumeMaterial();

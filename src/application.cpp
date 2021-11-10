@@ -54,11 +54,11 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 	{
 		if (app_mode == APPMODE::VOLUME) {
-			sh = Shader::Get("data/shaders/basic.vs", "data/shaders/volume.fs");
+			sh = Shader::Get("data/shaders/basic.vs", "data/shaders/volume2.fs");
 
 			Volume* volume = new Volume();
 			//volume->loadPVM("data/volumes/Orange.pvm");
-			volume->loadPNG("data/volumes/teapot_16_16.png", 16, 16);
+			volume->loadPNG("data/volumes/foot_16_16.png", 16, 16);
 			Texture* tex3d = new Texture();
 			tex3d->create3DFromVolume(volume, GL_CLAMP_TO_EDGE);
 

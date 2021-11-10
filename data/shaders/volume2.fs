@@ -29,7 +29,8 @@ void main(){
     float d = 0.0f;
     vec3 uv_3D = vec3(0.0f);
     vec4 sample_color = vec4(0.0f);
-    vec3 curr_sample_pos = vec3(0.0f);
+    // vec3 curr_sample_pos = vec3(0.0f);// se puede poner o no
+
     // float limit_l_min = -1.0f;
     // float limit_l_max = 1.0f;
 
@@ -51,8 +52,8 @@ void main(){
         // 5. Next sample
         // sample_vector = (sample_vector + ray_dir) * u_length_step;
         
-        curr_sample_pos = sample_pos;
-        sample_pos = curr_sample_pos + step_vector;
+        // curr_sample_pos = sample_pos;
+        sample_pos = sample_pos + step_vector;
 
         // curr_sample_point = curr_sample_point + step_vector;
 

@@ -179,13 +179,15 @@ VolumeNode::~VolumeNode()
 
 void VolumeNode::render(Camera* camera)
 {
-	if (volume_material && visible_flag) {
-		volume_material->render(mesh, model, inverse_model, camera);
-	}
-	else if (material && visible_flag) {
+	if (material && visible_flag) {
 		// Downcast
-		VolumeMaterial* volume_mat = (VolumeMaterial*)&material;
+		VolumeMaterial* volume_mat = dynamic_cast<VolumeMaterial*>(material);
+
+		//VolumeMaterial* volume_mat = (VolumeMaterial*)&material;
 		volume_mat->render(mesh, model, inverse_model, camera);
+	}
+	else if (volume_material && visible_flag) {
+		volume_material->render(mesh, model, inverse_model, camera);
 	}
 }
 

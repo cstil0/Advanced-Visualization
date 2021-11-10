@@ -68,8 +68,8 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 			VolumeNode* vol_node = new VolumeNode("Volume Node");
 
 			vol_node->volume = volume;
-			vol_node->volume_material = vol_material;
-			//vol_node->material = vol_material;
+			//vol_node->volume_material = vol_material;
+			vol_node->material = vol_material;
 
 			vol_node->mesh = Mesh::getCube();
 			//vol_node->model.scale(volume->width, volume->height, volume->depth);                  // NO ESTAMOS MUY SEGURAS DE ESTO PERO CLARA CREE QUE EL CUBO TIENE QUE CONTENER EL VOLUMEN

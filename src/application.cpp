@@ -65,7 +65,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 			tex3d->create3DFromVolume(volume, GL_CLAMP_TO_EDGE);
 
 			VolumeMaterial* vol_material = new VolumeMaterial(sh, tex3d);
-			vol_material->length_step = 0.1f;
+			vol_material->length_step = 0.02f;
 			vol_material->brightness = 10.0f;
 
 			VolumeNode* vol_node = new VolumeNode("Volume Node");

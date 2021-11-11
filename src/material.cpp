@@ -347,7 +347,6 @@ VolumeMaterial::VolumeMaterial(Shader* sh, Texture* tex)
 {
 	this->shader = sh;
 	this->texture = tex;
-	this->brightness = 1.0f;
 }
 
 VolumeMaterial::~VolumeMaterial()
@@ -389,7 +388,6 @@ void VolumeMaterial::render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, 
 
 void VolumeMaterial::renderInMenu()
 {
-	ImGui::SliderFloat("Length Step", &this->length_step, 0.0f, 1.0f);
-	ImGui::SliderFloat("Brightness", &this->brightness, 0.0f, 50.0f);
-
+	ImGui::SliderFloat("Length Step", &this->length_step, 0.02, 1);
+	ImGui::SliderFloat("Brightness", &this->brightness, 1.0f, 50.0f);
 }

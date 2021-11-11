@@ -17,7 +17,7 @@ void main(){
     // 1. Ray setup
 
     vec3 camera_l_pos = (u_inverse_model * vec4(u_camera_position, 1.0)).xyz; 
-    vec3 ray_dir = normalize( v_position - camera_l_pos);
+    vec3 ray_dir = normalize(v_position - camera_l_pos);
 	vec3 sample_pos = v_position; //initialiced as entry point to the volume
 	vec4 final_color = vec4(0.0f);
 
@@ -78,6 +78,6 @@ void main(){
 
     //7. Final color
     //...   
-    // gl_FragColor = vec4(d,d,d, 1.0f);
+    // gl_FragColor = vec4(ray_dir, 0.0);
     gl_FragColor = final_color * u_brightness;
 }

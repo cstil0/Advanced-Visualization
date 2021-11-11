@@ -179,20 +179,42 @@ VolumeNode::~VolumeNode()
 
 void VolumeNode::render(Camera* camera)
 {
-	if (volume_material && visible_flag)
-		volume_material->render(mesh, model, inverse_model, camera);
+	if (material && visible_flag) {
+		// Downcast --> con este dynamic cast podemos recuperar las variables propias del VolumeNode si fue creado asi aunque le hayamos hecho un downcast
+		VolumeMaterial* volume_mat = dynamic_cast<VolumeMaterial*>(material);
+
+		//VolumeMaterial* volume_mat = (VolumeMaterial*)&material;
+		volume_mat->render(mesh, model, inverse_model, camera);
+	}
+	//else if (volume_material && visible_flag) {
+	//	volume_material->render(mesh, model, inverse_model, camera);
+	//}
 }
 
+
+// ESTAMOS REPITIENDO
 void VolumeNode::renderInMenu()
 {
-	if (this->volume_material && ImGui::TreeNode("Volumetric_Sets")) 
+	if (!(this->typeOfNode == TYPEOFNODE::VOLUME)) {
+		ImGui::Checkbox("Visible", &visible_flag);
+	}
+
+	// Material
+	if (ImGui::TreeNode("Material")) {
+		material->renderInMenu();
+		ImGui::TreePop();
+	}
+
+	//Model edit
+	if (ImGui::TreeNode("Model"))
 	{
-		volume_material->renderInMenu();
-		//	ImGui::TreePop();
+		float matrixTranslation[3], matrixRotation[3], matrixScale[3];
+		ImGuizmo::DecomposeMatrixToComponents(model.m, matrixTranslation, matrixRotation, matrixScale);
+		ImGui::DragFloat3("Position", matrixTranslation, 0.1f);
+		ImGui::DragFloat3("Rotation", matrixRotation, 0.1f);
+		ImGui::DragFloat3("Scale", matrixScale, 0.1f);
+		ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, model.m);
+
+		ImGui::TreePop();
 	}
 }
-//if (material && ImGui::TreeNode("Material"))
-//{
-//	material->renderInMenu();
-//	ImGui::TreePop();
-//}

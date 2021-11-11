@@ -101,7 +101,7 @@ public:
 class VolumeNode : public SceneNode {
 public:
 	Matrix44 inverse_model;
-	VolumeMaterial* volume_material; // Para acceder al inverse model desde setUniform -- quizá se puede buscar otra forma
+	//VolumeMaterial* volume_material; // Para acceder al inverse model desde setUniform -- quizá se puede buscar otra forma
 	Volume* volume; // Util si queremos escalar en ImGUI
 
 	VolumeNode();

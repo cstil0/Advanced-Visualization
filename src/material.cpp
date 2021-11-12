@@ -14,6 +14,7 @@ StandardMaterial::StandardMaterial(Shader* sh, Texture* tex)
 	this->color = vec4(1.f, 1.f, 1.f, 1.f);
 	this->shader = sh;
 	this->texture = tex;
+	
 }
 
 
@@ -347,6 +348,8 @@ VolumeMaterial::VolumeMaterial(Shader* sh, Texture* tex)
 {
 	this->shader = sh;
 	this->texture = tex;
+	this->length_step = 0.1f;// cambiando a un valor mas pequeño
+	this->brightness = 5.0f;
 }
 
 VolumeMaterial::~VolumeMaterial()
@@ -390,4 +393,5 @@ void VolumeMaterial::renderInMenu()
 {
 	ImGui::SliderFloat("Length Step", &this->length_step, 0.02, 1);
 	ImGui::SliderFloat("Brightness", &this->brightness, 1.0f, 50.0f);
+	ImGui::ColorEdit3("Color", color.v);
 }

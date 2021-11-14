@@ -373,6 +373,8 @@ void VolumeMaterial::setUniforms(Camera* camera, Matrix44 model, Matrix44 invers
 		shader->setTexture("u_texture", texture, 0); // poner offset para numerar las texturas
 	if(noise_texture)
 		shader->setTexture("u_noise_texture", noise_texture, 1);
+	if (tf_mapping_texture)
+		shader->setTexture("u_tf_mapping_texture", tf_mapping_texture, 2);
 }
 
 void VolumeMaterial::render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, Camera* camera)

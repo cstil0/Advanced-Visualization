@@ -14,6 +14,7 @@ uniform vec3 u_camera_position;
 //Textures uniforms
 uniform sampler3D u_texture;
 uniform sampler2D u_noise_texture;
+uniform sampler2D u_tf_mapping_texture;
 uniform vec4 u_color;
 
 uniform float u_length_step; //ray step
@@ -29,7 +30,9 @@ void main(){
     vec4 camera_l_pos_temp = (u_inverse_model * vec4(u_camera_position, 1.0));
     vec3 camera_l_pos = camera_l_pos_temp.xyz/camera_l_pos_temp.w;
     vec3 ray_dir = normalize(v_position - camera_l_pos);
-	vec3 sample_pos = v_position + offset; //initialiced as entry point to the volume
+    // vec3 step_offset = offset*ray_dir;   
+    vec3 step_offset = 0.0f;
+	vec3 sample_pos = v_position+step_offset; //initialiced as entry point to the volume
 	vec4 final_color = vec4(0.0f);
 
     vec3 step_vector = u_length_step*ray_dir;
@@ -47,7 +50,9 @@ void main(){
         d = texture3D(u_texture, uv_3D).x;
 
         // 3. Classification
-        sample_color = vec4(u_color.r,u_color.g,u_color.b,d);//important that the d, 4ºcomponent. Para que funcione la volumetric
+        vec3 tf_color = texture2D(u_tf_mapping_texture, vec2(d,1)).xyz;
+        sample_color = vec4(u_color.r*tf_color.r,u_color.g*tf_color.g,u_color.b*tf_color.b,d);//important that the d, 4ºcomponent. Para que funcione la volumetric
+        // sample_color = vec4(u_color.r,u_color.g,u_color.b,d);//important that the d, 4ºcomponent. Para que funcione la volumetric
 
         // 4. Composition
 		sample_color.rgb *= sample_color.a; //CREO Q PONIENDO ESTO SE VE PEOR

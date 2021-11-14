@@ -112,6 +112,7 @@ public:
 	float brightness;
 
 	Texture* noise_texture;
+	Texture* tf_mapping_texture;
 	//Vector3 direction_vector; // no se si es buena idea guardarlo aquí
 
 	VolumeMaterial();

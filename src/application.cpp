@@ -67,7 +67,6 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 			VolumeMaterial* vol_material = new VolumeMaterial(sh, tex3d);
 			
-
 			VolumeNode* vol_node = new VolumeNode("Volume Node");
 
 			vol_node->volume = volume;

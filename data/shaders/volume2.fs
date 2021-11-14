@@ -11,19 +11,25 @@ uniform mat4 u_model;
 uniform mat4 u_inverse_model;
 uniform vec3 u_camera_position;
 
+//Textures uniforms
 uniform sampler3D u_texture;
+uniform sampler2D u_noise_texture;
 uniform vec4 u_color;
 
 uniform float u_length_step; //ray step
 uniform float u_brightness;
 
 void main(){
-    // 1. Ray setup
+    
+    float texture_width = 128.0f;
+    vec2 uv_screen =  gl_FragCoord.xy / texture_width; 
+    vec3 offset = texture2D(u_noise_texture, uv_screen).xyz ;
 
+    // 1. Ray setup
     vec4 camera_l_pos_temp = (u_inverse_model * vec4(u_camera_position, 1.0));
-    vec3 camera_l_pos= camera_l_pos_temp.xyz/camera_l_pos_temp.w;
+    vec3 camera_l_pos = camera_l_pos_temp.xyz/camera_l_pos_temp.w;
     vec3 ray_dir = normalize(v_position - camera_l_pos);
-	vec3 sample_pos = v_position; //initialiced as entry point to the volume
+	vec3 sample_pos = v_position + offset; //initialiced as entry point to the volume
 	vec4 final_color = vec4(0.0f);
 
     vec3 step_vector = u_length_step*ray_dir;
@@ -31,8 +37,7 @@ void main(){
     vec3 uv_3D = vec3(0.0f);
     vec4 sample_color = vec4(0.0f);
 
-    // float limit_l_min = -1.0f;
-    // float limit_l_max = 1.0f;
+    
 
     // Ray loop
     for(int i=0; i<MAX_ITERATIONS; i++){
@@ -49,6 +54,8 @@ void main(){
         final_color += u_length_step * (1.0 - final_color.a) * sample_color;
 
         // 5. Next sample
+        // if (i==1)
+        //     sample_pos += offset;
         sample_pos += step_vector;
 
         // 6. Early termination
@@ -74,4 +81,5 @@ void main(){
 
     //7. Final color
     gl_FragColor = final_color * u_brightness;
+    //gl_FragColor = vec4(offset);
 }

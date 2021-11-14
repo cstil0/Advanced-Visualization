@@ -350,6 +350,8 @@ VolumeMaterial::VolumeMaterial(Shader* sh, Texture* tex)
 	this->texture = tex;
 	this->length_step = 0.1f;// cambiando a un valor mas pequeño
 	this->brightness = 5.0f;
+	
+	this->noise_texture = Texture::Get("data/blueNoise.png");
 }
 
 VolumeMaterial::~VolumeMaterial()
@@ -368,7 +370,9 @@ void VolumeMaterial::setUniforms(Camera* camera, Matrix44 model, Matrix44 invers
 	shader->setUniform("u_brightness", this->brightness);
 
 	if (texture)
-		shader->setTexture("u_texture", texture, 0);
+		shader->setTexture("u_texture", texture, 0); // poner offset para numerar las texturas
+	if(noise_texture)
+		shader->setTexture("u_noise_texture", noise_texture, 1);
 }
 
 void VolumeMaterial::render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, Camera* camera)

@@ -352,6 +352,11 @@ VolumeMaterial::VolumeMaterial(Shader* sh, Texture* tex)
 	this->brightness = 5.0f;
 	
 	this->noise_texture = Texture::Get("data/blueNoise.png");
+	this->plane_abcd = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+	//this->plane_a = 0.0f;
+	//this->plane_b = 0.0f;
+	//this->plane_c = 0.0f;
+	//this->plane_d = 0.0f;
 }
 
 VolumeMaterial::~VolumeMaterial()
@@ -368,6 +373,11 @@ void VolumeMaterial::setUniforms(Camera* camera, Matrix44 model, Matrix44 invers
 
 	shader->setUniform("u_length_step", length_step);
 	shader->setUniform("u_brightness", this->brightness);
+	shader->setUniform("u_plane_abcs", this->plane_abcd);
+	//shader->setUniform("u_plane_a", this->plane_a);
+	//shader->setUniform("u_plane_b", this->plane_b);
+	//shader->setUniform("u_plane_c", this->plane_c);
+	//shader->setUniform("u_plane_d", this->plane_d);
 
 	if (texture)
 		shader->setTexture("u_texture", texture, 0); // poner offset para numerar las texturas
@@ -400,4 +410,5 @@ void VolumeMaterial::renderInMenu()
 	ImGui::SliderFloat("Length Step", &this->length_step, 0.02, 1);
 	ImGui::SliderFloat("Brightness", &this->brightness, 1.0f, 50.0f);
 	ImGui::ColorEdit3("Color", color.v);
+	ImGui::SliderFloat4("Clipping Plane", plane_abcd.v, 0.0f, 5.0f);
 }

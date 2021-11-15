@@ -348,7 +348,7 @@ VolumeMaterial::VolumeMaterial(Shader* sh, Texture* tex)
 {
 	this->shader = sh;
 	this->texture = tex;
-	this->length_step = 0.1f;// cambiando a un valor mas pequeño
+	this->length_step = 0.001f;// cambiando a un valor mas pequeño
 	this->brightness = 5.0f;
 	
 	this->noise_texture = Texture::Get("data/blueNoise.png");
@@ -407,8 +407,8 @@ void VolumeMaterial::render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, 
 
 void VolumeMaterial::renderInMenu()
 {
-	ImGui::SliderFloat("Length Step", &this->length_step, 0.02, 1);
+	ImGui::SliderFloat("Length Step", &this->length_step, 0.001, 0.01);
 	ImGui::SliderFloat("Brightness", &this->brightness, 1.0f, 50.0f);
-	ImGui::ColorEdit3("Color", color.v);
+	ImGui::ColorEdit3("Color", color.v); 
 	ImGui::SliderFloat4("Clipping Plane", plane_abcd.v, 0.0f, 5.0f);
 }

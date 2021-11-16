@@ -21,16 +21,40 @@ uniform float u_length_step; //ray step
 uniform float u_brightness;
 uniform vec4 u_plane_abcd;
 uniform float u_iso_threshold;
-// uniform float u_plane_a;
-// uniform float u_plane_b;
-// uniform float u_plane_c;
-// uniform float u_plane_d;
+uniform float u_h_threshold;
+
+
+float sampling_volume(in float x, in float y, in float z ){
+    vec3 sample_pos = vec3(x,y,z);
+    vec3 uv_3D = (sample_pos + 1.0f)*0.5f;
+    float d = texture3D(u_texture, uv_3D).x;
+    return d;
+}
+
+vec3 compute_gradient(const in vec3 sample_pos, const in float h){
+    
+    float f1 = sampling_volume(sample_pos.x + h,  sample_pos.y,  sample_pos.z );
+    float f2 = sampling_volume(sample_pos.x,  sample_pos.y + h,  sample_pos.z );
+    float f3 = sampling_volume(sample_pos.x,  sample_pos.y ,  sample_pos.z + h );
+    float f4 = sampling_volume(sample_pos.x - h,  sample_pos.y ,  sample_pos.z );
+    float f5 = sampling_volume(sample_pos.x,  sample_pos.y - h,  sample_pos.z );
+    float f6 = sampling_volume(sample_pos.x,  sample_pos.y,  sample_pos.z - h);
+
+    f1 = f1-f4;
+    f2 = f2-f5;
+    f3 = f3-f6;
+    // f1 = max(f1-f4, 0.0f);
+    // f2 = max(f2-f5, 0.0f);
+    // f3 = max(f3-f6, 0.0f);
+    vec3 gradient = normalize(- 0.5*1/h*vec3(f1,f2,f3));
+    // gradient = max(gradient,v);
+	return gradient;
+}
 
 void main(){
     
     float texture_width = 128.0f;
     vec2 uv_screen =  gl_FragCoord.xy / texture_width; 
-    float offset = texture2D(u_noise_texture, uv_screen).x ;
 
     // 1. Ray setup
     vec4 camera_l_pos_temp = (u_inverse_model * vec4(u_camera_position, 1.0));
@@ -38,6 +62,7 @@ void main(){
     vec3 ray_dir = normalize(v_position - camera_l_pos);
     vec3 step_vector = u_length_step*ray_dir;
     
+    // float offset = texture2D(u_noise_texture, uv_screen).x ;
     // vec3 step_offset = offset*step_vector;   
     vec3 step_offset = vec3(0.0f);
 	
@@ -51,6 +76,11 @@ void main(){
     vec4 sample_color = vec4(0.0f);
     float plane = 0.0f;
 
+    float f1 = 0.0f; float f2 = 0.0f; float f3 = 0.0f; float f4 = 0.0f; float f5 = 0.0f; float f6 = 0.0f;
+    vec3 gradient = vec3(0.0f);
+
+    float h = u_h_threshold;
+    
     // Ray loop
     for(int i=0; i<MAX_ITERATIONS; i++){
        
@@ -67,26 +97,45 @@ void main(){
         // Classification basica
         // sample_color = vec4(u_color.r*tf_color.r,u_color.g*tf_color.g,u_color.b*tf_color.b,d);//important that the d, 4ºcomponent. Para que funcione la volumetric
         
-        sample_color = vec4(u_color.r,u_color.r,u_color.r,d);//important that the d, 4ºcomponent. Para que funcione la volumetric
-        
+        // sample_color = vec4(u_color.r,u_color.r,u_color.r,d);//important that the d, 4ºcomponent. Para que funcione la volumetric
+        sample_color = vec4(u_color.r,u_color.g,u_color.b,d);//important that the d, 4ºcomponent. Para que funcione la volumetric
+      
         // 4. Composition
-		sample_color.rgb *= sample_color.a; 
+		// sample_color.rgb *= sample_color.a; 
         // final_color += u_length_step * (1.0 - final_color.a) * sample_color;
+        
         // Visualizing isosurfaces
         // ME HE QUEDADO AQUI, SALE COSAS RARAS HAY Q MIRAR...
-        if ( d > u_iso_threshold)
-            final_color = (1.0 - final_color.a) * sample_color;
+        if ( sample_color.a > u_iso_threshold){
+            // vec3 gradient = compute_gradient(sample_pos, 0.1);
+            // f1 = sampling_volume(sample_pos.x + h,  sample_pos.y,  sample_pos.z );
+            // f2 = sampling_volume(sample_pos.x,  sample_pos.y + h,  sample_pos.z );
+            // f3 = sampling_volume(sample_pos.x,  sample_pos.y ,  sample_pos.z + h );
+            // f4 = sampling_volume(sample_pos.x - h,  sample_pos.y,  sample_pos.z );
+            // f5 = sampling_volume(sample_pos.x,  sample_pos.y - h,  sample_pos.z );
+            // f6 = sampling_volume(sample_pos.x,  sample_pos.y,  sample_pos.z - h);
+
+            // f1 = f1-f4;
+            // f2 = f2-f5;
+            // f3 = f3-f6;
+            // gradient = 0.5*1/h*vec3(f1,f2,f3);
+            gradient = compute_gradient(sample_pos, h);
+            final_color = sample_color;
+        }
+            
 
         // 5. Next sample
 
         sample_pos += step_vector;
+
+
+        // //volume clipping
         // plane = u_plane_abcd.x*sample_pos.x + u_plane_abcd.y*sample_pos.y + u_plane_abcd.z*sample_pos.z + u_plane_abcd.w;
         
-        //volume clipping
         // if (plane > 0.0f) {
         //     final_color = vec4(0.0f);    
-        //     //final_color += u_length_step * (1.0 - final_color.a) * sample_color;// not sure if is correct
-        //     //final_color += sample_color.a > u_iso_threshold;
+        //     final_color += u_length_step * (1.0 - final_color.a) * sample_color;// not sure if is correct
+            
         // }
 
         // 6. Early termination
@@ -111,6 +160,7 @@ void main(){
     }
 
     //7. Final color
-    gl_FragColor = final_color * u_brightness;
-    //gl_FragColor = vec4(offset);
+    // gl_FragColor = final_color * u_brightness;
+    // gl_FragColor = vec4(offset);
+    gl_FragColor = vec4(gradient,1.0);
 }

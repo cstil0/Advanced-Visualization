@@ -355,6 +355,8 @@ VolumeMaterial::VolumeMaterial(Shader* sh, Texture* tex)
 	this->plane_abcd = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
 	this->iso_threshold = 0.015;
+	this->h_threshold = 0.015;
+
 }
 
 VolumeMaterial::~VolumeMaterial()
@@ -373,7 +375,7 @@ void VolumeMaterial::setUniforms(Camera* camera, Matrix44 model, Matrix44 invers
 	shader->setUniform("u_brightness", this->brightness);
 	shader->setUniform("u_plane_abcd", this->plane_abcd);
 	shader->setUniform("u_iso_threshold", this->iso_threshold);
-
+	shader->setUniform("u_h_threshold", this->h_threshold);
 	//shader->setUniform("u_plane_a", this->plane_a);
 	//shader->setUniform("u_plane_b", this->plane_b);
 	//shader->setUniform("u_plane_c", this->plane_c);
@@ -397,9 +399,10 @@ void VolumeMaterial::render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, 
 		//upload uniforms
 		setUniforms(camera, model, inverse_model);
 
+		//glEnable(GL_BLEND);
 		//do the draw call
 		mesh->render(GL_TRIANGLES);
-
+		//glDisable(GL_BLEND);
 		//disable shader
 		shader->disable();
 	}
@@ -410,7 +413,9 @@ void VolumeMaterial::renderInMenu()
 	ImGui::SliderFloat("Length Step", &this->length_step, 0.001, 1.0f);
 	ImGui::SliderFloat("Brightness", &this->brightness, 1.0f, 50.0f);
 	ImGui::ColorEdit3("Color", color.v); 
-	ImGui::SliderFloat4("Clipping Plane", plane_abcd.v,-0.5f, 0.5f);
+	ImGui::SliderFloat4("Clipping Plane", plane_abcd.v, -20.0f, 20.0f);
 	ImGui::SliderFloat("Isosurface threshold", &this->iso_threshold, 0.0f, 1.0f);
+	ImGui::SliderFloat("H threshold", &this->h_threshold, 0.0f, 1.0f);
+
 
 }

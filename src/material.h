@@ -112,6 +112,7 @@ public:
 	float brightness;
 	vec4 plane_abcd;
 	float iso_threshold;
+	float h_threshold;
 
 	Texture* noise_texture;
 	Texture* tf_mapping_texture;

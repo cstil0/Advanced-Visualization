@@ -198,13 +198,6 @@ void VolumeNode::renderInMenu()
 	if (!(this->typeOfNode == TYPEOFNODE::VOLUME)) {
 		ImGui::Checkbox("Visible", &visible_flag);
 	}
-
-	// Material
-	if (ImGui::TreeNode("Material")) {
-		material->renderInMenu();
-		ImGui::TreePop();
-	}
-
 	//Model edit
 	if (ImGui::TreeNode("Model"))
 	{
@@ -217,4 +210,11 @@ void VolumeNode::renderInMenu()
 
 		ImGui::TreePop();
 	}
+	// Material
+	if (ImGui::TreeNode("Material")) {
+		material->renderInMenu();
+		ImGui::TreePop();
+	}
+
+	
 }

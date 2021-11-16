@@ -20,6 +20,7 @@ uniform vec4 u_color;
 uniform float u_length_step; //ray step
 uniform float u_brightness;
 uniform vec4 u_plane_abcd;
+uniform float u_iso_threshold;
 // uniform float u_plane_a;
 // uniform float u_plane_b;
 // uniform float u_plane_c;
@@ -36,9 +37,11 @@ void main(){
     vec3 camera_l_pos = camera_l_pos_temp.xyz/camera_l_pos_temp.w;
     vec3 ray_dir = normalize(v_position - camera_l_pos);
     vec3 step_vector = u_length_step*ray_dir;
-    vec3 step_offset = offset*step_vector;   
-    // vec3 step_offset = 0.0f;
-	vec3 sample_pos = v_position+step_offset; //initialiced as entry point to the volume
+    
+    // vec3 step_offset = offset*step_vector;   
+    vec3 step_offset = vec3(0.0f);
+	
+    vec3 sample_pos = v_position+step_offset; //initialiced as entry point to the volume
 	vec4 final_color = vec4(0.0f);
 
 
@@ -50,31 +53,41 @@ void main(){
 
     // Ray loop
     for(int i=0; i<MAX_ITERATIONS; i++){
-        plane = u_plane_abcd.x*sample_pos.x + u_plane_abcd.y*sample_pos.y + u_plane_abcd.z*sample_pos.z + u_plane_abcd.w;
-        if (plane > 0.0f)
-            discard;
+       
 
         // 2. Volume sampling
         uv_3D = (sample_pos + 1.0f)*0.5f;
         d = texture3D(u_texture, uv_3D).x;
 
         // 3. Classification
-        vec3 tf_color = texture2D(u_tf_mapping_texture, vec2(d,1)).xyz;
+        //vec3 tf_color = texture2D(u_tf_mapping_texture, vec2(d,1)).xyz;
         // Con tf
-        sample_color = vec4(tf_color.r, tf_color.g, tf_color.b,d);//important that the d, 4ºcomponent. Para que funcione la volumetric4
+        //sample_color = vec4(tf_color.r, tf_color.g, tf_color.b,d);//important that the d, 4ºcomponent. Para que funcione la volumetric4
 
         // Classification basica
         // sample_color = vec4(u_color.r*tf_color.r,u_color.g*tf_color.g,u_color.b*tf_color.b,d);//important that the d, 4ºcomponent. Para que funcione la volumetric
-        // sample_color = vec4(d,1-d,0,d);//important that the d, 4ºcomponent. Para que funcione la volumetric
-
+        
+        sample_color = vec4(u_color.r,u_color.r,u_color.r,d);//important that the d, 4ºcomponent. Para que funcione la volumetric
+        
         // 4. Composition
-		sample_color.rgb *= sample_color.a; //CREO Q PONIENDO ESTO SE VE PEOR
-        final_color += u_length_step * (1.0 - final_color.a) * sample_color;
+		sample_color.rgb *= sample_color.a; 
+        // final_color += u_length_step * (1.0 - final_color.a) * sample_color;
+        // Visualizing isosurfaces
+        // ME HE QUEDADO AQUI, SALE COSAS RARAS HAY Q MIRAR...
+        if ( d > u_iso_threshold)
+            final_color = (1.0 - final_color.a) * sample_color;
 
         // 5. Next sample
-        // if (i==1)
-        //     sample_pos += offset;
+
         sample_pos += step_vector;
+        // plane = u_plane_abcd.x*sample_pos.x + u_plane_abcd.y*sample_pos.y + u_plane_abcd.z*sample_pos.z + u_plane_abcd.w;
+        
+        //volume clipping
+        // if (plane > 0.0f) {
+        //     final_color = vec4(0.0f);    
+        //     //final_color += u_length_step * (1.0 - final_color.a) * sample_color;// not sure if is correct
+        //     //final_color += sample_color.a > u_iso_threshold;
+        // }
 
         // 6. Early termination
         //If is outside the auxiliar mesh

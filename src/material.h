@@ -111,10 +111,7 @@ public:
 	float length_step;
 	float brightness;
 	vec4 plane_abcd;
-	//float plane_a;
-	//float plane_b;
-	//float plane_c;
-	//float plane_d;
+	float iso_threshold;
 
 	Texture* noise_texture;
 	Texture* tf_mapping_texture;

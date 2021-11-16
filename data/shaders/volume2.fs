@@ -19,7 +19,7 @@ uniform vec4 u_color;
 
 uniform float u_length_step; //ray step
 uniform float u_brightness;
-uniform vec4 u_plane_abcd;
+uniform float u_threshold_plane;
 // uniform float u_plane_a;
 // uniform float u_plane_b;
 // uniform float u_plane_c;
@@ -36,9 +36,13 @@ void main(){
     vec3 camera_l_pos = camera_l_pos_temp.xyz/camera_l_pos_temp.w;
     vec3 ray_dir = normalize(v_position - camera_l_pos);
     vec3 step_vector = u_length_step*ray_dir;
-    vec3 step_offset = offset*step_vector;   
-    // vec3 step_offset = 0.0f;
-	vec3 sample_pos = v_position+step_offset; //initialiced as entry point to the volume
+
+    vec3 step_offset = 0.0f;
+    #ifdef USE_JITTERING
+        step_offset = offset*step_vector;
+    #endif
+    
+	vec3 sample_pos = v_position+step_offset; //initialized as entry point to the volume
 	vec4 final_color = vec4(0.0f);
 
 
@@ -46,12 +50,15 @@ void main(){
     float d = 0.0f;
     vec3 uv_3D = vec3(0.0f);
     vec4 sample_color = vec4(0.0f);
-    float plane = 0.0f;
+    float plane_value = 0.0f;
+    vec4 plane_abcd = (0.0f, 1.0f, 0.0f, 1.0f);
 
     // Ray loop
     for(int i=0; i<MAX_ITERATIONS; i++){
-        plane = u_plane_abcd.x*sample_pos.x + u_plane_abcd.y*sample_pos.y + u_plane_abcd.z*sample_pos.z + u_plane_abcd.w;
-        if (plane > 0.0f)
+        plane_value = plane_abcd.x*sample_pos.x + plane_abcd.y*sample_pos.y + plane_abcd.z*sample_pos.z + plane_abcd.w;
+        // plane_value += plane_abcd.y*sample_pos.y;
+
+        if (plane_value < u_threshold_plane)
             discard;
 
         // 2. Volume sampling
@@ -59,13 +66,18 @@ void main(){
         d = texture3D(u_texture, uv_3D).x;
 
         // 3. Classification
-        vec3 tf_color = texture2D(u_tf_mapping_texture, vec2(d,1)).xyz;
-        // Con tf
-        sample_color = vec4(tf_color.r, tf_color.g, tf_color.b,d);//important that the d, 4ºcomponent. Para que funcione la volumetric4
-
         // Classification basica
-        // sample_color = vec4(u_color.r*tf_color.r,u_color.g*tf_color.g,u_color.b*tf_color.b,d);//important that the d, 4ºcomponent. Para que funcione la volumetric
-        // sample_color = vec4(d,1-d,0,d);//important that the d, 4ºcomponent. Para que funcione la volumetric
+        // SEGURO QUE ESTO SE PUEDE HACER MÁS EFICIENTE PARA QUE NO SE HAGA SI EL TF ESTÁ ACTIVADO
+        sample_color = vec4(d,1-d,0,d);//important that the d, 4ºcomponent. Para que funcione la volumetric
+
+        // Con tf
+        #ifdef USE_TF
+            vec3 tf_color = texture2D(u_tf_mapping_texture, vec2(d,1)).xyz;
+            sample_color = vec4(tf_color.r, tf_color.g, tf_color.b,d);//important that the d, 4ºcomponent. Para que funcione la volumetric4
+            // sample_color = vec4(u_color.r*tf_color.r,u_color.g*tf_color.g,u_color.b*tf_color.b,d);//important that the d, 4ºcomponent. Para que funcione la volumetric
+        #endif
+
+
 
         // 4. Composition
 		sample_color.rgb *= sample_color.a; //CREO Q PONIENDO ESTO SE VE PEOR
@@ -99,5 +111,5 @@ void main(){
 
     //7. Final color
     gl_FragColor = final_color * u_brightness;
-    //gl_FragColor = vec4(offset);
+    // gl_FragColor = vec4( plane_abcd);
 }

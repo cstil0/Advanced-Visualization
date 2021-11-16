@@ -453,16 +453,42 @@ void Application::update(double seconds_elapsed)
 	if (mouse_locked)
 		Input::centerMouse();
 
-	// Update the inverse model matrix
 	if (app_mode == APPMODE::VOLUME) {
 		for (int i = 0; i < node_list.size(); i++)
 		{
-			if (node_list[i]->typeOfNode == SceneNode::TYPEOFNODE::NODE) {
+			if (node_list[i]->typeOfNode == SceneNode::TYPEOFNODE::VOLUME) {
+				// Update inverse model matrix
 				VolumeNode* volume_node = (VolumeNode*)node_list[i];
 				Matrix44 inv_m_aux = volume_node->model;
 				inv_m_aux.inverse();
 				volume_node->inverse_model = inv_m_aux;
 				node_list[i] = volume_node;
+
+				// Update the visualization flags according to imgui and pass the corresponding macros to the shader
+				VolumeMaterial* volume_material = (VolumeMaterial*)volume_node->material;
+				// If the flag corresponding to the imgui is not equal to the one of the material - update
+				if (volume_material->jittering_flag_imgui != volume_material->jittering_flag) {
+					// Update
+					volume_material->jittering_flag = volume_material->jittering_flag_imgui;
+					// Send macro
+					std::string jittering_macro = "\n#define USE_JITTERING true\n";
+					volume_material->shader->setMacros(jittering_macro.c_str());
+				}
+				if (volume_material->TF_flag_imgui != volume_material->TF_flag) {
+					volume_material->TF_flag = volume_material->TF_flag_imgui;
+					std::string TF_macro = "\n#define USE_TF true\n";
+					volume_material->shader->setMacros(TF_macro.c_str());
+				}
+				if (volume_material->clipping_flag_imgui != volume_material->clipping_flag) {
+					volume_material->clipping_flag = volume_material->clipping_flag_imgui;
+					std::string clipping_macro = "\n#define USE_CLIPPING true\n";
+					volume_material->shader->setMacros(clipping_macro.c_str());
+				}
+				if (volume_material->illumination_flag_imgui != volume_material->illumination_flag) {
+					volume_material->illumination_flag = volume_material->illumination_flag_imgui;
+					std::string illumination_macro = "\n#define USE_illumination true\n";
+					volume_material->shader->setMacros(illumination_macro.c_str());
+				}
 			}
 		}
 	}
@@ -485,9 +511,6 @@ void Application::update(double seconds_elapsed)
 			for (int i = 0; i < optional_skybox_list.size(); i++) {
 				if (optional_skybox_list[i]->typeOfSkybox == typeOfSkybox_ImGUI) {
 					// Update the new skybox
-					if (typeOfSkybox_ImGUI == 2) {
-						int s = 0;
-					}
 					node_list[SceneNode::TYPEOFNODE::SKYBOX] = (SceneNode*)optional_skybox_list[i];
 					skybox_node = optional_skybox_list[i];
 				}

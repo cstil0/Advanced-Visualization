@@ -351,8 +351,19 @@ VolumeMaterial::VolumeMaterial(Shader* sh, Texture* tex)
 	this->length_step = 0.001f;// cambiando a un valor mas pequeño
 	this->brightness = 5.0f;
 	
+	jittering_flag = false;
+	TF_flag = false;
+	illumination_flag = false;
+	clipping_flag = false;
+
+	jittering_flag_imgui = false;
+	TF_flag_imgui = false;
+	illumination_flag_imgui = false;
+	clipping_flag_imgui = false;
+
 	this->noise_texture = Texture::Get("data/blueNoise.png");
-	this->plane_abcd = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+	this->threshold_plane = 0.0f;
+
 	//this->plane_a = 0.0f;
 	//this->plane_b = 0.0f;
 	//this->plane_c = 0.0f;
@@ -373,7 +384,7 @@ void VolumeMaterial::setUniforms(Camera* camera, Matrix44 model, Matrix44 invers
 
 	shader->setUniform("u_length_step", length_step);
 	shader->setUniform("u_brightness", this->brightness);
-	shader->setUniform("u_plane_abcs", this->plane_abcd);
+	shader->setUniform("u_threshold_plane", this->threshold_plane);
 	//shader->setUniform("u_plane_a", this->plane_a);
 	//shader->setUniform("u_plane_b", this->plane_b);
 	//shader->setUniform("u_plane_c", this->plane_c);
@@ -407,8 +418,13 @@ void VolumeMaterial::render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, 
 
 void VolumeMaterial::renderInMenu()
 {
-	ImGui::SliderFloat("Length Step", &this->length_step, 0.001, 0.01);
+	ImGui::SliderFloat("Length Step", &this->length_step, 0.001, 1);
+	ImGui::SliderFloat("Clipping Plane", &threshold_plane, -1.0f, 0.0f);
 	ImGui::SliderFloat("Brightness", &this->brightness, 1.0f, 50.0f);
 	ImGui::ColorEdit3("Color", color.v); 
-	ImGui::SliderFloat4("Clipping Plane", plane_abcd.v, 0.0f, 5.0f);
+	ImGui::Checkbox("Jittering", &jittering_flag_imgui);
+	ImGui::Checkbox("Transfer function", &TF_flag_imgui);
+	ImGui::Checkbox("Clipping", &clipping_flag_imgui);
+	ImGui::Checkbox("Illumination", &illumination_flag_imgui);
+
 }

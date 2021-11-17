@@ -109,17 +109,20 @@ class VolumeMaterial : public StandardMaterial {
 public:
 	//Vector3 first_sample;
 	float length_step;
+	float density_threshold;
 	float brightness;
 	float threshold_plane;
 
 	// Flags for different visualization
 	bool jittering_flag;
 	bool TF_flag;
+	bool TF_debug_flag;
 	bool clipping_flag;
 	bool illumination_flag;
 
 	bool jittering_flag_imgui;
 	bool TF_flag_imgui;
+	bool TF_debug_flag_imgui;
 	bool illumination_flag_imgui;
 	bool clipping_flag_imgui;
 

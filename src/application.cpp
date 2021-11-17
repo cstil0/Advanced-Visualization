@@ -479,6 +479,11 @@ void Application::update(double seconds_elapsed)
 					std::string TF_macro = "\n#define USE_TF true\n";
 					volume_material->shader->setMacros(TF_macro.c_str());
 				}
+				if (volume_material->TF_debug_flag_imgui != volume_material->TF_debug_flag) {
+					volume_material->TF_debug_flag = volume_material->TF_debug_flag_imgui;
+					std::string TF_debug_macro = "\n#define USE_TF_DEBUG true\n";
+					volume_material->shader->setMacros(TF_debug_macro.c_str());
+				}
 				if (volume_material->clipping_flag_imgui != volume_material->clipping_flag) {
 					volume_material->clipping_flag = volume_material->clipping_flag_imgui;
 					std::string clipping_macro = "\n#define USE_CLIPPING true\n";

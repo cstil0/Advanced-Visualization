@@ -20,6 +20,7 @@ uniform vec4 u_color;
 uniform float u_length_step; //ray step
 uniform float u_brightness;
 uniform float u_threshold_plane;
+uniform float u_threshold_d;
 // uniform float u_plane_a;
 // uniform float u_plane_b;
 // uniform float u_plane_c;
@@ -58,8 +59,15 @@ void main(){
         plane_value = plane_abcd.x*sample_pos.x + plane_abcd.y*sample_pos.y + plane_abcd.z*sample_pos.z + plane_abcd.w;
         // plane_value += plane_abcd.y*sample_pos.y;
 
-        if (plane_value < u_threshold_plane)
-            discard;
+        // if (plane_value < u_threshold_plane)
+        //     discard;
+
+        #ifdef USE_TF_DEBUG
+            //Si estamos en el modo debug de la TF, queremos visualizar solo aquellos puntos que tengan una densidad menor a la marcada en el imgui
+            if(d>u_threshold_d){
+                discard;
+            }
+        #endif
 
         // 2. Volume sampling
         uv_3D = (sample_pos + 1.0f)*0.5f;

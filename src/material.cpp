@@ -349,15 +349,18 @@ VolumeMaterial::VolumeMaterial(Shader* sh, Texture* tex)
 	this->shader = sh;
 	this->texture = tex;
 	this->length_step = 0.001f;// cambiando a un valor mas pequeño
+	this->density_threshold = 1.0f;
 	this->brightness = 5.0f;
 	
 	jittering_flag = false;
 	TF_flag = false;
+	TF_debug_flag = false;
 	illumination_flag = false;
 	clipping_flag = false;
 
 	jittering_flag_imgui = false;
 	TF_flag_imgui = false;
+	TF_debug_flag_imgui = false;
 	illumination_flag_imgui = false;
 	clipping_flag_imgui = false;
 
@@ -383,6 +386,7 @@ void VolumeMaterial::setUniforms(Camera* camera, Matrix44 model, Matrix44 invers
 	shader->setUniform("u_color", color);
 
 	shader->setUniform("u_length_step", length_step);
+	shader->setUniform("u_threshold_d", density_threshold);
 	shader->setUniform("u_brightness", this->brightness);
 	shader->setUniform("u_threshold_plane", this->threshold_plane);
 	//shader->setUniform("u_plane_a", this->plane_a);
@@ -419,11 +423,13 @@ void VolumeMaterial::render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, 
 void VolumeMaterial::renderInMenu()
 {
 	ImGui::SliderFloat("Length Step", &this->length_step, 0.001, 1);
+	ImGui::SliderFloat("Density threshold TF", &this->density_threshold, 0.0, 1);
 	ImGui::SliderFloat("Clipping Plane", &threshold_plane, -1.0f, 0.0f);
 	ImGui::SliderFloat("Brightness", &this->brightness, 1.0f, 50.0f);
 	ImGui::ColorEdit3("Color", color.v); 
 	ImGui::Checkbox("Jittering", &jittering_flag_imgui);
 	ImGui::Checkbox("Transfer function", &TF_flag_imgui);
+	ImGui::Checkbox("Debug TF", &TF_debug_flag_imgui);
 	ImGui::Checkbox("Clipping", &clipping_flag_imgui);
 	ImGui::Checkbox("Illumination", &illumination_flag_imgui);
 

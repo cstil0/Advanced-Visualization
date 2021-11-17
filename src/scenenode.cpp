@@ -103,6 +103,7 @@ Light::Light(const char* name)
 	this->name = name;
 	this->visible_flag = TRUE;
 	this->typeOfNode = (int)TYPEOFNODE::LIGHT;
+
 	this->diffuse_intensity.set(1.0, 1.0, 1.0);
 	this->specular_intensity.set(1.0f, 1.0f, 1.0f);
 	this->light_intensity = 2.5;

@@ -23,6 +23,33 @@ uniform vec4 u_plane_abcd;
 uniform float u_iso_threshold;
 uniform float u_h_threshold;
 
+//light parameters:
+uniform vec3 u_light_pos;
+uniform vec3 u_Ia, u_Id, u_Is; //Ambient, diffuse, specular
+
+//Material uniforms parameters
+uniform vec3 u_diffuse;
+uniform vec3 u_specular;
+uniform float u_shininess;
+
+
+vec3 compute_lightPhong(vec3 gradient){
+    
+    // Compute the light equation vectors
+    vec3 L = normalize(u_light_pos - v_world_position);// local or world?
+    vec3 N = (gradient); // ya esta normalizado ¿?
+    vec3 V = normalize(u_camera_position - v_world_position); //;- ray_dir; //since is the same but just the opposite
+    vec3 R = reflect(-L,N);
+
+    //We initialize the variables to store differents parts of lights
+    vec3 ambient_light = u_Ia;
+    vec3 diffuse_light = u_diffuse * max(dot(L,N), 0.0f) * u_Id;
+    vec3 specular_light = u_specular * pow( max(dot(R,V), 0.0f) , u_shininess) * u_Is;
+
+    //Final phong equation
+    vec3 light_intensity += ambient_light + diffuse_light + specular_light;
+    return light_intensity;
+}
 
 float sampling_volume(in float x, in float y, in float z ){
     vec3 sample_pos = vec3(x,y,z);
@@ -76,7 +103,7 @@ void main(){
     vec4 sample_color = vec4(0.0f);
     float plane = 0.0f;
 
-    float f1 = 0.0f; float f2 = 0.0f; float f3 = 0.0f; float f4 = 0.0f; float f5 = 0.0f; float f6 = 0.0f;
+    // float f1 = 0.0f; float f2 = 0.0f; float f3 = 0.0f; float f4 = 0.0f; float f5 = 0.0f; float f6 = 0.0f;
     vec3 gradient = vec3(0.0f);
 
     float h = u_h_threshold;
@@ -101,8 +128,8 @@ void main(){
         sample_color = vec4(u_color.r,u_color.g,u_color.b,d);//important that the d, 4ºcomponent. Para que funcione la volumetric
       
         // 4. Composition
-		// sample_color.rgb *= sample_color.a; 
-        // final_color += u_length_step * (1.0 - final_color.a) * sample_color;
+		sample_color.rgb *= sample_color.a; 
+        final_color += u_length_step * (1.0 - final_color.a) * sample_color;
         
         // Visualizing isosurfaces
         // ME HE QUEDADO AQUI, SALE COSAS RARAS HAY Q MIRAR...
@@ -119,6 +146,7 @@ void main(){
             // f2 = f2-f5;
             // f3 = f3-f6;
             // gradient = 0.5*1/h*vec3(f1,f2,f3);
+
             gradient = compute_gradient(sample_pos, h);
             final_color = sample_color;
         }
@@ -127,17 +155,16 @@ void main(){
         // 5. Next sample
 
         sample_pos += step_vector;
-
-
-        // //volume clipping
+        
         // plane = u_plane_abcd.x*sample_pos.x + u_plane_abcd.y*sample_pos.y + u_plane_abcd.z*sample_pos.z + u_plane_abcd.w;
         
         // if (plane > 0.0f) {
-        //     final_color = vec4(0.0f);    
-        //     final_color += u_length_step * (1.0 - final_color.a) * sample_color;// not sure if is correct
-            
+        //    //sample_pos = vec3(0.0);
+           
+        //     final_color = vec4(0.0);
+        //     // final_color += u_length_step * (1.0 - final_color.a) * sample_color;// not sure if is correct    
         // }
-
+        
         // 6. Early termination
         //If is outside the auxiliar mesh
         if( sample_pos.x > 1.0f || sample_pos.y > 1.0f || sample_pos.z > 1.0f ) {
@@ -152,6 +179,9 @@ void main(){
             break;
         }
        
+
+
+            
     }
 
     float threshold = 0.01f;
@@ -160,7 +190,7 @@ void main(){
     }
 
     //7. Final color
-    // gl_FragColor = final_color * u_brightness;
+    gl_FragColor = final_color * u_brightness;
     // gl_FragColor = vec4(offset);
-    gl_FragColor = vec4(gradient,1.0);
+    //gl_FragColor = vec4(gradient,1.0);
 }

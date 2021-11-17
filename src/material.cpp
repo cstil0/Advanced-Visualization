@@ -104,7 +104,6 @@ PhongMaterial::PhongMaterial(Shader* sh, Texture* texture)
 	this->specular.set(1.0f, 1.0f, 0.0f);
 	this->diffuse.set(0.0f, 0.0f, 1.0f);
 	this->shininess = 20;
-	
 	this->shader = sh;
 	this->texture = texture;
 }
@@ -389,6 +388,7 @@ void VolumeMaterial::setUniforms(Camera* camera, Matrix44 model, Matrix44 invers
 		shader->setTexture("u_tf_mapping_texture", tf_mapping_texture, 2);
 }
 
+
 void VolumeMaterial::render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, Camera* camera)
 {
 	if (mesh && shader)
@@ -413,9 +413,48 @@ void VolumeMaterial::renderInMenu()
 	ImGui::SliderFloat("Length Step", &this->length_step, 0.001, 1.0f);
 	ImGui::SliderFloat("Brightness", &this->brightness, 1.0f, 50.0f);
 	ImGui::ColorEdit3("Color", color.v); 
-	ImGui::SliderFloat4("Clipping Plane", plane_abcd.v, -20.0f, 20.0f);
+	ImGui::SliderFloat4("Clipping Plane", plane_abcd.v, -10.0f, 10.0f);
 	ImGui::SliderFloat("Isosurface threshold", &this->iso_threshold, 0.0f, 1.0f);
 	ImGui::SliderFloat("H threshold", &this->h_threshold, 0.0f, 1.0f);
 
+
+}
+
+VolumetricPhong::VolumetricPhong(Shader* sh, Texture* texture) {
+	this->color.set(0.7f, 0.7f, 0.7f, 0.f); //ambient material color
+	this->specular.set(1.0f, 1.0f, 0.0f);
+	this->diffuse.set(0.0f, 0.0f, 1.0f);
+	this->shininess = 20;
+
+	this->shader = sh;
+	this->texture = texture;
+}
+
+void VolumetricPhong::setUniforms(Camera* camera, Matrix44 model)
+{
+	shader->setUniform("u_viewprojection", camera->viewprojection_matrix);
+	shader->setUniform("u_camera_position", camera->eye);
+	shader->setUniform("u_model", model);
+	shader->setUniform("u_color", this->color);
+	
+	shader->setUniform("u_light_pos", light->model.getTranslation());
+	shader->setUniform("u_Ia", Application::instance->ambient_light); //just one time
+	shader->setUniform("u_Id", light->diffuse_intensity);
+	shader->setUniform("u_Is", light->specular_intensity);
+
+	shader->setUniform("u_specular", specular);
+	shader->setUniform("u_diffuse", diffuse);
+	shader->setUniform("u_shininess", shininess);
+
+	/*if (texture)
+		shader->setUniform("u_texture", texture, EOutput::ALBEDO);*/
+}
+
+void VolumetricPhong::renderInMenu()
+{
+	ImGui::ColorEdit3("Color A. Material", (float*)&this->color); // Edit 3 floats representing a color
+	ImGui::ColorEdit3("Specular", (float*)&this->specular);
+	ImGui::ColorEdit3("Diffuse", (float*)&this->diffuse);
+	ImGui::SliderFloat("Shininess", (float*)&this->shininess, 1, 50);
 
 }

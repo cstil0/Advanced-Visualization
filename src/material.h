@@ -126,4 +126,22 @@ public:
 	void render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, Camera* camera);
 	void renderInMenu();
 };
+
+class VolumetricPhong :public VolumeMaterial {
+public:
+
+	vec3 specular;
+	vec3 diffuse;
+	float shininess;
+
+	Light * light;
+
+	VolumetricPhong();
+	VolumetricPhong(Shader* sh, Texture* texture);
+	~VolumetricPhong();
+	void setUniforms(Camera* camera, Matrix44 model);
+	//void render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, Camera* camera);
+	void renderInMenu();
+};
+
 #endif

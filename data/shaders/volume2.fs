@@ -92,6 +92,7 @@ void main(){
             if(d>u_threshold_d_max)
                 discard;
 
+            // ELSE??
             if(d<u_density_limits.x)
                 sample_color = vec4(u_tf_fst_color.r,u_tf_fst_color.g,u_tf_fst_color.b,d);
             if(d>u_density_limits.x && d<u_density_limits.y)

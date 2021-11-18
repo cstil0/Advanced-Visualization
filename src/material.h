@@ -138,6 +138,7 @@ public:
 	vec4 TF_second_color;
 	vec4 TF_third_color;
 	vec4 TF_forth_color;
+	bool save_texture;
 
 	VolumeMaterial();
 	VolumeMaterial(Shader* sh, Texture* tex, vec4 d_lim, vec4 TF_fst_col, vec4 TF_snd_col, vec4 TF_trd_col, vec4 TF_frth_col);
@@ -145,6 +146,7 @@ public:
 
 	void setUniforms(Camera* camera, Matrix44 model, Matrix44 inverse_model);
 	void render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, Camera* camera);
+	void saveTexture();
 	void renderInMenu();
 	void renderInMenu_TF();
 };

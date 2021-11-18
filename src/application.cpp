@@ -97,7 +97,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 			foot_tex3d->create3DFromVolume(foot_volume, GL_CLAMP_TO_EDGE);
 
 			VolumeMaterial* foot_material = new VolumeMaterial(sh, foot_tex3d, foot_d_lim, foot_fst_col, foot_snd_col, foot_trd_col, foot_frth_col);
-			Texture* tf_foot = Texture::Get("data/TF_mapping_foot.png");
+			Texture* tf_foot = Texture::Get("data/TF_texture_vol.tga");
 			foot_material->tf_mapping_texture = tf_foot;
 			VolumeNode* foot_vol_node = new VolumeNode("Foot Node");
 
@@ -587,6 +587,7 @@ void Application::update(double seconds_elapsed)
 
 				// Update volume according to the imgui
 				// 0 POR QUE EN ESTA PRÁCTICA SOLO HAY UN NODO
+				// CREO QUE SE PUEDE CAMBIAR POR LE VOLUME_NODE
 				if (typeOfVolume_ImGUI != node_list[0]->typeOfVolume) {
 					//SceneNode* principal_node = node_list[2];
 					// Look for the new node to be rendered
@@ -599,7 +600,6 @@ void Application::update(double seconds_elapsed)
 				// AIXÒ NO ESTÀ BEN GESTIONAT: QUAN CANVIA L'IMGUI HAURIEN S'HAURIEN DE TORNAR A ENVIAR TOTES LES MACROS
 				// Update the visualization flags according to imgui and pass the corresponding macros to the shader
 				// Miramos si alguno de los flags ha cambiado --> Si cualquiera de ellos ha cambiado tenemos que volver a enviar todas las macros (sino lo pilla como no definido)
-				VolumeMaterial* volume_material = (VolumeMaterial*)volume_node->material;
 				//bool change_jitttering = volume_material->jittering_flag_imgui != volume_material->jittering_flag;
 				//bool change_TF = volume_material->TF_flag_imgui != volume_material->TF_flag;
 				//bool change_TF_debug = volume_material->TF_debug_flag_imgui != volume_material->TF_debug_flag;
@@ -642,6 +642,7 @@ void Application::update(double seconds_elapsed)
 				//	volume_material->shader->setMacros(illumination_macro.c_str());
 				//}
 
+				VolumeMaterial* volume_material = (VolumeMaterial*)volume_node->material;
 
 				// If the flag corresponding to the imgui is not equal to the one of the material - update
 				if (volume_material->jittering_flag_imgui != volume_material->jittering_flag) {
@@ -686,6 +687,11 @@ void Application::update(double seconds_elapsed)
 						illumination_macro = "\n#define USE_illumination true\n";
 					}
 					volume_material->shader->setMacros(illumination_macro.c_str());
+				}
+
+				// Check if the save the TF texture is active to save it
+				if (volume_material->save_texture) {
+					volume_material->saveTexture();
 				}
 			}
 		}

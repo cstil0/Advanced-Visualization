@@ -435,6 +435,39 @@ void VolumeMaterial::render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, 
 	}
 }
 
+void VolumeMaterial::saveTexture()
+{
+	int TF_width = 20;
+	int TF_height = 1;
+	Image* TF_texture = new Image(TF_width, TF_height);
+	// POR ALGUN MOTIVO NO ME FUNCIONA LA DIVISIÓN
+	float step = 0.05;
+	float position = 0.0f;
+	// Iterate through the image to set the pixels
+	for (int i = 1; i <= TF_width; i++) {
+		// Check between which limits the pixel is
+		position = i * step;
+		if (position <= density_limits.x) {
+			TF_texture->setPixel(i, 0, Color(TF_first_color.x*255, TF_first_color.y*255, TF_first_color.z * 255, TF_first_color.w));
+		}
+		else if (position <= density_limits.y) {
+			TF_texture->setPixel(i, 0, Color(TF_second_color.x * 255, TF_second_color.y * 255, TF_second_color.z * 255, TF_second_color.w));
+		}
+		else if (position <= density_limits.z) {
+			TF_texture->setPixel(i, 0, Color(TF_third_color.x * 255, TF_third_color.y * 255, TF_third_color.z * 255, TF_third_color.w));
+		}
+		else if (position <= density_limits.w) {
+			TF_texture->setPixel(i, 0, Color(TF_forth_color.x * 255, TF_forth_color.y * 255, TF_forth_color.z * 255, TF_forth_color.w));
+		}
+		//TF_texture->setPixel(i,0, Color(255.0f,255.0f,255.0f,1.0f));
+	}
+
+	TF_texture->saveTGA("data/TF_texture_vol.tga");
+	// Load the texture again to show the updated one
+	this->tf_mapping_texture = Texture::Get("data/TF_texture_vol.tga");
+	save_texture = false;
+}
+
 void VolumeMaterial::renderInMenu()
 {
 	ImGui::SliderFloat("Length Step", &this->length_step, 0.001, 1);
@@ -455,4 +488,5 @@ void VolumeMaterial::renderInMenu_TF(){
 	ImGui::ColorEdit3("Second Color", TF_second_color.v);
 	ImGui::ColorEdit3("Third Color", TF_third_color.v);
 	ImGui::ColorEdit3("Forth Color", TF_forth_color.v);
+	ImGui::Checkbox("Save TF texture", &save_texture);
 }

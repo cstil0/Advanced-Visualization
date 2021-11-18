@@ -13,6 +13,14 @@ class Volume;
 
 class SceneNode {
 public:
+	// Used to identify which type of volume it is
+	enum TYPEOFVOLUME {
+		FOOT,
+		TEA,
+		ABDOMEN,
+		BONSAI,
+		ORANGE
+	};
 
 	// Used to identify which type of node it is
 	enum TYPEOFNODE {
@@ -30,6 +38,7 @@ public:
 	};
 
 	static unsigned int lastNameId;
+	int typeOfVolume;
 	int typeOfNode;
 	int typeOfModel;
 

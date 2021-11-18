@@ -35,6 +35,14 @@ class Application
 public:
 	static Application* instance;
 
+	// Selected volume in the imGUI
+	enum TYPEOFVOLUMEIMGUI {
+		FOOT,
+		TEA,
+		ABDOMEN,
+		BONSAI,
+		ORANGE
+	};
 	// Selected model in the imGUI
 	enum TYPEOFMODELIMGUI {
 		BASIC,
@@ -55,6 +63,7 @@ public:
 		VOLUME
 	};
 
+	int typeOfVolume_ImGUI;
 	int typeOfModel_ImGUI;
 	int typeOfSkybox_ImGUI;
 	int app_mode;

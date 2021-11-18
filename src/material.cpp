@@ -344,12 +344,13 @@ VolumeMaterial::VolumeMaterial()
 {
 }
 
-VolumeMaterial::VolumeMaterial(Shader* sh, Texture* tex)
+VolumeMaterial::VolumeMaterial(Shader* sh, Texture* tex, vec4 d_lim, vec4 TF_fst_col, vec4 TF_snd_col, vec4 TF_trd_col, vec4 TF_frth_col)
 {
 	this->shader = sh;
 	this->texture = tex;
 	this->length_step = 0.001f;// cambiando a un valor mas pequeño
-	this->density_threshold = 1.0f;
+	this->density_threshold_min = 0.0f;
+	this->density_threshold_max = 1.0f;
 	this->brightness = 5.0f;
 	
 	jittering_flag = false;
@@ -360,12 +361,18 @@ VolumeMaterial::VolumeMaterial(Shader* sh, Texture* tex)
 
 	jittering_flag_imgui = false;
 	TF_flag_imgui = false;
-	TF_debug_flag_imgui = false;
+	TF_debug_flag_imgui = true;
 	illumination_flag_imgui = false;
 	clipping_flag_imgui = false;
 
 	this->noise_texture = Texture::Get("data/blueNoise.png");
 	this->threshold_plane = 0.0f;
+
+	density_limits = d_lim;
+	TF_first_color = TF_fst_col;
+	TF_second_color = TF_snd_col;
+	TF_third_color = TF_trd_col;
+	TF_forth_color = TF_frth_col;
 
 	//this->plane_a = 0.0f;
 	//this->plane_b = 0.0f;
@@ -386,9 +393,17 @@ void VolumeMaterial::setUniforms(Camera* camera, Matrix44 model, Matrix44 invers
 	shader->setUniform("u_color", color);
 
 	shader->setUniform("u_length_step", length_step);
-	shader->setUniform("u_threshold_d", density_threshold);
+	shader->setUniform("u_threshold_d_min", density_threshold_min);
+	shader->setUniform("u_threshold_d_max", density_threshold_max);
 	shader->setUniform("u_brightness", this->brightness);
 	shader->setUniform("u_threshold_plane", this->threshold_plane);
+
+	shader->setUniform("u_density_limits", this->density_limits);
+	shader->setUniform("u_tf_fst_color", this->TF_first_color);
+	shader->setUniform("u_tf_snd_color", this->TF_second_color);
+	shader->setUniform("u_tf_trd_color", this->TF_third_color);
+	shader->setUniform("u_tf_frth_color", this->TF_forth_color);
+
 	//shader->setUniform("u_plane_a", this->plane_a);
 	//shader->setUniform("u_plane_b", this->plane_b);
 	//shader->setUniform("u_plane_c", this->plane_c);
@@ -423,14 +438,21 @@ void VolumeMaterial::render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, 
 void VolumeMaterial::renderInMenu()
 {
 	ImGui::SliderFloat("Length Step", &this->length_step, 0.001, 1);
-	ImGui::SliderFloat("Density threshold TF", &this->density_threshold, 0.0, 1);
 	ImGui::SliderFloat("Clipping Plane", &threshold_plane, -1.0f, 0.0f);
 	ImGui::SliderFloat("Brightness", &this->brightness, 1.0f, 50.0f);
 	ImGui::ColorEdit3("Color", color.v); 
 	ImGui::Checkbox("Jittering", &jittering_flag_imgui);
 	ImGui::Checkbox("Transfer function", &TF_flag_imgui);
-	ImGui::Checkbox("Debug TF", &TF_debug_flag_imgui);
 	ImGui::Checkbox("Clipping", &clipping_flag_imgui);
 	ImGui::Checkbox("Illumination", &illumination_flag_imgui);
+}
 
+void VolumeMaterial::renderInMenu_TF(){
+	ImGui::Checkbox("Debug TF", &TF_debug_flag_imgui);
+	ImGui::SliderFloat("MAX Density threshold", &this->density_threshold_max, 0.0, 1);
+	ImGui::SliderFloat4("Density limits", &density_limits.x, 0.0f, 1.0f);
+	ImGui::ColorEdit3("First Color", TF_first_color.v); 
+	ImGui::ColorEdit3("Second Color", TF_second_color.v);
+	ImGui::ColorEdit3("Third Color", TF_third_color.v);
+	ImGui::ColorEdit3("Forth Color", TF_forth_color.v);
 }

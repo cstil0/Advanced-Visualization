@@ -20,7 +20,16 @@ uniform vec4 u_color;
 uniform float u_length_step; //ray step
 uniform float u_brightness;
 uniform float u_threshold_plane;
-uniform float u_threshold_d;
+uniform float u_threshold_d_min;
+uniform float u_threshold_d_max;
+
+// TF generator variables
+uniform vec4 u_density_limits;
+uniform vec4 u_tf_fst_color;
+uniform vec4 u_tf_snd_color;
+uniform vec4 u_tf_trd_color;
+uniform vec4 u_tf_frth_color;
+
 // uniform float u_plane_a;
 // uniform float u_plane_b;
 // uniform float u_plane_c;
@@ -62,13 +71,6 @@ void main(){
         // if (plane_value < u_threshold_plane)
         //     discard;
 
-        #ifdef USE_TF_DEBUG
-            //Si estamos en el modo debug de la TF, queremos visualizar solo aquellos puntos que tengan una densidad menor a la marcada en el imgui
-            if(d>u_threshold_d){
-                discard;
-            }
-        #endif
-
         // 2. Volume sampling
         uv_3D = (sample_pos + 1.0f)*0.5f;
         d = texture3D(u_texture, uv_3D).x;
@@ -76,13 +78,29 @@ void main(){
         // 3. Classification
         // Classification basica
         // SEGURO QUE ESTO SE PUEDE HACER MÁS EFICIENTE PARA QUE NO SE HAGA SI EL TF ESTÁ ACTIVADO
-        sample_color = vec4(d,1-d,0,d);//important that the d, 4ºcomponent. Para que funcione la volumetric
+        sample_color = vec4(d,d,d,d);//important that the d, 4ºcomponent. Para que funcione la volumetric
 
         // Con tf
         #ifdef USE_TF
             vec3 tf_color = texture2D(u_tf_mapping_texture, vec2(d,1)).xyz;
             sample_color = vec4(tf_color.r, tf_color.g, tf_color.b,d);//important that the d, 4ºcomponent. Para que funcione la volumetric4
             // sample_color = vec4(u_color.r*tf_color.r,u_color.g*tf_color.g,u_color.b*tf_color.b,d);//important that the d, 4ºcomponent. Para que funcione la volumetric
+        #endif
+
+        #ifdef USE_TF_DEBUG
+            //Si estamos en el modo debug de la TF, queremos visualizar solo aquellos puntos que tengan una densidad menor a la marcada en el imgui
+            if(d>u_threshold_d_max)
+                discard;
+
+            if(d<u_density_limits.x)
+                sample_color = vec4(u_tf_fst_color.r,u_tf_fst_color.g,u_tf_fst_color.b,d);
+            if(d>u_density_limits.x && d<u_density_limits.y)
+                sample_color = vec4(u_tf_snd_color.r,u_tf_snd_color.g,u_tf_snd_color.b,d);
+            if(d>u_density_limits.y && d<u_density_limits.z)
+                sample_color = vec4(u_tf_trd_color.r,u_tf_trd_color.g,u_tf_trd_color.b,d);
+            if(d>u_density_limits.z && d<u_density_limits.w)
+                sample_color = vec4(u_tf_frth_color.r,u_tf_frth_color.g,u_tf_frth_color.b,d);
+
         #endif
 
 
@@ -119,5 +137,5 @@ void main(){
 
     //7. Final color
     gl_FragColor = final_color * u_brightness;
-    // gl_FragColor = vec4( plane_abcd);
+    // gl_FragColor = u_tf_fst_color;
 }

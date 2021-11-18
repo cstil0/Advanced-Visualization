@@ -195,7 +195,7 @@ void VolumeNode::render(Camera* camera)
 // ESTAMOS REPITIENDO
 void VolumeNode::renderInMenu()
 {
-	if (!(this->typeOfNode == TYPEOFNODE::VOLUME)) {
+	if (this->typeOfNode == TYPEOFNODE::VOLUME) {
 		ImGui::Checkbox("Visible", &visible_flag);
 	}
 
@@ -203,6 +203,21 @@ void VolumeNode::renderInMenu()
 	if (ImGui::TreeNode("Material")) {
 		material->renderInMenu();
 		ImGui::TreePop();
+	}
+
+	//Geometry
+	if (this->typeOfNode == TYPEOFNODE::VOLUME && mesh && ImGui::TreeNode("Geometry"))
+	{
+		ImGui::Combo("Volume", &Application::instance->typeOfVolume_ImGUI, "FOOT\0TEA\0ABDOMEN\0BONSAI\0ORANGE\0");
+		ImGui::TreePop();
+	}
+
+	// TF generator
+	if (this->typeOfNode == TYPEOFNODE::VOLUME && mesh && ImGui::TreeNode("TF Generator"))
+	{
+		// Downcast
+		VolumeMaterial* volume_mat = dynamic_cast<VolumeMaterial*>(material);
+		volume_mat->renderInMenu_TF();
 	}
 
 	//Model edit

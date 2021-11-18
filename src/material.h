@@ -109,7 +109,8 @@ class VolumeMaterial : public StandardMaterial {
 public:
 	//Vector3 first_sample;
 	float length_step;
-	float density_threshold;
+	float density_threshold_min;
+	float density_threshold_max;
 	float brightness;
 	float threshold_plane;
 
@@ -131,12 +132,20 @@ public:
 	Texture* tf_mapping_texture;
 	//Vector3 direction_vector; // no se si es buena idea guardarlo aquí
 
+	// Variables fot TF generator
+	Vector4 density_limits;
+	vec4 TF_first_color;
+	vec4 TF_second_color;
+	vec4 TF_third_color;
+	vec4 TF_forth_color;
+
 	VolumeMaterial();
-	VolumeMaterial(Shader* sh, Texture* tex);
+	VolumeMaterial(Shader* sh, Texture* tex, vec4 d_lim, vec4 TF_fst_col, vec4 TF_snd_col, vec4 TF_trd_col, vec4 TF_frth_col);
 	~VolumeMaterial();
 
 	void setUniforms(Camera* camera, Matrix44 model, Matrix44 inverse_model);
 	void render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, Camera* camera);
 	void renderInMenu();
+	void renderInMenu_TF();
 };
 #endif

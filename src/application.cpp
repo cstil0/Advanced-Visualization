@@ -54,31 +54,152 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 	{
 		if (app_mode == APPMODE::VOLUME) {
+			// Define the colors and density limits
+			vec4 foot_d_lim = vec4(0.3f, 0.8f, 0.8f, 1.0f);
+			vec4 foot_fst_col = vec4(0.7f, 0.0f, 0.0f, 1.0f);
+			vec4 foot_snd_col = vec4(0.0f, 1.0f, 0.0f, 1.0f);
+			vec4 foot_trd_col = vec4(1.0f, 1.0f, 0.0f, 1.0f);
+			vec4 foot_frth_col = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+			vec4 tea_d_lim = vec4(0.2f, 0.5f, 0.6f, 1.0f);
+			vec4 tea_fst_col = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+			vec4 tea_snd_col = vec4(0.0f, 1.0f, 0.0f, 1.0f);
+			vec4 tea_trd_col = vec4(1.0f, 1.0f, 0.0f, 1.0f);
+			vec4 tea_frth_col = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+			vec4 abd_d_lim = vec4(0.2f, 0.3f, 0.3f, 1.0f);
+			vec4 abd_fst_col = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+			vec4 abd_snd_col = vec4(0.0f, 1.0f, 0.0f, 1.0f);
+			vec4 abd_trd_col = vec4(0.0f, 1.0f, 0.0f, 1.0f);
+			vec4 abd_frth_col = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+			vec4 bonsai_d_lim = vec4(0.1f, 0.4f, 0.6f, 1.0f);
+			vec4 bonsai_fst_col = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+			vec4 bonsai_snd_col = vec4(0.0f, 1.0f, 0.0f, 1.0f);
+			vec4 bonsai_trd_col = vec4(0.0f, 0.0f, 1.0f, 1.0f);
+			vec4 bonsai_frth_col = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+			vec4 orange_d_lim = vec4(0.2f, 0.2f, 1.0f, 1.0f);
+			vec4 orange_fst_col = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+			vec4 orange_snd_col = vec4(0.0f, 1.0f, 0.0f, 1.0f);
+			vec4 orange_trd_col = vec4(1.0f, 1.0f, 0.0f, 1.0f);
+			vec4 orange_frth_col = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
 			sh = Shader::Get("data/shaders/basic.vs", "data/shaders/volume2.fs");
 
-			Volume* volume = new Volume();
-			//volume->loadPVM("data/volumes/Orange.pvm");
-			//volume->loadPNG("data/volumes/bonsai_16_16.png", 16, 16);
-			//volume->loadPNG("data/volumes/teapot_16_16.png", 16, 16);
-			volume->loadPVM("data/volumes/CT-Abdomen.pvm");
-			//volume->loadPNG("data/volumes/foot_16_16.png", 16, 16);
+			// Foot
+			// AHORA MISMO NO ESTOY SEGURA DE POR QUE CREAMOS PRIMERO UN VOLUMEN Y LUEGO COMO QUE LO PASAMOS A VOLUME NODE
+			// ES POR LO DE LA DEPENDENCIA DEL MATERIAL?
+			Volume* foot_volume = new Volume();
+			foot_volume->loadPNG("data/volumes/foot_16_16.png", 16, 16);
 
-			Texture* tex3d = new Texture();
-			tex3d->create3DFromVolume(volume, GL_CLAMP_TO_EDGE);
+			Texture* foot_tex3d = new Texture();
+			foot_tex3d->create3DFromVolume(foot_volume, GL_CLAMP_TO_EDGE);
 
-			VolumeMaterial* vol_material = new VolumeMaterial(sh, tex3d);
-			Texture* tf_mapping_density = Texture::Get("data/TF_mapping.png");
-			vol_material->tf_mapping_texture = tf_mapping_density;
-			VolumeNode* vol_node = new VolumeNode("Volume Node");
+			VolumeMaterial* foot_material = new VolumeMaterial(sh, foot_tex3d, foot_d_lim, foot_fst_col, foot_snd_col, foot_trd_col, foot_frth_col);
+			Texture* tf_foot = Texture::Get("data/TF_mapping_foot.png");
+			foot_material->tf_mapping_texture = tf_foot;
+			VolumeNode* foot_vol_node = new VolumeNode("Foot Node");
 
-			vol_node->volume = volume;
+			foot_vol_node->volume = foot_volume;
 			//vol_node->volume_material = vol_material;
-			vol_node->material = vol_material;
+			foot_vol_node->material = foot_material;
 
-			vol_node->mesh = Mesh::getCube();
-			//vol_node->model.scale(volume->width, volume->height, volume->depth);                  // NO ESTAMOS MUY SEGURAS DE ESTO PERO CLARA CREE QUE EL CUBO TIENE QUE CONTENER EL VOLUMEN
+			foot_vol_node->mesh = Mesh::getCube();
+			foot_vol_node->typeOfNode = SceneNode::TYPEOFNODE::VOLUME;
+			foot_vol_node->typeOfVolume = SceneNode::TYPEOFVOLUME::FOOT;
+			typeOfVolume_ImGUI = TYPEOFVOLUMEIMGUI::FOOT;
 
-			node_list.push_back(vol_node);
+			optional_node_list.push_back(foot_vol_node);
+			node_list.push_back(foot_vol_node);
+
+			// Tea
+			Volume* tea_volume = new Volume();
+			tea_volume->loadPNG("data/volumes/teapot_16_16.png", 16, 16);
+
+			Texture* tea_tex3d = new Texture();
+			tea_tex3d->create3DFromVolume(tea_volume, GL_CLAMP_TO_EDGE);
+
+			VolumeMaterial* tea_material = new VolumeMaterial(sh, tea_tex3d, tea_d_lim, tea_fst_col, tea_snd_col, tea_trd_col, tea_frth_col);
+			Texture* tf_tea = Texture::Get("data/TF_mapping.png");
+			tea_material->tf_mapping_texture = tf_tea;
+			VolumeNode* tea_vol_node = new VolumeNode("Tea Node");
+
+			tea_vol_node->volume = tea_volume;
+			//vol_node->volume_material = vol_material;
+			tea_vol_node->material = tea_material;
+
+			tea_vol_node->mesh = Mesh::getCube();
+			tea_vol_node->typeOfNode = SceneNode::TYPEOFNODE::VOLUME;
+			tea_vol_node->typeOfVolume = SceneNode::TYPEOFVOLUME::TEA;
+
+			optional_node_list.push_back(tea_vol_node);
+
+			// Abdomen
+			Volume* abd_volume = new Volume();
+			abd_volume->loadPVM("data/volumes/CT-Abdomen.pvm");
+
+			Texture* abd_tex3d = new Texture();
+			abd_tex3d->create3DFromVolume(abd_volume, GL_CLAMP_TO_EDGE);
+
+			VolumeMaterial* abd_material = new VolumeMaterial(sh, abd_tex3d, foot_d_lim, abd_fst_col, abd_snd_col, abd_trd_col, abd_frth_col);
+			Texture* tf_abd = Texture::Get("data/TF_mapping_abdomen.png");
+			abd_material->tf_mapping_texture = tf_abd;
+			VolumeNode* abd_vol_node = new VolumeNode("Abdomen Node");
+
+			abd_vol_node->volume = abd_volume;
+			//vol_node->volume_material = vol_material;
+			abd_vol_node->material = abd_material;
+
+			abd_vol_node->mesh = Mesh::getCube();
+			abd_vol_node->typeOfNode = SceneNode::TYPEOFNODE::VOLUME;
+			abd_vol_node->typeOfVolume = SceneNode::TYPEOFVOLUME::ABDOMEN;
+
+			optional_node_list.push_back(abd_vol_node);
+
+			// Bonsai
+			Volume* bonsai_volume = new Volume();
+			bonsai_volume->loadPNG("data/volumes/bonsai_16_16.png", 16, 16);
+
+			Texture* bonsai_tex3d = new Texture();
+			bonsai_tex3d->create3DFromVolume(bonsai_volume, GL_CLAMP_TO_EDGE);
+
+			VolumeMaterial* bonsai_material = new VolumeMaterial(sh, bonsai_tex3d, bonsai_d_lim, bonsai_fst_col, bonsai_snd_col, bonsai_trd_col, bonsai_frth_col);
+			Texture* tf_bonsai = Texture::Get("data/TF_mapping.png");
+			bonsai_material->tf_mapping_texture = tf_bonsai;
+			VolumeNode* bonsai_vol_node = new VolumeNode("Bonsai Node");
+
+			bonsai_vol_node->volume = bonsai_volume;
+			//vol_node->volume_material = vol_material;
+			bonsai_vol_node->material = bonsai_material;
+
+			bonsai_vol_node->mesh = Mesh::getCube();
+			bonsai_vol_node->typeOfNode = SceneNode::TYPEOFNODE::VOLUME;
+			bonsai_vol_node->typeOfVolume = SceneNode::TYPEOFVOLUME::BONSAI;
+
+			optional_node_list.push_back(bonsai_vol_node);
+
+			// Orange
+			Volume* orange_volume = new Volume();
+			orange_volume->loadPVM("data/volumes/Orange.pvm");
+
+			Texture* orange_tex3d = new Texture();
+			orange_tex3d->create3DFromVolume(orange_volume, GL_CLAMP_TO_EDGE);
+
+			VolumeMaterial* orange_material = new VolumeMaterial(sh, orange_tex3d, orange_d_lim, orange_fst_col, orange_snd_col, orange_trd_col, orange_frth_col);
+			Texture* tf_orange = Texture::Get("data/TF_mapping.png");
+			orange_material ->tf_mapping_texture = tf_orange;
+			VolumeNode* orange_vol_node = new VolumeNode("Orange Node");
+
+			orange_vol_node->volume = orange_volume;
+			//vol_node->volume_material = vol_material;
+			orange_vol_node->material = orange_material;
+
+			orange_vol_node->mesh = Mesh::getCube();
+			orange_vol_node->typeOfNode = SceneNode::TYPEOFNODE::VOLUME;
+			orange_vol_node->typeOfVolume = SceneNode::TYPEOFVOLUME::ORANGE;
+
+			optional_node_list.push_back(orange_vol_node);
 		}
 		
 		//Functions used in the phong lab
@@ -464,34 +585,106 @@ void Application::update(double seconds_elapsed)
 				volume_node->inverse_model = inv_m_aux;
 				node_list[i] = volume_node;
 
+				// Update volume according to the imgui
+				// 0 POR QUE EN ESTA PRÁCTICA SOLO HAY UN NODO
+				if (typeOfVolume_ImGUI != node_list[0]->typeOfVolume) {
+					//SceneNode* principal_node = node_list[2];
+					// Look for the new node to be rendered
+					for (int i = 0; i < optional_node_list.size(); i++) {
+						if (optional_node_list[i]->typeOfVolume == typeOfVolume_ImGUI)
+							node_list[0] = optional_node_list[i];
+					}
+				}
+
+				// AIXÒ NO ESTÀ BEN GESTIONAT: QUAN CANVIA L'IMGUI HAURIEN S'HAURIEN DE TORNAR A ENVIAR TOTES LES MACROS
 				// Update the visualization flags according to imgui and pass the corresponding macros to the shader
+				// Miramos si alguno de los flags ha cambiado --> Si cualquiera de ellos ha cambiado tenemos que volver a enviar todas las macros (sino lo pilla como no definido)
 				VolumeMaterial* volume_material = (VolumeMaterial*)volume_node->material;
+				//bool change_jitttering = volume_material->jittering_flag_imgui != volume_material->jittering_flag;
+				//bool change_TF = volume_material->TF_flag_imgui != volume_material->TF_flag;
+				//bool change_TF_debug = volume_material->TF_debug_flag_imgui != volume_material->TF_debug_flag;
+				//bool change_clipping = volume_material->clipping_flag_imgui != volume_material->clipping_flag;
+				//bool change_illumination = volume_material->illumination_flag_imgui != volume_material->illumination_flag;
+
+				//if (change_jitttering || change_TF || change_TF_debug || change_clipping || change_illumination) {
+				//	volume_material->jittering_flag = volume_material->jittering_flag_imgui;
+				//	volume_material->TF_flag = volume_material->TF_flag_imgui;
+				//	volume_material->TF_debug_flag = volume_material->TF_debug_flag_imgui;
+				//	volume_material->clipping_flag = volume_material->clipping_flag_imgui;
+				//	volume_material->illumination_flag = volume_material->illumination_flag_imgui;
+
+				//	// Enviamos todas las macros dependiendo del imGUI
+				//	std::string jittering_macro = "";
+				//	if (volume_material->jittering_flag_imgui)
+				//		jittering_macro = "\n#define USE_JITTERING true\n";
+				//	volume_material->shader->setMacros(jittering_macro.c_str());
+
+				//	std::string TF_macro = "";
+				//	if (volume_material->TF_flag_imgui)
+				//		TF_macro = "\n#define USE_TF true\n";
+				//	volume_material->shader->setMacros(TF_macro.c_str());
+
+				//	std::string TF_debug_macro = "";
+				//	if (volume_material->TF_debug_flag_imgui)
+				//		TF_debug_macro = "\n#define USE_TF_DEBUG true\n";
+				//	volume_material->shader->setMacros(TF_debug_macro.c_str());
+
+				//	std::string clipping_macro = "";
+				//	if (volume_material->clipping_flag_imgui) {
+				//		clipping_macro = "\n#define USE_CLIPPING true\n";
+				//	}
+				//	volume_material->shader->setMacros(clipping_macro.c_str());
+
+				//	std::string illumination_macro = "";
+				//	if (volume_material->illumination_flag_imgui) {
+				//		illumination_macro = "\n#define USE_illumination true\n";
+				//	}
+				//	volume_material->shader->setMacros(illumination_macro.c_str());
+				//}
+
+
 				// If the flag corresponding to the imgui is not equal to the one of the material - update
 				if (volume_material->jittering_flag_imgui != volume_material->jittering_flag) {
 					// Update
 					volume_material->jittering_flag = volume_material->jittering_flag_imgui;
 					// Send macro
-					std::string jittering_macro = "\n#define USE_JITTERING true\n";
+					std::string jittering_macro = "";
+					if (volume_material->jittering_flag_imgui)
+						jittering_macro = "\n#define USE_JITTERING true\n";
 					volume_material->shader->setMacros(jittering_macro.c_str());
 				}
+
 				if (volume_material->TF_flag_imgui != volume_material->TF_flag) {
 					volume_material->TF_flag = volume_material->TF_flag_imgui;
-					std::string TF_macro = "\n#define USE_TF true\n";
+					std::string TF_macro = "";
+					if (volume_material->TF_flag_imgui)
+						TF_macro = "\n#define USE_TF true\n";
 					volume_material->shader->setMacros(TF_macro.c_str());
 				}
+
 				if (volume_material->TF_debug_flag_imgui != volume_material->TF_debug_flag) {
 					volume_material->TF_debug_flag = volume_material->TF_debug_flag_imgui;
-					std::string TF_debug_macro = "\n#define USE_TF_DEBUG true\n";
+					std::string TF_debug_macro = "";
+					if (volume_material->TF_debug_flag_imgui)
+						TF_debug_macro = "\n#define USE_TF_DEBUG true\n";
 					volume_material->shader->setMacros(TF_debug_macro.c_str());
 				}
+
 				if (volume_material->clipping_flag_imgui != volume_material->clipping_flag) {
 					volume_material->clipping_flag = volume_material->clipping_flag_imgui;
-					std::string clipping_macro = "\n#define USE_CLIPPING true\n";
+					std::string clipping_macro = "";
+					if (volume_material->clipping_flag_imgui) {
+						clipping_macro = "\n#define USE_CLIPPING true\n";
+					}
 					volume_material->shader->setMacros(clipping_macro.c_str());
 				}
+
 				if (volume_material->illumination_flag_imgui != volume_material->illumination_flag) {
+					std::string illumination_macro = "";
 					volume_material->illumination_flag = volume_material->illumination_flag_imgui;
-					std::string illumination_macro = "\n#define USE_illumination true\n";
+					if (volume_material->illumination_flag_imgui) {
+						illumination_macro = "\n#define USE_illumination true\n";
+					}
 					volume_material->shader->setMacros(illumination_macro.c_str());
 				}
 			}
@@ -501,14 +694,6 @@ void Application::update(double seconds_elapsed)
 	else if (app_mode == APPMODE::PBR) {
 		 //Update the model according to the imGUI
 		 //Node_list[2] corresponds to the principal node IGUAL SE PODRÍA PONER MEJOR
-		if (typeOfModel_ImGUI != node_list[SceneNode::TYPEOFNODE::NODE]->typeOfModel) {
-			//SceneNode* principal_node = node_list[2];
-			// Look for the new node to be rendered
-			for (int i = 0; i < optional_node_list.size(); i++) {
-				if (optional_node_list[i]->typeOfModel == typeOfModel_ImGUI)
-					node_list[SceneNode::TYPEOFNODE::NODE] = optional_node_list[i];
-			}
-		}
 
 		// Same with skybox
 		if (typeOfSkybox_ImGUI != skybox_node->typeOfSkybox) {

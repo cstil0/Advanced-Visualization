@@ -359,6 +359,13 @@ VolumeMaterial::VolumeMaterial(Shader* sh, Texture* tex)
 	//flags
 	jittering_flag, clipping_flag, TF_flag, shade_flag = TRUE;
 	//v_material_phong = NULL;
+
+
+	this->color.set(0.7f, 0.7f, 0.7f, 0.f); //ambient material color
+	this->specular.set(1.0f, 1.0f, 0.0f);
+	this->diffuse.set(0.0f, 0.0f, 1.0f);
+	this->shininess = 20;
+
 }
 
 VolumeMaterial::~VolumeMaterial()
@@ -390,6 +397,24 @@ void VolumeMaterial::setUniforms(Camera* camera, Matrix44 model, Matrix44 invers
 		shader->setTexture("u_noise_texture", noise_texture, 1);
 	if (tf_mapping_texture)
 		shader->setTexture("u_tf_mapping_texture", tf_mapping_texture, 2);
+
+
+	//PHONG
+	shader->setUniform("u_light_pos", light->model.getTranslation());
+	shader->setUniform("u_Ia", Application::instance->ambient_light); //just one time
+	shader->setUniform("u_Id", light->diffuse_intensity);
+	shader->setUniform("u_Is", light->specular_intensity);
+
+	shader->setUniform("u_specular", specular);
+	shader->setUniform("u_diffuse", diffuse);
+	shader->setUniform("u_shininess", shininess);
+
+	shader->setUniform("u_test", vec3(1, 0, 0));
+
+	//AÑADO LA INTENSENDIDAD DE LA LUZ
+	shader->setUniform("u_light_intensity", light->light_intensity);
+
+
 }
 
 
@@ -427,6 +452,12 @@ void VolumeMaterial::renderInMenu()
 	ImGui::Checkbox("Clipping", &this->clipping_flag);
 	ImGui::Checkbox("TF", &this->TF_flag);
 	ImGui::Checkbox("Shade", &this->shade_flag);
+
+	/////
+	ImGui::ColorEdit3("Color A. Material", (float*)&this->color); // Edit 3 floats representing a color
+	ImGui::ColorEdit3("Specular", (float*)&this->specular);
+	ImGui::ColorEdit3("Diffuse", (float*)&this->diffuse);
+	ImGui::SliderFloat("Shininess", (float*)&this->shininess, 1, 50);
 
 }
 

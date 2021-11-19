@@ -32,6 +32,7 @@ uniform bool u_shade_flag;
 //light parameters:
 uniform vec3 u_light_pos;
 uniform vec3 u_Ia, u_Id, u_Is; //Ambient, diffuse, specular
+uniform float u_light_intensity;
 
 //Material uniforms parameters
 uniform vec3 u_diffuse;
@@ -55,7 +56,7 @@ vec3 compute_lightPhong(vec3 gradient, vec4 final_color){
     //Final phong equation
     // vec3 light_intensity = vec3(0.0);
     vec3 light_intensity = ambient_light + diffuse_light + specular_light;
-    return light_intensity;
+    return light_intensity * u_light_intensity;
 }
 
 float sampling_volume(in float x, in float y, in float z ){
@@ -135,13 +136,21 @@ void main(){
         sample_color = vec4(u_color.r,u_color.g,u_color.b,d);//important that the d, 4ºcomponent. Para que funcione la volumetric
       
         // 4. Composition
-        
-		plane = u_plane_abcd.x*sample_pos.x + u_plane_abcd.y*sample_pos.y + u_plane_abcd.z*sample_pos.z + u_plane_abcd.w;
+        // aqui esta bn, pq el primer sample, tendra el plane a 0.0
+        // si el flag de clipping esta activado q salte esta linea, si no hay clipping entre al if
+        // usamos or por q cuando no hay clipiing tamb pueda hacer esta contribucion de final color!!
         if (!u_clipping_flag || plane <= 0.0f){ // que haga la suma total de las contribuciones, si no esto, pues no hay sumas...
             sample_color.rgb *= sample_color.a; //atenuendo el color dependiendo de alpha
             final_color += u_length_step * (1.0 - final_color.a) * sample_color; 
-        } 
-        
+            
+        }
+        if(u_shade_flag && (sample_color.a > u_iso_threshold ) && (!u_clipping_flag || plane <= 0.0f )){
+            gradient = compute_gradient(sample_pos, h);
+            light_intensity = compute_lightPhong(gradient, final_color);
+            final_color = sample_color * vec4(light_intensity, 1.0) ; //le damos la iluminacion
+            // final_color = vec4(gradient,1.0);
+            break;
+        }
         // // Visualizing isosurfaces
         // if ( u_shade_flag && (sample_color.a > u_iso_threshold )){
         //     gradient = compute_gradient(sample_pos, h);
@@ -156,27 +165,24 @@ void main(){
             
 
         // 5. Next sample
-
         sample_pos += step_vector;
-        if(u_clipping_flag){
-            
-            // else {
-                
-            //     if ( u_shade_flag && (sample_color.a > u_iso_threshold )){
-            //         gradient = compute_gradient(sample_pos, h);
-            //         light_intensity = compute_lightPhong(gradient, final_color);
-            //         final_color = sample_color * vec4(light_intensity, 1.0) ; //le damos la iluminacion
-            //         break;
-            //     }
-            //     sample_color.rgb *= sample_color.a; //atenuendo el color dependiendo de alpha
-            //     final_color += u_length_step * (1.0 - final_color.a) * sample_color; 
-            // }   
-        }
         
-        // ESTO SE PUEDE MEJORAR SEGURAMENTE... OTRA FORMA DE DAR MAS SALTOS...
-
-      
-
+        //  (computing the next step always). entonces hay que ponerlo abajo ?¿??????
+		plane = u_plane_abcd.x*sample_pos.x + u_plane_abcd.y*sample_pos.y + u_plane_abcd.z*sample_pos.z + u_plane_abcd.w;
+        
+        
+        // else {
+            
+        //     if ( u_shade_flag && (sample_color.a > u_iso_threshold )){
+        //         gradient = compute_gradient(sample_pos, h);
+        //         light_intensity = compute_lightPhong(gradient, final_color);
+        //         final_color = sample_color * vec4(light_intensity, 1.0) ; //le damos la iluminacion
+        //         break;
+        //     }
+        //     sample_color.rgb *= sample_color.a; //atenuendo el color dependiendo de alpha
+        //     final_color += u_length_step * (1.0 - final_color.a) * sample_color; 
+        // }   
+        
         // 6. Early termination
         //If is outside the auxiliar mesh
         if( sample_pos.x > 1.0f || sample_pos.y > 1.0f || sample_pos.z > 1.0f ) {

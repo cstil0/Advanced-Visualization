@@ -56,7 +56,6 @@ public:
 
 	static unsigned int lastNameId;
 
-	
 	vec3 diffuse_intensity;
 	vec3 specular_intensity;
 	

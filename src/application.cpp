@@ -65,11 +65,22 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 			Texture* tex3d = new Texture();
 			tex3d->create3DFromVolume(volume, GL_CLAMP_TO_EDGE);
+			Light* light = new Light();
+			
+			light->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
+			StandardMaterial* l_mat = new StandardMaterial();
+			light->material = l_mat;
+			light->model.scale(0.1, 0.1, 0.1);
+			light->model.translate(-4, 16, 14);
+			node_list.push_back(light);
+			
 
 			VolumeMaterial* vol_material = new VolumeMaterial(sh, tex3d);
 
 			Texture* tf_mapping_density = Texture::Get("data/TF_mapping.png");
 			vol_material->tf_mapping_texture = tf_mapping_density;
+			vol_material->light = light;
+
 			VolumeNode* vol_node = new VolumeNode("Volume Node");
 
 			//VolumetricPhong* v_material_phong = new VolumetricPhong(sh, tex3d);

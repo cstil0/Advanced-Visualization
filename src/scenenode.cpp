@@ -127,6 +127,10 @@ void Light::renderInMenu()
 	if (ImGui::TreeNode("Light intensity") ) 
 	{
 		ImGui::SliderFloat("Intensity", &this->light_intensity, 0.0f, 10.0f);
+		/// GESTIONAR QUE SI ES PBR QUE NO MUESTREE LOS SIGUIENTES!!!!!!!!!!!!!!!!!!!!!
+		ImGui::ColorEdit3("Specular_intensity", (float*)&this->specular_intensity);
+		ImGui::ColorEdit3("Diffuse_intensity", (float*)&this->diffuse_intensity);
+
 		ImGui::TreePop();
 	}
 }

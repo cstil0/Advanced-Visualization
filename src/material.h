@@ -120,6 +120,13 @@ public:
 	//flags
 	bool jittering_flag, clipping_flag, TF_flag, shade_flag ;
 	
+	// phong attributes
+	vec3 specular;
+	vec3 diffuse;
+	float shininess;
+
+	Light* light = NULL;
+
 	VolumeMaterial();
 	VolumeMaterial(Shader* sh, Texture* tex);
 	~VolumeMaterial();

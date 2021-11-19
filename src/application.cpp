@@ -597,98 +597,65 @@ void Application::update(double seconds_elapsed)
 					}
 				}
 
-				// AIXÒ NO ESTÀ BEN GESTIONAT: QUAN CANVIA L'IMGUI HAURIEN S'HAURIEN DE TORNAR A ENVIAR TOTES LES MACROS
-				// Update the visualization flags according to imgui and pass the corresponding macros to the shader
-				// Miramos si alguno de los flags ha cambiado --> Si cualquiera de ellos ha cambiado tenemos que volver a enviar todas las macros (sino lo pilla como no definido)
-				//bool change_jitttering = volume_material->jittering_flag_imgui != volume_material->jittering_flag;
-				//bool change_TF = volume_material->TF_flag_imgui != volume_material->TF_flag;
-				//bool change_TF_debug = volume_material->TF_debug_flag_imgui != volume_material->TF_debug_flag;
-				//bool change_clipping = volume_material->clipping_flag_imgui != volume_material->clipping_flag;
-				//bool change_illumination = volume_material->illumination_flag_imgui != volume_material->illumination_flag;
-
-				//if (change_jitttering || change_TF || change_TF_debug || change_clipping || change_illumination) {
-				//	volume_material->jittering_flag = volume_material->jittering_flag_imgui;
-				//	volume_material->TF_flag = volume_material->TF_flag_imgui;
-				//	volume_material->TF_debug_flag = volume_material->TF_debug_flag_imgui;
-				//	volume_material->clipping_flag = volume_material->clipping_flag_imgui;
-				//	volume_material->illumination_flag = volume_material->illumination_flag_imgui;
-
-				//	// Enviamos todas las macros dependiendo del imGUI
-				//	std::string jittering_macro = "";
-				//	if (volume_material->jittering_flag_imgui)
-				//		jittering_macro = "\n#define USE_JITTERING true\n";
-				//	volume_material->shader->setMacros(jittering_macro.c_str());
-
-				//	std::string TF_macro = "";
-				//	if (volume_material->TF_flag_imgui)
-				//		TF_macro = "\n#define USE_TF true\n";
-				//	volume_material->shader->setMacros(TF_macro.c_str());
-
-				//	std::string TF_debug_macro = "";
-				//	if (volume_material->TF_debug_flag_imgui)
-				//		TF_debug_macro = "\n#define USE_TF_DEBUG true\n";
-				//	volume_material->shader->setMacros(TF_debug_macro.c_str());
-
-				//	std::string clipping_macro = "";
-				//	if (volume_material->clipping_flag_imgui) {
-				//		clipping_macro = "\n#define USE_CLIPPING true\n";
-				//	}
-				//	volume_material->shader->setMacros(clipping_macro.c_str());
-
-				//	std::string illumination_macro = "";
-				//	if (volume_material->illumination_flag_imgui) {
-				//		illumination_macro = "\n#define USE_illumination true\n";
-				//	}
-				//	volume_material->shader->setMacros(illumination_macro.c_str());
-				//}
-
 				VolumeMaterial* volume_material = (VolumeMaterial*)volume_node->material;
+				// Definimos primero todas las posibles macros
+				std::string jittering_macro = "#define USE_JITTERING true\n ";
+				std::string TF_macro = "#define USE_TF true\n ";
+				std::string TF_debug_macro = "#define USE_TF_DEBUG true\n ";
+				std::string clipping_macro = "#define USE_CLIPPING true\n ";
+				std::string illumination_macro = "#define USE_illumination true\n ";
 
+				std::string final_macro = "\n";
+
+				bool change_imgui = false;
+				// Update the visualization flags according to imgui and pass the corresponding macros to the shader
+				// Miramos si alguno de los flags ha cambiado, para evitar enviar macros a no ser que haya cambiado el flag en el imgui
 				// If the flag corresponding to the imgui is not equal to the one of the material - update
 				if (volume_material->jittering_flag_imgui != volume_material->jittering_flag) {
 					// Update
 					volume_material->jittering_flag = volume_material->jittering_flag_imgui;
+					change_imgui = true;
 					// Send macro
-					std::string jittering_macro = "";
-					if (volume_material->jittering_flag_imgui)
-						jittering_macro = "\n#define USE_JITTERING true\n";
-					volume_material->shader->setMacros(jittering_macro.c_str());
 				}
 
 				if (volume_material->TF_flag_imgui != volume_material->TF_flag) {
 					volume_material->TF_flag = volume_material->TF_flag_imgui;
-					std::string TF_macro = "";
-					if (volume_material->TF_flag_imgui)
-						TF_macro = "\n#define USE_TF true\n";
-					volume_material->shader->setMacros(TF_macro.c_str());
+					change_imgui = true;
 				}
 
-				if (volume_material->TF_debug_flag_imgui != volume_material->TF_debug_flag) {
+				if (volume_material->TF_debug_flag_imgui != volume_material->TF_debug_flag){
 					volume_material->TF_debug_flag = volume_material->TF_debug_flag_imgui;
-					std::string TF_debug_macro = "";
-					if (volume_material->TF_debug_flag_imgui)
-						TF_debug_macro = "\n#define USE_TF_DEBUG true\n";
-					volume_material->shader->setMacros(TF_debug_macro.c_str());
+					change_imgui = true;
 				}
 
-				if (volume_material->clipping_flag_imgui != volume_material->clipping_flag) {
+				if (volume_material->clipping_flag_imgui != volume_material->clipping_flag){
 					volume_material->clipping_flag = volume_material->clipping_flag_imgui;
-					std::string clipping_macro = "";
-					if (volume_material->clipping_flag_imgui) {
-						clipping_macro = "\n#define USE_CLIPPING true\n";
-					}
-					volume_material->shader->setMacros(clipping_macro.c_str());
+					change_imgui = true;
 				}
 
 				if (volume_material->illumination_flag_imgui != volume_material->illumination_flag) {
-					std::string illumination_macro = "";
 					volume_material->illumination_flag = volume_material->illumination_flag_imgui;
-					if (volume_material->illumination_flag_imgui) {
-						illumination_macro = "\n#define USE_illumination true\n";
-					}
-					volume_material->shader->setMacros(illumination_macro.c_str());
+					change_imgui = true;
 				}
 
+				// Concatenamos strings finales
+				if (volume_material->jittering_flag_imgui)
+					final_macro = final_macro + jittering_macro;
+				if (volume_material->TF_flag_imgui)
+					final_macro = final_macro + TF_macro;
+				if (volume_material->TF_debug_flag_imgui)
+					final_macro = final_macro + TF_debug_macro;
+				if (volume_material->clipping_flag_imgui) {
+					final_macro = final_macro + clipping_macro;
+				}
+				if (volume_material->illumination_flag_imgui) {
+					final_macro = final_macro + illumination_macro;
+				}
+
+				// Enviamos la macro resultante de concatenar todos los strings activos si ha habido un cambio en el imgui
+				if (change_imgui)
+					volume_material->shader->setMacros(final_macro.c_str());
+				
 				// Check if the save the TF texture is active to save it
 				if (volume_material->save_texture) {
 					volume_material->saveTexture();

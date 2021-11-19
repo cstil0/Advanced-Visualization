@@ -348,7 +348,7 @@ VolumeMaterial::VolumeMaterial(Shader* sh, Texture* tex, vec4 d_lim, vec4 TF_fst
 {
 	this->shader = sh;
 	this->texture = tex;
-	this->length_step = 0.001f;// cambiando a un valor mas pequeño
+	this->length_step = 0.06f;// cambiando a un valor mas pequeño
 	this->density_threshold_min = 0.0f;
 	this->density_threshold_max = 1.0f;
 	this->brightness = 5.0f;
@@ -373,6 +373,8 @@ VolumeMaterial::VolumeMaterial(Shader* sh, Texture* tex, vec4 d_lim, vec4 TF_fst
 	TF_second_color = TF_snd_col;
 	TF_third_color = TF_trd_col;
 	TF_forth_color = TF_frth_col;
+
+	save_texture = false;
 
 	//this->plane_a = 0.0f;
 	//this->plane_b = 0.0f;

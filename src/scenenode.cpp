@@ -103,7 +103,6 @@ Light::Light(const char* name)
 	this->name = name;
 	this->visible_flag = TRUE;
 	this->typeOfNode = (int)TYPEOFNODE::LIGHT;
-
 	this->diffuse_intensity.set(1.0, 1.0, 1.0);
 	this->specular_intensity.set(1.0f, 1.0f, 1.0f);
 	this->light_intensity = 2.5;
@@ -183,9 +182,11 @@ void VolumeNode::render(Camera* camera)
 	if (material && visible_flag) {
 		// Downcast --> con este dynamic cast podemos recuperar las variables propias del VolumeNode si fue creado asi aunque le hayamos hecho un downcast
 		VolumeMaterial* volume_mat = dynamic_cast<VolumeMaterial*>(material);
+		//VolumetricPhong* volume_mat = dynamic_cast<VolumetricPhong*>(material);
 
 		//VolumeMaterial* volume_mat = (VolumeMaterial*)&material;
 		volume_mat->render(mesh, model, inverse_model, camera);
+		//volume_mat->v_material_phong->render();
 	}
 	//else if (volume_material && visible_flag) {
 	//	volume_material->render(mesh, model, inverse_model, camera);

@@ -116,15 +116,17 @@ public:
 
 	Texture* noise_texture;
 	Texture* tf_mapping_texture;
-	//Vector3 direction_vector; // no se si es buena idea guardarlo aquí
 
+	//flags
+	bool jittering_flag, clipping_flag, TF_flag, shade_flag ;
+	
 	VolumeMaterial();
 	VolumeMaterial(Shader* sh, Texture* tex);
 	~VolumeMaterial();
 
 	void setUniforms(Camera* camera, Matrix44 model, Matrix44 inverse_model);
 	void render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, Camera* camera);
-	void renderInMenu();
+	void renderInMenu() ;
 };
 
 class VolumetricPhong :public VolumeMaterial {
@@ -134,13 +136,14 @@ public:
 	vec3 diffuse;
 	float shininess;
 
-	Light * light;
+	Light* light = NULL;
 
 	VolumetricPhong();
-	VolumetricPhong(Shader* sh, Texture* texture);
+	VolumetricPhong(Shader* sh, Texture* tex);
 	~VolumetricPhong();
-	void setUniforms(Camera* camera, Matrix44 model);
-	//void render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, Camera* camera);
+
+	void setUniforms(Camera* camera, Matrix44 model, Matrix44 inverse_model);
+	void render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, Camera* camera);
 	void renderInMenu();
 };
 

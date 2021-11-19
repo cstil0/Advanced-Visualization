@@ -356,6 +356,9 @@ VolumeMaterial::VolumeMaterial(Shader* sh, Texture* tex)
 	this->iso_threshold = 0.015;
 	this->h_threshold = 0.015;
 
+	//flags
+	jittering_flag, clipping_flag, TF_flag, shade_flag = TRUE;
+	//v_material_phong = NULL;
 }
 
 VolumeMaterial::~VolumeMaterial()
@@ -375,10 +378,11 @@ void VolumeMaterial::setUniforms(Camera* camera, Matrix44 model, Matrix44 invers
 	shader->setUniform("u_plane_abcd", this->plane_abcd);
 	shader->setUniform("u_iso_threshold", this->iso_threshold);
 	shader->setUniform("u_h_threshold", this->h_threshold);
-	//shader->setUniform("u_plane_a", this->plane_a);
-	//shader->setUniform("u_plane_b", this->plane_b);
-	//shader->setUniform("u_plane_c", this->plane_c);
-	//shader->setUniform("u_plane_d", this->plane_d);
+
+	shader->setUniform("u_jittering_flag", this->jittering_flag);
+	shader->setUniform("u_clipping_flag", this->clipping_flag);
+	shader->setUniform("u_TF_flag", this->TF_flag);
+	shader->setUniform("u_shade_flag", this->shade_flag);
 
 	if (texture)
 		shader->setTexture("u_texture", texture, 0); // poner offset para numerar las texturas
@@ -408,6 +412,8 @@ void VolumeMaterial::render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, 
 	}
 }
 
+
+
 void VolumeMaterial::renderInMenu()
 {
 	ImGui::SliderFloat("Length Step", &this->length_step, 0.001, 1.0f);
@@ -417,26 +423,58 @@ void VolumeMaterial::renderInMenu()
 	ImGui::SliderFloat("Isosurface threshold", &this->iso_threshold, 0.0f, 1.0f);
 	ImGui::SliderFloat("H threshold", &this->h_threshold, 0.0f, 1.0f);
 
+	ImGui::Checkbox("Jittering", &this->jittering_flag);
+	ImGui::Checkbox("Clipping", &this->clipping_flag);
+	ImGui::Checkbox("TF", &this->TF_flag);
+	ImGui::Checkbox("Shade", &this->shade_flag);
 
 }
 
-VolumetricPhong::VolumetricPhong(Shader* sh, Texture* texture) {
+///////////////////////////////////////////////////////////////////////////////////
+VolumetricPhong::VolumetricPhong(){}
+
+VolumetricPhong::VolumetricPhong(Shader* sh, Texture* tex) {
+
+	this->shader = sh;
+	this->texture = tex;
+
 	this->color.set(0.7f, 0.7f, 0.7f, 0.f); //ambient material color
 	this->specular.set(1.0f, 1.0f, 0.0f);
 	this->diffuse.set(0.0f, 0.0f, 1.0f);
 	this->shininess = 20;
 
-	this->shader = sh;
-	this->texture = texture;
+
 }
 
-void VolumetricPhong::setUniforms(Camera* camera, Matrix44 model)
+
+void VolumetricPhong::setUniforms(Camera* camera, Matrix44 model, Matrix44 inverse_model)
 {
+
 	shader->setUniform("u_viewprojection", camera->viewprojection_matrix);
 	shader->setUniform("u_camera_position", camera->eye);
 	shader->setUniform("u_model", model);
-	shader->setUniform("u_color", this->color);
+	shader->setUniform("u_inverse_model", inverse_model);
+	shader->setUniform("u_color", color);
+
+	shader->setUniform("u_length_step", length_step);
+	shader->setUniform("u_brightness", this->brightness);
+	shader->setUniform("u_plane_abcd", this->plane_abcd);
+	shader->setUniform("u_iso_threshold", this->iso_threshold);
+	shader->setUniform("u_h_threshold", this->h_threshold);
+
+	shader->setUniform("u_jittering_flag", this->jittering_flag);
+	shader->setUniform("u_clipping_flag", this->clipping_flag);
+	shader->setUniform("u_TF_flag", this->TF_flag);
+	shader->setUniform("u_shade_flag", this->shade_flag);
+
+	if (texture)
+		shader->setTexture("u_texture", texture, 0); // poner offset para numerar las texturas
+	if (noise_texture)
+		shader->setTexture("u_noise_texture", noise_texture, 1);
+	if (tf_mapping_texture)
+		shader->setTexture("u_tf_mapping_texture", tf_mapping_texture, 2);
 	
+	//PHONG
 	shader->setUniform("u_light_pos", light->model.getTranslation());
 	shader->setUniform("u_Ia", Application::instance->ambient_light); //just one time
 	shader->setUniform("u_Id", light->diffuse_intensity);
@@ -446,9 +484,29 @@ void VolumetricPhong::setUniforms(Camera* camera, Matrix44 model)
 	shader->setUniform("u_diffuse", diffuse);
 	shader->setUniform("u_shininess", shininess);
 
-	/*if (texture)
-		shader->setUniform("u_texture", texture, EOutput::ALBEDO);*/
+	shader->setUniform("u_test", vec3(1, 0, 0));
+
 }
+
+void VolumetricPhong::render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, Camera* camera)
+{
+	if (mesh && shader)
+	{
+		//enable shader
+		shader->enable();
+
+		//upload uniforms
+		setUniforms(camera, model, inverse_model);
+
+		//glEnable(GL_BLEND);
+		//do the draw call
+		mesh->render(GL_TRIANGLES);
+		//glDisable(GL_BLEND);
+		//disable shader
+		shader->disable();
+	}
+}
+
 
 void VolumetricPhong::renderInMenu()
 {
@@ -457,4 +515,15 @@ void VolumetricPhong::renderInMenu()
 	ImGui::ColorEdit3("Diffuse", (float*)&this->diffuse);
 	ImGui::SliderFloat("Shininess", (float*)&this->shininess, 1, 50);
 
+	ImGui::SliderFloat("Length Step", &this->length_step, 0.001, 1.0f);
+	ImGui::SliderFloat("Brightness", &this->brightness, 1.0f, 50.0f);
+	ImGui::ColorEdit3("Color", color.v);
+	ImGui::SliderFloat4("Clipping Plane", plane_abcd.v, -10.0f, 10.0f);
+	ImGui::SliderFloat("Isosurface threshold", &this->iso_threshold, 0.0f, 1.0f);
+	ImGui::SliderFloat("H threshold", &this->h_threshold, 0.0f, 1.0f);
+
+	ImGui::Checkbox("Jittering", &this->jittering_flag);
+	ImGui::Checkbox("Clipping", &this->clipping_flag);
+	ImGui::Checkbox("TF", &this->TF_flag);
+	ImGui::Checkbox("Shade", &this->shade_flag);
 }

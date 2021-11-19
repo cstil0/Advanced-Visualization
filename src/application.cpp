@@ -67,12 +67,17 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 			tex3d->create3DFromVolume(volume, GL_CLAMP_TO_EDGE);
 
 			VolumeMaterial* vol_material = new VolumeMaterial(sh, tex3d);
+
 			Texture* tf_mapping_density = Texture::Get("data/TF_mapping.png");
 			vol_material->tf_mapping_texture = tf_mapping_density;
 			VolumeNode* vol_node = new VolumeNode("Volume Node");
 
+			//VolumetricPhong* v_material_phong = new VolumetricPhong(sh, tex3d);
+			
 			vol_node->volume = volume;
 			//vol_node->volume_material = vol_material;
+			//vol_node->material = v_material_phong;
+
 			vol_node->material = vol_material;
 
 			vol_node->mesh = Mesh::getCube();
@@ -138,7 +143,7 @@ void Application::loadHelmet(Light* light, Texture* BRDFLut) {
 	// Add the direct light to the material
 	helmet_material->light = light;
 	helmet_node->material = helmet_material;
-	helmet_node->material = helmet_material;
+	//helmet_node->material = helmet_material; //////////////////////////////////////////BORRAR!!
 	helmet_node->typeOfModel = SceneNode::TYPEOFMODEL::HELMET;
 
 	// Add the node to the list of possible nodes that can be chosen in the imGUI

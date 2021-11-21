@@ -114,12 +114,19 @@ public:
 	void onFileChanged(const char* filename);
 
 	//functions to create nodes in the scene
+	void loadFoot();
+	void loadTea();
+	void loadAbdomen();
+	void loadBonsai();
+	void loadOrange();
+
 	void loadBall(Light* light, Texture* BRDFLUT);
 	void loadHelmet(Light* light, Texture* BRDFLUT);
 	void loadLantern(Light* light, Texture* BRDFLUT);
 	void loadSkybox_Pisa();
 	void loadSkybox_Panorama();
 	void loadSkybox_Bridge();
+
 	void renderPhongEquation();
 	void renderReflection();
 

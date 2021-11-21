@@ -54,152 +54,14 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 
 	{
 		if (app_mode == APPMODE::VOLUME) {
-			// Define the colors and density limits
-			vec4 foot_d_lim = vec4(0.3f, 0.8f, 0.9f, 1.0f);
-			vec4 foot_fst_col = vec4(0.7f, 0.0f, 0.0f, 1.0f);
-			vec4 foot_snd_col = vec4(0.0f, 1.0f, 0.0f, 1.0f);
-			vec4 foot_trd_col = vec4(1.0f, 1.0f, 0.0f, 1.0f);
-			vec4 foot_frth_col = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-
-			vec4 tea_d_lim = vec4(0.2f, 0.5f, 0.6f, 1.0f);
-			vec4 tea_fst_col = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-			vec4 tea_snd_col = vec4(0.0f, 1.0f, 0.0f, 1.0f);
-			vec4 tea_trd_col = vec4(1.0f, 1.0f, 0.0f, 1.0f);
-			vec4 tea_frth_col = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-
-			vec4 abd_d_lim = vec4(0.2f, 0.3f, 0.3f, 1.0f);
-			vec4 abd_fst_col = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-			vec4 abd_snd_col = vec4(0.0f, 1.0f, 0.0f, 1.0f);
-			vec4 abd_trd_col = vec4(0.0f, 1.0f, 0.0f, 1.0f);
-			vec4 abd_frth_col = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-
-			vec4 bonsai_d_lim = vec4(0.1f, 0.4f, 0.6f, 1.0f);
-			vec4 bonsai_fst_col = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-			vec4 bonsai_snd_col = vec4(0.0f, 1.0f, 0.0f, 1.0f);
-			vec4 bonsai_trd_col = vec4(0.0f, 0.0f, 1.0f, 1.0f);
-			vec4 bonsai_frth_col = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-
-			vec4 orange_d_lim = vec4(0.2f, 0.2f, 1.0f, 1.0f);
-			vec4 orange_fst_col = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-			vec4 orange_snd_col = vec4(0.0f, 1.0f, 0.0f, 1.0f);
-			vec4 orange_trd_col = vec4(1.0f, 1.0f, 0.0f, 1.0f);
-			vec4 orange_frth_col = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-
 			sh = Shader::Get("data/shaders/basic.vs", "data/shaders/volume2.fs");
-
-			// Foot
-			Volume* foot_volume = new Volume();
-			foot_volume->loadPNG("data/volumes/foot_16_16.png", 16, 16);
-
-			Texture* foot_tex3d = new Texture();
-			foot_tex3d->create3DFromVolume(foot_volume, GL_CLAMP_TO_EDGE);
-
-			VolumeMaterial* foot_material = new VolumeMaterial(sh, foot_tex3d, foot_d_lim, foot_fst_col, foot_snd_col, foot_trd_col, foot_frth_col);
-			Texture* tf_foot = Texture::Get("data/TF_texture.tga");
-			foot_material->tf_mapping_texture = tf_foot;
-			VolumeNode* foot_vol_node = new VolumeNode("Foot Node");
-
-			foot_vol_node->volume = foot_volume;
-			//vol_node->volume_material = vol_material;
-			foot_vol_node->material = foot_material;
-
-			foot_vol_node->mesh = Mesh::getCube();
-			foot_vol_node->typeOfNode = SceneNode::TYPEOFNODE::VOLUME;
-			foot_vol_node->typeOfVolume = SceneNode::TYPEOFVOLUME::FOOT;
-			typeOfVolume_ImGUI = TYPEOFVOLUMEIMGUI::FOOT;
-
-			optional_node_list.push_back(foot_vol_node);
-			node_list.push_back(foot_vol_node);
-
-			// Tea
-			Volume* tea_volume = new Volume();
-			tea_volume->loadPNG("data/volumes/teapot_16_16.png", 16, 16);
-
-			Texture* tea_tex3d = new Texture();
-			tea_tex3d->create3DFromVolume(tea_volume, GL_CLAMP_TO_EDGE);
-
-			VolumeMaterial* tea_material = new VolumeMaterial(sh, tea_tex3d, tea_d_lim, tea_fst_col, tea_snd_col, tea_trd_col, tea_frth_col);
-			Texture* tf_tea = Texture::Get("data/TF_mapping.png");
-			tea_material->tf_mapping_texture = tf_tea;
-			VolumeNode* tea_vol_node = new VolumeNode("Tea Node");
-
-			tea_vol_node->volume = tea_volume;
-			//vol_node->volume_material = vol_material;
-			tea_vol_node->material = tea_material;
-
-			tea_vol_node->mesh = Mesh::getCube();
-			tea_vol_node->typeOfNode = SceneNode::TYPEOFNODE::VOLUME;
-			tea_vol_node->typeOfVolume = SceneNode::TYPEOFVOLUME::TEA;
-
-			optional_node_list.push_back(tea_vol_node);
-
-			// Abdomen
-			Volume* abd_volume = new Volume();
-			abd_volume->loadPVM("data/volumes/CT-Abdomen.pvm");
-
-			Texture* abd_tex3d = new Texture();
-			abd_tex3d->create3DFromVolume(abd_volume, GL_CLAMP_TO_EDGE);
-
-			VolumeMaterial* abd_material = new VolumeMaterial(sh, abd_tex3d, foot_d_lim, abd_fst_col, abd_snd_col, abd_trd_col, abd_frth_col);
-			Texture* tf_abd = Texture::Get("data/TF_mapping_abdomen.png");
-			abd_material->tf_mapping_texture = tf_abd;
-			VolumeNode* abd_vol_node = new VolumeNode("Abdomen Node");
-
-			abd_vol_node->volume = abd_volume;
-			//vol_node->volume_material = vol_material;
-			abd_vol_node->material = abd_material;
-
-			abd_vol_node->mesh = Mesh::getCube();
-			abd_vol_node->typeOfNode = SceneNode::TYPEOFNODE::VOLUME;
-			abd_vol_node->typeOfVolume = SceneNode::TYPEOFVOLUME::ABDOMEN;
-
-			optional_node_list.push_back(abd_vol_node);
-
-			// Bonsai
-			Volume* bonsai_volume = new Volume();
-			bonsai_volume->loadPNG("data/volumes/bonsai_16_16.png", 16, 16);
-
-			Texture* bonsai_tex3d = new Texture();
-			bonsai_tex3d->create3DFromVolume(bonsai_volume, GL_CLAMP_TO_EDGE);
-
-			VolumeMaterial* bonsai_material = new VolumeMaterial(sh, bonsai_tex3d, bonsai_d_lim, bonsai_fst_col, bonsai_snd_col, bonsai_trd_col, bonsai_frth_col);
-			Texture* tf_bonsai = Texture::Get("data/TF_mapping.png");
-			bonsai_material->tf_mapping_texture = tf_bonsai;
-			VolumeNode* bonsai_vol_node = new VolumeNode("Bonsai Node");
-
-			bonsai_vol_node->volume = bonsai_volume;
-			//vol_node->volume_material = vol_material;
-			bonsai_vol_node->material = bonsai_material;
-
-			bonsai_vol_node->mesh = Mesh::getCube();
-			bonsai_vol_node->typeOfNode = SceneNode::TYPEOFNODE::VOLUME;
-			bonsai_vol_node->typeOfVolume = SceneNode::TYPEOFVOLUME::BONSAI;
-
-			optional_node_list.push_back(bonsai_vol_node);
-
-			// Orange
-			Volume* orange_volume = new Volume();
-			orange_volume->loadPVM("data/volumes/Orange.pvm");
-
-			Texture* orange_tex3d = new Texture();
-			orange_tex3d->create3DFromVolume(orange_volume, GL_CLAMP_TO_EDGE);
-
-			VolumeMaterial* orange_material = new VolumeMaterial(sh, orange_tex3d, orange_d_lim, orange_fst_col, orange_snd_col, orange_trd_col, orange_frth_col);
-			Texture* tf_orange = Texture::Get("data/TF_mapping.png");
-			orange_material ->tf_mapping_texture = tf_orange;
-			VolumeNode* orange_vol_node = new VolumeNode("Orange Node");
-
-			orange_vol_node->volume = orange_volume;
-			//vol_node->volume_material = vol_material;
-			orange_vol_node->material = orange_material;
-
-			orange_vol_node->mesh = Mesh::getCube();
-			orange_vol_node->typeOfNode = SceneNode::TYPEOFNODE::VOLUME;
-			orange_vol_node->typeOfVolume = SceneNode::TYPEOFVOLUME::ORANGE;
-
-			optional_node_list.push_back(orange_vol_node);
+			
+			loadFoot();
+			loadTea();
+			loadAbdomen();
+			loadBonsai();
+			loadOrange();
 		}
-		
 		//Functions used in the phong lab
 		if (app_mode == APPMODE::PHONG) {
 			renderPhongEquation();
@@ -217,6 +79,165 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	SDL_ShowCursor(!mouse_locked); //hide or show the mouse
 }
 
+// ---Volume---
+void Application::loadFoot() {
+	// Define the colors and density limits
+	vec4 foot_d_lim = vec4(0.3f, 0.8f, 0.9f, 1.0f);
+	vec4 foot_fst_col = vec4(0.62f, 0.29f, 0.29f, 1.0f);
+	vec4 foot_snd_col = vec4(0.52f, 0.72f, 0.38f, 1.0f);
+	vec4 foot_trd_col = vec4(1.0f, 1.0f, 0.0f, 1.0f);
+	vec4 foot_frth_col = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+	// Foot
+	Volume* foot_volume = new Volume();
+	foot_volume->loadPNG("data/volumes/foot_16_16.png", 16, 16);
+
+	Texture* foot_tex3d = new Texture();
+	foot_tex3d->create3DFromVolume(foot_volume, GL_CLAMP_TO_EDGE);
+
+	VolumeMaterial* foot_material = new VolumeMaterial(sh, foot_tex3d, foot_d_lim, foot_fst_col, foot_snd_col, foot_trd_col, foot_frth_col);
+	Texture* tf_foot = Texture::Get("data/TF_texture_foot.png");
+	foot_material->tf_mapping_texture = tf_foot;
+	VolumeNode* foot_vol_node = new VolumeNode("Foot Node");
+
+	foot_vol_node->volume = foot_volume;
+	//vol_node->volume_material = vol_material;
+	foot_vol_node->material = foot_material;
+
+	foot_vol_node->mesh = Mesh::getCube();
+	foot_vol_node->typeOfNode = SceneNode::TYPEOFNODE::VOLUME;
+	foot_vol_node->typeOfVolume = SceneNode::TYPEOFVOLUME::FOOT;
+	typeOfVolume_ImGUI = TYPEOFVOLUMEIMGUI::FOOT;
+
+	optional_node_list.push_back(foot_vol_node);
+	node_list.push_back(foot_vol_node);
+}
+
+void Application::loadTea() {
+
+	vec4 tea_d_lim = vec4(0.2f, 0.5f, 0.9f, 1.0f);
+	vec4 tea_fst_col = vec4(0.41f, 0.36f, 0.20f, 1.0f);
+	vec4 tea_snd_col = vec4(0.47f, 0.24f, 0.55f, 1.0f);
+	vec4 tea_trd_col = vec4(0.91f, 0.54f, 0.14f, 1.0f);
+	vec4 tea_frth_col = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+	// Tea
+	Volume* tea_volume = new Volume();
+	tea_volume->loadPNG("data/volumes/teapot_16_16.png", 16, 16);
+
+	Texture* tea_tex3d = new Texture();
+	tea_tex3d->create3DFromVolume(tea_volume, GL_CLAMP_TO_EDGE);
+
+	VolumeMaterial* tea_material = new VolumeMaterial(sh, tea_tex3d, tea_d_lim, tea_fst_col, tea_snd_col, tea_trd_col, tea_frth_col);
+	Texture* tf_tea = Texture::Get("data/TF_texture_tea.png");
+	tea_material->tf_mapping_texture = tf_tea;
+	VolumeNode* tea_vol_node = new VolumeNode("Tea Node");
+
+	tea_vol_node->volume = tea_volume;
+	//vol_node->volume_material = vol_material;
+	tea_vol_node->material = tea_material;
+
+	tea_vol_node->mesh = Mesh::getCube();
+	tea_vol_node->typeOfNode = SceneNode::TYPEOFNODE::VOLUME;
+	tea_vol_node->typeOfVolume = SceneNode::TYPEOFVOLUME::TEA;
+
+	optional_node_list.push_back(tea_vol_node);
+
+}
+
+void Application::loadAbdomen() {
+	vec4 abd_d_lim = vec4(0.2f, 0.3f, 0.8f, 1.0f);
+	vec4 abd_fst_col = vec4(0.62f, 0.29f, 0.29f, 1.0f);
+	vec4 abd_snd_col = vec4(0.52f, 0.72f, 0.38f, 1.0f);
+	vec4 abd_trd_col = vec4(1.0f, 1.0f, 0.0f, 1.0f);
+	vec4 abd_frth_col = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+	// Abdomen
+	Volume* abd_volume = new Volume();
+	abd_volume->loadPVM("data/volumes/CT-Abdomen.pvm");
+
+	Texture* abd_tex3d = new Texture();
+	abd_tex3d->create3DFromVolume(abd_volume, GL_CLAMP_TO_EDGE);
+
+	VolumeMaterial* abd_material = new VolumeMaterial(sh, abd_tex3d, abd_d_lim, abd_fst_col, abd_snd_col, abd_trd_col, abd_frth_col);
+	Texture* tf_abd = Texture::Get("data/TF_texture_abdomen.png");
+	abd_material->tf_mapping_texture = tf_abd;
+	VolumeNode* abd_vol_node = new VolumeNode("Abdomen Node");
+
+	abd_vol_node->volume = abd_volume;
+	//vol_node->volume_material = vol_material;
+	abd_vol_node->material = abd_material;
+
+	abd_vol_node->mesh = Mesh::getCube();
+	abd_vol_node->typeOfNode = SceneNode::TYPEOFNODE::VOLUME;
+	abd_vol_node->typeOfVolume = SceneNode::TYPEOFVOLUME::ABDOMEN;
+
+	optional_node_list.push_back(abd_vol_node);
+
+}
+
+void Application::loadBonsai() {
+
+	vec4 bonsai_d_lim = vec4(0.15f, 0.2f, 0.55f, 1.0f);
+	vec4 bonsai_fst_col = vec4(0.25f, 0.13f, 0.13f, 1.0f);
+	vec4 bonsai_snd_col = vec4(0.0f, 1.0f, 0.0f, 1.0f);
+	vec4 bonsai_trd_col = vec4(0.47f, 0.37f, 0.02f, 1.0f);
+	vec4 bonsai_frth_col = vec4(0.0f, 0.0f, 1.0f, 1.0f);
+
+	// Bonsai
+	Volume* bonsai_volume = new Volume();
+	bonsai_volume->loadPNG("data/volumes/bonsai_16_16.png", 16, 16);
+
+	Texture* bonsai_tex3d = new Texture();
+	bonsai_tex3d->create3DFromVolume(bonsai_volume, GL_CLAMP_TO_EDGE);
+
+	VolumeMaterial* bonsai_material = new VolumeMaterial(sh, bonsai_tex3d, bonsai_d_lim, bonsai_fst_col, bonsai_snd_col, bonsai_trd_col, bonsai_frth_col);
+	Texture* tf_bonsai = Texture::Get("data/TF_texture_bonsai.png");
+	bonsai_material->tf_mapping_texture = tf_bonsai;
+	VolumeNode* bonsai_vol_node = new VolumeNode("Bonsai Node");
+
+	bonsai_vol_node->volume = bonsai_volume;
+	//vol_node->volume_material = vol_material;
+	bonsai_vol_node->material = bonsai_material;
+
+	bonsai_vol_node->mesh = Mesh::getCube();
+	bonsai_vol_node->typeOfNode = SceneNode::TYPEOFNODE::VOLUME;
+	bonsai_vol_node->typeOfVolume = SceneNode::TYPEOFVOLUME::BONSAI;
+
+	optional_node_list.push_back(bonsai_vol_node);
+}
+
+void Application::loadOrange() {
+	vec4 orange_d_lim = vec4(0.15f, 0.25f, 0.9f, 1.0f);
+	vec4 orange_fst_col = vec4(0.62f, 0.29f, 0.29f, 1.0f);
+	vec4 orange_snd_col = vec4(1.0f, 1.0f, 0.0f, 1.0f);
+	vec4 orange_trd_col = vec4(0.92f, 0.54f, 0.14f, 1.0f);
+	vec4 orange_frth_col = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+	// Orange
+	Volume* orange_volume = new Volume();
+	orange_volume->loadPVM("data/volumes/Orange.pvm");
+
+	Texture* orange_tex3d = new Texture();
+	orange_tex3d->create3DFromVolume(orange_volume, GL_CLAMP_TO_EDGE);
+
+	VolumeMaterial* orange_material = new VolumeMaterial(sh, orange_tex3d, orange_d_lim, orange_fst_col, orange_snd_col, orange_trd_col, orange_frth_col);
+	Texture* tf_orange = Texture::Get("data/TF_texture_orange.png");
+	orange_material->tf_mapping_texture = tf_orange;
+	VolumeNode* orange_vol_node = new VolumeNode("Orange Node");
+
+	orange_vol_node->volume = orange_volume;
+	//vol_node->volume_material = vol_material;
+	orange_vol_node->material = orange_material;
+
+	orange_vol_node->mesh = Mesh::getCube();
+	orange_vol_node->typeOfNode = SceneNode::TYPEOFNODE::VOLUME;
+	orange_vol_node->typeOfVolume = SceneNode::TYPEOFVOLUME::ORANGE;
+
+	optional_node_list.push_back(orange_vol_node);
+}
+
+// ---PBR---
 void Application::loadBall(Light* light, Texture* BRDFLut){
 	// Load textures
 	Texture* ball_color_texture = Texture::Get("data/models/ball/albedo.png");

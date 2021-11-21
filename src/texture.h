@@ -34,6 +34,7 @@ public:
 
 	void resize(int w, int h, int bytes_per_pixel = 3) { if (data) delete[] data; width = w; height = h; this->bytes_per_pixel = bytes_per_pixel; data = new uint8[w*h*bytes_per_pixel]; memset(data, 0, w*h*bytes_per_pixel); }
 	void clear() { if (data) delete[]data; data = NULL; width = height = 0; }
+	bool saveTGA(const char* filename, bool flip_y);
 	void flipY();
 
 	Color getPixel(int x, int y) {

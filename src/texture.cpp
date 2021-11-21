@@ -13,6 +13,7 @@
 #include "extra/picopng.h"
 #include <cassert>
 
+
 //bilinear interpolation
 Color Image::getPixelInterpolated(float x, float y, bool repeat) {
 	int ix = repeat ? fmod(x,width) : clamp(x,0,width-1);

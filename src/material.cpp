@@ -472,7 +472,7 @@ void VolumeMaterial::saveTexture()
 		//TF_texture->setPixel(i,0, Color(255.0f,255.0f,255.0f,1.0f));
 	}
 
-	TF_texture->saveTGA("data/TF_texture.tga", true);
+	//TF_texture->saveTGA("data/TF_texture.tga", true);
 	// Load the texture again to show the updated one
 	this->tf_mapping_texture = new Texture(TF_texture);
 	//this->tf_mapping_texture

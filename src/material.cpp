@@ -361,7 +361,7 @@ VolumeMaterial::VolumeMaterial(Shader* sh, Texture* tex, vec4 d_lim, vec4 TF_fst
 
 	jittering_flag_imgui = false;
 	TF_flag_imgui = false;
-	TF_debug_flag_imgui = true;
+	TF_debug_flag_imgui = false;
 	illumination_flag_imgui = false;
 	clipping_flag_imgui = false;
 
@@ -441,16 +441,24 @@ void VolumeMaterial::saveTexture()
 {
 	int TF_width = 20;
 	int TF_height = 1;
+
 	Image* TF_texture = new Image(TF_width, TF_height);
 	// POR ALGUN MOTIVO NO ME FUNCIONA LA DIVISIÓN
 	float step = 0.05;
 	float position = 0.0f;
 	// Iterate through the image to set the pixels
-	for (int i = 1; i <= TF_width; i++) {
+	//for (int i = 0; i < TF_width; i++) {
+	//	// Check between which limits the pixel is
+	//	position = (i + 1) * step;
+	//	Color c = Color(255, 0, 0, 100);
+	//	TF_texture->setPixel(i, 0, c);
+	//}
+	for (int i = 0; i < TF_width; i++) {
 		// Check between which limits the pixel is
-		position = i * step;
+		position = (i+1) * step;
 		if (position <= density_limits.x) {
-			TF_texture->setPixel(i, 0, Color(TF_first_color.x*255, TF_first_color.y*255, TF_first_color.z * 255, TF_first_color.w));
+			Color c = Color(TF_first_color.x*255, TF_first_color.y*255, TF_first_color.z*255, TF_first_color.w);
+			TF_texture->setPixel(i, 0, c);
 		}
 		else if (position <= density_limits.y) {
 			TF_texture->setPixel(i, 0, Color(TF_second_color.x * 255, TF_second_color.y * 255, TF_second_color.z * 255, TF_second_color.w));
@@ -464,9 +472,10 @@ void VolumeMaterial::saveTexture()
 		//TF_texture->setPixel(i,0, Color(255.0f,255.0f,255.0f,1.0f));
 	}
 
-	TF_texture->saveTGA("data/TF_texture_vol.tga");
+	TF_texture->saveTGA("data/TF_texture.tga", true);
 	// Load the texture again to show the updated one
-	this->tf_mapping_texture = Texture::Get("data/TF_texture_vol.tga");
+	this->tf_mapping_texture = new Texture(TF_texture);
+	//this->tf_mapping_texture
 	save_texture = false;
 }
 

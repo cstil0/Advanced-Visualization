@@ -55,7 +55,7 @@ public:
 
 	bool loadTGA(const char* filename);
 	bool loadPNG(const char* filename, bool flip_y = true);
-	bool saveTGA(const char* filename, bool flip_y = true);
+	bool saveTGA(const char* filename);
 };
 
 

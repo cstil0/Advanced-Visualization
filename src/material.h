@@ -132,7 +132,7 @@ public:
 	Texture* tf_mapping_texture;
 	//Vector3 direction_vector; // no se si es buena idea guardarlo aquí
 
-	// Variables fot TF generator
+	// Variables for TF generator
 	Vector4 density_limits;
 	vec4 TF_first_color;
 	vec4 TF_second_color;

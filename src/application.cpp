@@ -55,7 +55,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	{
 		if (app_mode == APPMODE::VOLUME) {
 			// Define the colors and density limits
-			vec4 foot_d_lim = vec4(0.3f, 0.8f, 0.8f, 1.0f);
+			vec4 foot_d_lim = vec4(0.3f, 0.8f, 0.9f, 1.0f);
 			vec4 foot_fst_col = vec4(0.7f, 0.0f, 0.0f, 1.0f);
 			vec4 foot_snd_col = vec4(0.0f, 1.0f, 0.0f, 1.0f);
 			vec4 foot_trd_col = vec4(1.0f, 1.0f, 0.0f, 1.0f);
@@ -88,8 +88,6 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 			sh = Shader::Get("data/shaders/basic.vs", "data/shaders/volume2.fs");
 
 			// Foot
-			// AHORA MISMO NO ESTOY SEGURA DE POR QUE CREAMOS PRIMERO UN VOLUMEN Y LUEGO COMO QUE LO PASAMOS A VOLUME NODE
-			// ES POR LO DE LA DEPENDENCIA DEL MATERIAL?
 			Volume* foot_volume = new Volume();
 			foot_volume->loadPNG("data/volumes/foot_16_16.png", 16, 16);
 
@@ -97,7 +95,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 			foot_tex3d->create3DFromVolume(foot_volume, GL_CLAMP_TO_EDGE);
 
 			VolumeMaterial* foot_material = new VolumeMaterial(sh, foot_tex3d, foot_d_lim, foot_fst_col, foot_snd_col, foot_trd_col, foot_frth_col);
-			Texture* tf_foot = Texture::Get("data/TF_texture_vol.tga");
+			Texture* tf_foot = Texture::Get("data/TF_texture.tga");
 			foot_material->tf_mapping_texture = tf_foot;
 			VolumeNode* foot_vol_node = new VolumeNode("Foot Node");
 
@@ -645,12 +643,10 @@ void Application::update(double seconds_elapsed)
 					final_macro = final_macro + TF_macro;
 				if (volume_material->TF_debug_flag_imgui)
 					final_macro = final_macro + TF_debug_macro;
-				if (volume_material->clipping_flag_imgui) {
+				if (volume_material->clipping_flag_imgui)
 					final_macro = final_macro + clipping_macro;
-				}
-				if (volume_material->illumination_flag_imgui) {
+				if (volume_material->illumination_flag_imgui)
 					final_macro = final_macro + illumination_macro;
-				}
 
 				// Enviamos la macro resultante de concatenar todos los strings activos si ha habido un cambio en el imgui
 				if (change_imgui)

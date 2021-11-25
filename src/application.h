@@ -62,6 +62,8 @@ public:
 	std::vector< SceneNode* > node_list;
 	// List with the nodes that can be selected in the imGUI
 	std::vector< SceneNode* > optional_node_list;
+
+	std::vector< StandardMaterial* > material_list;
 	Skybox* skybox_node = NULL;
 	// List with the types of skybox that can be selected in the imGUI
 	std::vector< Skybox* > optional_skybox_list;
@@ -81,6 +83,7 @@ public:
 	float scene_exposure;
 	
 	int output;
+	int mode_VolumeMaterial;
 	vec3 ambient_light;
 	
 	//some vars

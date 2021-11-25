@@ -117,8 +117,9 @@ public:
 	Texture* noise_texture;
 	Texture* tf_mapping_texture;
 
+
 	//flags
-	bool jittering_flag, clipping_flag, TF_flag, shade_flag ;
+	bool jittering_flag, clipping_flag, TF_flag;
 	
 	// phong attributes
 	vec3 specular;
@@ -145,12 +146,16 @@ public:
 
 	Light* light = NULL;
 
+	//flags
+	bool shade_flag, gradient_flag, phong_flag;
+
 	VolumetricPhong();
 	VolumetricPhong(Shader* sh, Texture* tex);
 	~VolumetricPhong();
 
 	void setUniforms(Camera* camera, Matrix44 model, Matrix44 inverse_model);
 	void render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, Camera* camera);
+
 	void renderInMenu();
 };
 

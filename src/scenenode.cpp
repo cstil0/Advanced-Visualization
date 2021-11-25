@@ -127,7 +127,7 @@ void Light::renderInMenu()
 	if (ImGui::TreeNode("Light intensity") ) 
 	{
 		ImGui::SliderFloat("Intensity", &this->light_intensity, 0.0f, 10.0f);
-		/// GESTIONAR QUE SI ES PBR QUE NO MUESTREE LOS SIGUIENTES!!!!!!!!!!!!!!!!!!!!!
+		/// GESTIONAR QUE SI ES PBR QUE NO MUESTREE LOS SIGUIENTES!!!
 		ImGui::ColorEdit3("Specular_intensity", (float*)&this->specular_intensity);
 		ImGui::ColorEdit3("Diffuse_intensity", (float*)&this->diffuse_intensity);
 
@@ -185,7 +185,9 @@ void VolumeNode::render(Camera* camera)
 {
 	if (material && visible_flag) {
 		// Downcast --> con este dynamic cast podemos recuperar las variables propias del VolumeNode si fue creado asi aunque le hayamos hecho un downcast
-		VolumeMaterial* volume_mat = dynamic_cast<VolumeMaterial*>(material);
+		//VolumeMaterial* volume_mat = dynamic_cast<VolumeMaterial*>(material);
+		VolumetricPhong* volume_mat = dynamic_cast<VolumetricPhong*>(material);
+
 		//VolumetricPhong* volume_mat = dynamic_cast<VolumetricPhong*>(material);
 
 		//VolumeMaterial* volume_mat = (VolumeMaterial*)&material;
@@ -201,26 +203,5 @@ void VolumeNode::render(Camera* camera)
 // ESTAMOS REPITIENDO
 void VolumeNode::renderInMenu()
 {
-	if (!(this->typeOfNode == TYPEOFNODE::VOLUME)) {
-		ImGui::Checkbox("Visible", &visible_flag);
-	}
-	//Model edit
-	if (ImGui::TreeNode("Model"))
-	{
-		float matrixTranslation[3], matrixRotation[3], matrixScale[3];
-		ImGuizmo::DecomposeMatrixToComponents(model.m, matrixTranslation, matrixRotation, matrixScale);
-		ImGui::DragFloat3("Position", matrixTranslation, 0.1f);
-		ImGui::DragFloat3("Rotation", matrixRotation, 0.1f);
-		ImGui::DragFloat3("Scale", matrixScale, 0.1f);
-		ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, model.m);
-
-		ImGui::TreePop();
-	}
-	// Material
-	if (ImGui::TreeNode("Material")) {
-		material->renderInMenu();
-		ImGui::TreePop();
-	}
-
-	
+	SceneNode::renderInMenu();
 }

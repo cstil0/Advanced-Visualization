@@ -37,6 +37,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	mouse_locked = false;
 	scene_exposure = 1;
 	output = 0.0;
+	mode_VolumeMaterial = 1.0;
 
 	app_mode = APPMODE::VOLUME;
 
@@ -74,22 +75,26 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 			light->model.translate(-4, 16, 14);
 			node_list.push_back(light);
 			
-
 			VolumeMaterial* vol_material = new VolumeMaterial(sh, tex3d);
-
+			VolumeNode* vol_node = new VolumeNode("Volume Node");
 			Texture* tf_mapping_density = Texture::Get("data/TF_mapping.png");
 			vol_material->tf_mapping_texture = tf_mapping_density;
-			vol_material->light = light;
 
-			VolumeNode* vol_node = new VolumeNode("Volume Node");
-
-			//VolumetricPhong* v_material_phong = new VolumetricPhong(sh, tex3d);
-			
 			vol_node->volume = volume;
-			//vol_node->volume_material = vol_material;
-			//vol_node->material = v_material_phong;
+			
+			material_list.push_back(vol_material);
 
-			vol_node->material = vol_material;
+			//vol_material = (VolumetricPhong*)vol_material; 
+			//VolumeMaterial* volume_mat = dynamic_cast<VolumeMaterial*>(material);
+			//VolumetricPhong* phong_vol_material = dynamic_cast<VolumetricPhong*>(vol_material);
+
+			VolumetricPhong* phong_vol_material = new VolumetricPhong(sh, tex3d);
+	
+			phong_vol_material->light = light;
+			phong_vol_material->tf_mapping_texture = tf_mapping_density;
+			material_list.push_back(phong_vol_material);
+
+			vol_node->material = phong_vol_material; // Me he quedado debugeando aqui, queria probar pq no funciona al poner esto con el material de phong...
 
 			vol_node->mesh = Mesh::getCube();
 			//vol_node->model.scale(volume->width, volume->height, volume->depth);                  // NO ESTAMOS MUY SEGURAS DE ESTO PERO CLARA CREE QUE EL CUBO TIENE QUE CONTENER EL VOLUMEN
@@ -154,7 +159,6 @@ void Application::loadHelmet(Light* light, Texture* BRDFLut) {
 	// Add the direct light to the material
 	helmet_material->light = light;
 	helmet_node->material = helmet_material;
-	//helmet_node->material = helmet_material; //////////////////////////////////////////BORRAR!!
 	helmet_node->typeOfModel = SceneNode::TYPEOFMODEL::HELMET;
 
 	// Add the node to the list of possible nodes that can be chosen in the imGUI
@@ -473,7 +477,7 @@ void Application::update(double seconds_elapsed)
 	if (app_mode == APPMODE::VOLUME) {
 		for (int i = 0; i < node_list.size(); i++)
 		{
-			if (node_list[i]->typeOfNode == SceneNode::TYPEOFNODE::NODE) {
+			if (node_list[i]->typeOfNode == SceneNode::TYPEOFNODE::VOLUME) {
 				VolumeNode* volume_node = (VolumeNode*)node_list[i];
 				Matrix44 inv_m_aux = volume_node->model;
 				inv_m_aux.inverse();
@@ -495,15 +499,13 @@ void Application::update(double seconds_elapsed)
 			}
 		}
 
-		// Same with skybox
+		// Same with skyboxS
 		if (typeOfSkybox_ImGUI != skybox_node->typeOfSkybox) {
 			// Look for the new skybox to be rendered
 			for (int i = 0; i < optional_skybox_list.size(); i++) {
 				if (optional_skybox_list[i]->typeOfSkybox == typeOfSkybox_ImGUI) {
 					// Update the new skybox
-					if (typeOfSkybox_ImGUI == 2) {
-						int s = 0;
-					}
+					
 					node_list[SceneNode::TYPEOFNODE::SKYBOX] = (SceneNode*)optional_skybox_list[i];
 					skybox_node = optional_skybox_list[i];
 				}
@@ -514,6 +516,20 @@ void Application::update(double seconds_elapsed)
 	// Update skybox center position according to the camera position
 	if(node_list[SceneNode::TYPEOFNODE::SKYBOX]->typeOfNode == (int)SceneNode::TYPEOFNODE::SKYBOX )
 		node_list[SceneNode::TYPEOFNODE::SKYBOX]->model.setTranslation(camera->eye.x, camera->eye.y, camera->eye.z);
+
+
+	//if (mode_VolumeMaterial ) {
+	//	
+	//	for (int i = 0; i < node_list.size(); i++)
+	//	{
+	//		if (node_list[i]->typeOfNode == SceneNode::TYPEOFNODE::VOLUME ) {
+	//			node_list[i]->material = material_list[1]; // ahora esta harkcodeado!!!!!!!! la 0 basic, 1 es phong
+	//		}
+	//	}
+
+	//}
+
+
 }
 
 //Keyboard event handler (sync input)

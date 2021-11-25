@@ -1,4 +1,4 @@
-#define MAX_ITERATIONS 1000
+#define MAX_ITERATIONS 1000000
 
 varying vec3 v_position; //position in local coords
 varying vec3 v_world_position; //position in world coord
@@ -28,6 +28,9 @@ uniform bool u_jittering_flag;
 uniform bool u_clipping_flag;
 uniform bool u_TF_flag;
 uniform bool u_shade_flag;
+uniform bool u_gradient_flag;
+uniform bool u_phong_flag;
+
 
 //light parameters:
 uniform vec3 u_light_pos;
@@ -39,7 +42,7 @@ uniform vec3 u_diffuse;
 uniform vec3 u_specular;
 uniform float u_shininess;
 
-uniform vec3 u_test;
+
 vec3 compute_lightPhong(vec3 gradient, vec4 final_color){
     
     // Compute the light equation vectors
@@ -140,29 +143,29 @@ void main(){
         // si el flag de clipping esta activado q salte esta linea, si no hay clipping entre al if
         // usamos or por q cuando no hay clipiing tamb pueda hacer esta contribucion de final color!!
         if (!u_clipping_flag || plane <= 0.0f){ // que haga la suma total de las contribuciones, si no esto, pues no hay sumas...
-            sample_color.rgb *= sample_color.a; //atenuendo el color dependiendo de alpha
-            final_color += u_length_step * (1.0 - final_color.a) * sample_color; 
             
+            if(!u_phong_flag){
+                // otro flag paara phong
+                sample_color.rgb *= sample_color.a; //atenuendo el color dependiendo de alpha
+              
+                final_color += u_length_step * (1.0 - final_color.a) * sample_color;     
+            }
+            else if( sample_color.a > u_iso_threshold ) { // por algun motivo los flags estos enviados no se actualizan siempre son 0...
+                if(!u_shade_flag){
+                    final_color = sample_color;
+                    break;
+                }
+                gradient = compute_gradient(sample_pos, h);
+                if(u_gradient_flag){
+                    final_color = vec4(gradient,1.0)/u_brightness; 
+                    break;
+                }
+                light_intensity = compute_lightPhong(gradient, final_color);
+                final_color = sample_color * vec4(light_intensity, 1.0) ; //le damos la iluminacion
+                break;
+            }
         }
-        if(u_shade_flag && (sample_color.a > u_iso_threshold ) && (!u_clipping_flag || plane <= 0.0f )){
-            gradient = compute_gradient(sample_pos, h);
-            light_intensity = compute_lightPhong(gradient, final_color);
-            final_color = sample_color * vec4(light_intensity, 1.0) ; //le damos la iluminacion
-            // final_color = vec4(gradient,1.0);
-            break;
-        }
-        // // Visualizing isosurfaces
-        // if ( u_shade_flag && (sample_color.a > u_iso_threshold )){
-        //     gradient = compute_gradient(sample_pos, h);
-        //     light_intensity = compute_lightPhong(gradient, final_color);
-        //     final_color = sample_color * vec4(light_intensity, 1.0) ; //le damos la iluminacion
-        //     break;
-        // }
-        // else{
-        //     sample_color.rgb *= sample_color.a; //atenuendo el color dependiendo de alpha
-        //     final_color += u_length_step * (1.0 - final_color.a) * sample_color; 
-        // }
-            
+      
 
         // 5. Next sample
         sample_pos += step_vector;
@@ -171,17 +174,7 @@ void main(){
 		plane = u_plane_abcd.x*sample_pos.x + u_plane_abcd.y*sample_pos.y + u_plane_abcd.z*sample_pos.z + u_plane_abcd.w;
         
         
-        // else {
-            
-        //     if ( u_shade_flag && (sample_color.a > u_iso_threshold )){
-        //         gradient = compute_gradient(sample_pos, h);
-        //         light_intensity = compute_lightPhong(gradient, final_color);
-        //         final_color = sample_color * vec4(light_intensity, 1.0) ; //le damos la iluminacion
-        //         break;
-        //     }
-        //     sample_color.rgb *= sample_color.a; //atenuendo el color dependiendo de alpha
-        //     final_color += u_length_step * (1.0 - final_color.a) * sample_color; 
-        // }   
+
         
         // 6. Early termination
         //If is outside the auxiliar mesh
@@ -205,8 +198,9 @@ void main(){
     }
 
     //7. Final color
-    gl_FragColor = final_color * u_brightness ;
+    gl_FragColor = final_color * u_brightness ; // u_brightnesss lo mult aqui??
+    
     // gl_FragColor = vec4(u_test,1.0);
     // gl_FragColor = final_color;
-    // gl_FragColor = vec4(gradient,1.0);
+    
 }

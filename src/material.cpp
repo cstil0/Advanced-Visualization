@@ -442,7 +442,7 @@ void VolumeMaterial::resetMaterialColor(int typeOfVolume) {
 		this->TF_forth_color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 	else if (typeOfVolume == SceneNode::TYPEOFVOLUME::TEA) {
-		this->density_limits = vec4(0.2f, 0.5f, 0.9f, 1.0f);
+		this->density_limits = vec4(0.2f, 0.45f, 0.9f, 1.0f);
 		this->TF_first_color = vec4(0.41f, 0.36f, 0.20f, 1.0f);
 		this->TF_second_color = vec4(0.47f, 0.24f, 0.55f, 1.0f);
 		this->TF_third_color = vec4(0.91f, 0.54f, 0.14f, 1.0f);
@@ -533,15 +533,15 @@ void VolumeMaterial::renderInMenu_TF(){
 
 	if (density_limits.x > density_limits.y) {
 		// Si se pasa del limite lo ponemos un poco por debajo
-		density_limits.x = density_limits.x - 0.001f;
+		density_limits.x = density_limits.x;
 	}
 	if (density_limits.y > density_limits.z) {
 		// Si se pasa del limite lo ponemos un poco por debajo
-		density_limits.y = density_limits.y - 0.001f;
+		density_limits.y = density_limits.y;
 	}
 	if (density_limits.z > density_limits.w) {
 		// Si se pasa del limite lo ponemos un poco por debajo
-		density_limits.z = density_limits.w - 0.001f;
+		density_limits.z = density_limits.w;
 	}
 }
 
@@ -549,29 +549,69 @@ void VolumeMaterial::renderInMenu_highlight() {
 	int typeOfVolume = Application::instance->typeOfVolume_ImGUI;
 	// Create the strings for the buttons
 	std::vector<const char*> button_str; 
-	if (typeOfVolume == SceneNode::TYPEOFVOLUME::FOOT)
-		button_str = { "Highlight muscles", "Highlight bones", "Highlight bones mid", "Highlight bones high" };
-	else if (typeOfVolume == SceneNode::TYPEOFVOLUME::TEA)
-		button_str = { "Highlight table", "Highlight tea", "Highlight lobster", "Highlight lobster high" };
-	else if (typeOfVolume == SceneNode::TYPEOFVOLUME::ABDOMEN)
-		button_str = { "Highlight muscles", "Highlight organs", "Highlight bones", "Highlight bones high" };
-	else if (typeOfVolume == SceneNode::TYPEOFVOLUME::BONSAI)
-		button_str = { "Highlight noise", "Highlight leaves", "Highlight trunk", "Highlight water" };
-	if (typeOfVolume == SceneNode::TYPEOFVOLUME::ORANGE)
-		button_str = { "Highlight skin", "Highlight orange", "Highlight orange mid", "Highlight orange high" };
+	if (typeOfVolume == SceneNode::TYPEOFVOLUME::FOOT) {
+		button_str = { "Highlight muscles", "Highlight bones"};
+		if (ImGui::Button(button_str[0])) {
+			this->highlight = vec4(1.0f, 0.0f, 0.0f, 0.0f);
+		}
+		else if (ImGui::Button(button_str[1])) {
+			this->highlight = vec4(0.0f, 1.0f, 1.0f, 1.0f);
+		}
+	}
 
-	if (ImGui::Button(button_str[0])) {
-		this->highlight = vec4(1.0f, 0.0f, 0.0f, 0.0f);
+	else if (typeOfVolume == SceneNode::TYPEOFVOLUME::TEA) {
+		button_str = { "Highlight table", "Highlight tea", "Highlight lobster"};
+
+		if (ImGui::Button(button_str[0])) {
+			this->highlight = vec4(1.0f, 0.0f, 0.0f, 0.0f);
+		}
+		else if (ImGui::Button(button_str[1])) {
+			this->highlight = vec4(0.0f, 1.0f, 0.0f, 0.0f);
+		}
+		else if (ImGui::Button(button_str[2])) {
+			this->highlight = vec4(0.0f, 0.0f, 1.0f, 1.0f);
+		}
 	}
-	else if (ImGui::Button(button_str[1])) {
-		this->highlight = vec4(0.0f, 1.0f, 0.0f, 0.0f);
+	else if (typeOfVolume == SceneNode::TYPEOFVOLUME::ABDOMEN) {
+		button_str = { "Highlight muscles", "Highlight organs", "Highlight bones" };
+
+		if (ImGui::Button(button_str[0])) {
+			this->highlight = vec4(1.0f, 0.0f, 0.0f, 0.0f);
+		}
+		else if (ImGui::Button(button_str[1])) {
+			this->highlight = vec4(0.0f, 1.0f, 0.0f, 0.0f);
+		}
+		else if (ImGui::Button(button_str[2])) {
+			this->highlight = vec4(0.0f, 0.0f, 1.0f, 1.0f);
+		}
 	}
-	else if (ImGui::Button(button_str[2])) {
-		this->highlight = vec4(0.0f, 0.0f, 1.0f, 0.0f);
+	else if (typeOfVolume == SceneNode::TYPEOFVOLUME::BONSAI) {
+		button_str = { "Highlight noise", "Highlight leaves", "Highlight trunk", "Highlight water" };
+
+		if (ImGui::Button(button_str[0])) {
+			this->highlight = vec4(1.0f, 0.0f, 0.0f, 0.0f);
+		}
+		else if (ImGui::Button(button_str[1])) {
+			this->highlight = vec4(0.0f, 1.0f, 0.0f, 0.0f);
+		}
+		else if (ImGui::Button(button_str[2])) {
+			this->highlight = vec4(0.0f, 0.0f, 1.0f, 0.0f);
+		}
+		else if (ImGui::Button(button_str[3])) {
+			this->highlight = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+		}
 	}
-	else if (ImGui::Button(button_str[3])) {
-		this->highlight = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	if (typeOfVolume == SceneNode::TYPEOFVOLUME::ORANGE) {
+		button_str = { "Highlight skin", "Highlight orange"};
+
+		if (ImGui::Button(button_str[0])) {
+			this->highlight = vec4(1.0f, 0.0f, 0.0f, 0.0f);
+		}
+		else if (ImGui::Button(button_str[1])) {
+			this->highlight = vec4(0.0f, 1.0f, 1.0f, 1.0f);
+		}
 	}
+
 	else if (ImGui::Button("Return to default")) {
 		this->highlight = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	}

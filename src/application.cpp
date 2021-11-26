@@ -37,9 +37,9 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	mouse_locked = false;
 	scene_exposure = 1;
 	output = 0.0;
-	mode_VolumeMaterial = 1.0;
 
 	app_mode = APPMODE::VOLUME;
+	typeOfMaterial_ImGUI = 0;
 
 	//define the color of the ambient as a global variable since it is a property of the scene
 	ambient_light.set(0.1, 0.2, 0.3);
@@ -60,9 +60,9 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 			Volume* volume = new Volume();
 			//volume->loadPVM("data/volumes/Orange.pvm");
 			//volume->loadPNG("data/volumes/bonsai_16_16.png", 16, 16);
-			volume->loadPNG("data/volumes/teapot_16_16.png", 16, 16);
+			//volume->loadPNG("data/volumes/teapot_16_16.png", 16, 16);
 			//volume->loadPVM("data/volumes/CT-Abdomen.pvm");
-			//volume->loadPNG("data/volumes/foot_16_16.png", 16, 16);
+			volume->loadPNG("data/volumes/foot_16_16.png", 16, 16);
 
 			Texture* tex3d = new Texture();
 			tex3d->create3DFromVolume(volume, GL_CLAMP_TO_EDGE);
@@ -483,8 +483,20 @@ void Application::update(double seconds_elapsed)
 				inv_m_aux.inverse();
 				volume_node->inverse_model = inv_m_aux;
 				node_list[i] = volume_node;
+
+				VolumeMaterial* vm = (VolumeMaterial*)node_list[i]->material;
+				// no se si lo de arriba provoca pb para phong material
+				if (typeOfMaterial_ImGUI != vm->typeOfMaterial ) {
+
+					node_list[i]->material = material_list[typeOfMaterial_ImGUI]; 
+					// la primera de la lista es volumenMaterial, y el siguiente es Phong material
+				}
 			}
 		}
+		/*for (int i = 0; i < material_list.size(); i++)
+		{
+			if(material_list[i])
+		}*/
 	}
 
 	else if (app_mode == APPMODE::PBR) {
@@ -518,16 +530,6 @@ void Application::update(double seconds_elapsed)
 		node_list[SceneNode::TYPEOFNODE::SKYBOX]->model.setTranslation(camera->eye.x, camera->eye.y, camera->eye.z);
 
 
-	//if (mode_VolumeMaterial ) {
-	//	
-	//	for (int i = 0; i < node_list.size(); i++)
-	//	{
-	//		if (node_list[i]->typeOfNode == SceneNode::TYPEOFNODE::VOLUME ) {
-	//			node_list[i]->material = material_list[1]; // ahora esta harkcodeado!!!!!!!! la 0 basic, 1 es phong
-	//		}
-	//	}
-
-	//}
 
 
 }

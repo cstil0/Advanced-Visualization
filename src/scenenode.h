@@ -22,6 +22,12 @@ public:
 		VOLUME
 	};
 	
+	enum APPMODE {
+		PHONG,
+		PBR,
+		VOLUME_MODE
+	};
+
 	// Used to identify which kind of mesh it have
 	enum TYPEOFMODEL {
 		BASIC,

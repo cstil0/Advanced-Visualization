@@ -346,14 +346,17 @@ VolumeMaterial::VolumeMaterial()
 	this->iso_threshold = 0.015;
 	this->h_threshold = 0.015;
 
+	
+
 	this->noise_texture = Texture::Get("data/blueNoise.png");
 	this->plane_abcd = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
 	//flags
-	jittering_flag = TRUE;
-	clipping_flag = TRUE;
-	TF_flag = TRUE;
+	this->jittering_flag = TRUE;
+	this->clipping_flag = TRUE;
+	this->TF_flag = TRUE;
 
+	this->typeOfMaterial = 0;
 
 }
 
@@ -371,10 +374,11 @@ VolumeMaterial::VolumeMaterial(Shader* sh, Texture* tex)
 	this->plane_abcd = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
 	//flags
-	jittering_flag = TRUE;
-	clipping_flag = TRUE;
-	TF_flag =  TRUE;
+	this->jittering_flag = TRUE;
+	this->clipping_flag = TRUE;
+	this->TF_flag =  TRUE;
 
+	this->typeOfMaterial = 0;
 }
 
 VolumeMaterial::~VolumeMaterial()
@@ -447,9 +451,8 @@ void VolumeMaterial::render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, 
 
 void VolumeMaterial::renderInMenu()
 {
-	int& mode_VolumeMaterial = Application::instance->mode_VolumeMaterial;
-	//mode de phong or basic...
-	ImGui::Combo("Material", &mode_VolumeMaterial, "BASIC\0\PHONG\0");
+	
+	ImGui::Combo("Material", &Application::instance->typeOfMaterial_ImGUI , "BASIC\0\PHONG\0");
 
 	ImGui::SliderFloat("Length Step", &this->length_step, 0.001, 1.0f);
 	ImGui::SliderFloat("Brightness", &this->brightness, 1.0f, 50.0f);
@@ -476,6 +479,8 @@ VolumetricPhong::VolumetricPhong(){
 	this->gradient_flag = FALSE;
 	this->phong_flag = TRUE;
 	this->shade_flag = FALSE;
+
+	this->typeOfMaterial = 1;
 }
 
 VolumetricPhong::VolumetricPhong(Shader* sh, Texture* tex) {
@@ -491,6 +496,8 @@ VolumetricPhong::VolumetricPhong(Shader* sh, Texture* tex) {
 	this->gradient_flag = FALSE;
 	this->phong_flag = TRUE;
 	this->shade_flag = FALSE;
+
+	this->typeOfMaterial = 1;
 }
 
 
@@ -550,5 +557,6 @@ void VolumetricPhong::renderInMenu()
 	ImGui::Checkbox("Shade", &this->shade_flag);
 	ImGui::Checkbox("Show Gradient", &this->gradient_flag);
 	ImGui::Checkbox("Phong", &this->phong_flag);
+
 
 }

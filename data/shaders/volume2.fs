@@ -1,4 +1,4 @@
-#define MAX_ITERATIONS 1000000
+#define MAX_ITERATIONS 1000000000
 
 varying vec3 v_position; //position in local coords
 varying vec3 v_world_position; //position in world coord
@@ -151,7 +151,7 @@ void main(){
                 final_color += u_length_step * (1.0 - final_color.a) * sample_color;     
             }
             else if( sample_color.a > u_iso_threshold ) { // por algun motivo los flags estos enviados no se actualizan siempre son 0...
-                if(!u_shade_flag){
+                if(u_shade_flag){
                     final_color = sample_color;
                     break;
                 }
@@ -160,7 +160,7 @@ void main(){
                     final_color = vec4(gradient,1.0)/u_brightness; 
                     break;
                 }
-                light_intensity = compute_lightPhong(gradient, final_color);
+                light_intensity = compute_lightPhong(gradient, sample_color); //no final_color creo este ultimo
                 final_color = sample_color * vec4(light_intensity, 1.0) ; //le damos la iluminacion
                 break;
             }

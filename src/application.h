@@ -55,8 +55,11 @@ public:
 		VOLUME
 	};
 
+	//integers to gestion IMGUI optione
+	int output;
 	int typeOfModel_ImGUI;
 	int typeOfSkybox_ImGUI;
+	int typeOfMaterial_ImGUI; // for diff op of material for VolumetricMaterial
 	int app_mode;
 
 	std::vector< SceneNode* > node_list;
@@ -82,8 +85,7 @@ public:
 	bool render_debug;
 	float scene_exposure;
 	
-	int output;
-	int mode_VolumeMaterial;
+	
 	vec3 ambient_light;
 	
 	//some vars

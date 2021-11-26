@@ -107,7 +107,7 @@ public:
 
 class VolumeMaterial : public StandardMaterial {
 public:
-	//Vector3 first_sample;
+	
 	float length_step;
 	float brightness;
 	vec4 plane_abcd;
@@ -117,6 +117,7 @@ public:
 	Texture* noise_texture;
 	Texture* tf_mapping_texture;
 
+	int typeOfMaterial;
 
 	//flags
 	bool jittering_flag, clipping_flag, TF_flag;

@@ -9,6 +9,7 @@ unsigned int Light::lastNameId = 0;
 
 unsigned int mesh_selected = 0;
 
+
 SceneNode::SceneNode()
 {
 	this->typeOfNode = int(TYPEOFNODE::NODE);
@@ -70,8 +71,10 @@ void SceneNode::renderInMenu()
 		ImGui::TreePop();
 	}
 
+	
+	
 	//Textures
-	if (!(this->typeOfNode == TYPEOFNODE::LIGHT) && ImGui::TreeNode("Textures"))
+	if (!(this->typeOfNode == TYPEOFNODE::LIGHT)&& (*(&Application::instance->app_mode) == APPMODE::PBR) && ImGui::TreeNode("Textures"))
 	{
 		int& output = Application::instance->output;
 		ImGui::Combo("Textures", &output, "COMPLETE\0\ALBEDO\0\ROUGHNESS\0\METALNESS\0\NORMAL\0\EMMISIVE\0A_OCC\0LUT");
@@ -80,7 +83,7 @@ void SceneNode::renderInMenu()
 	}
 
 	//Geometry
-	if (!(this->typeOfNode == TYPEOFNODE::LIGHT) && mesh && ImGui::TreeNode("Geometry"))
+	if (!(this->typeOfNode == TYPEOFNODE::LIGHT) && (*(&Application::instance->app_mode) == APPMODE::PBR) && mesh && ImGui::TreeNode("Geometry"))
 	{
 		ImGui::Combo("Mesh", &Application::instance->typeOfModel_ImGUI, "BALL\0HELMET\0LANTERN\0");
 		ImGui::TreePop();
@@ -127,10 +130,11 @@ void Light::renderInMenu()
 	if (ImGui::TreeNode("Light intensity") ) 
 	{
 		ImGui::SliderFloat("Intensity", &this->light_intensity, 0.0f, 10.0f);
-		/// GESTIONAR QUE SI ES PBR QUE NO MUESTREE LOS SIGUIENTES!!!
-		ImGui::ColorEdit3("Specular_intensity", (float*)&this->specular_intensity);
-		ImGui::ColorEdit3("Diffuse_intensity", (float*)&this->diffuse_intensity);
-
+		//If is not the mode of PBR, we can anable the following
+		if ( !( *(&Application::instance->app_mode) == APPMODE::PBR) ) {
+			ImGui::ColorEdit3("Specular_intensity", (float*)&this->specular_intensity);
+			ImGui::ColorEdit3("Diffuse_intensity", (float*)&this->diffuse_intensity);
+		}
 		ImGui::TreePop();
 	}
 }
@@ -185,13 +189,24 @@ void VolumeNode::render(Camera* camera)
 {
 	if (material && visible_flag) {
 		// Downcast --> con este dynamic cast podemos recuperar las variables propias del VolumeNode si fue creado asi aunque le hayamos hecho un downcast
-		//VolumeMaterial* volume_mat = dynamic_cast<VolumeMaterial*>(material);
-		VolumetricPhong* volume_mat = dynamic_cast<VolumetricPhong*>(material);
+		int typeOfMaterial = *(&Application::instance->typeOfMaterial_ImGUI);
+		if (typeOfMaterial == 0) { //Basic Material
+			//FALTA REPASAR PORQUE SALTA ESTA LIENEA, Y SI ESTA MAL ESTO
+			//LAS TRES LINEAS DE COMPROBACIONES DE ESTE TIPO HAY QUE BORRAR-> EN EL IMGUI!
+			VolumeMaterial* volume_mat = dynamic_cast<VolumeMaterial*>(material);
+			volume_mat->render(mesh, model, inverse_model, camera);
+			return;
+		}
+		else { //Phong
 
+			VolumetricPhong* volume_mat = dynamic_cast<VolumetricPhong*>(material);
+			volume_mat->render(mesh, model, inverse_model, camera);
+			return;
+		}
 		//VolumetricPhong* volume_mat = dynamic_cast<VolumetricPhong*>(material);
 
 		//VolumeMaterial* volume_mat = (VolumeMaterial*)&material;
-		volume_mat->render(mesh, model, inverse_model, camera);
+		
 		//volume_mat->v_material_phong->render();
 	}
 	//else if (volume_material && visible_flag) {

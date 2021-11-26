@@ -39,6 +39,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	output = 0.0;
 
 	app_mode = APPMODE::VOLUME;
+	typeOfMaterial_ImGUI = 0;
 
 	//define the color of the ambient as a global variable since it is a property of the scene
 	ambient_light.set(0.1, 0.2, 0.3);
@@ -56,12 +57,14 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 		if (app_mode == APPMODE::VOLUME) {
 			sh = Shader::Get("data/shaders/basic.vs", "data/shaders/volume2.fs");
 			
+			loadLight();
 			loadFoot();
 			loadTea();
 			loadAbdomen();
 			loadBonsai();
 			loadOrange();
 		}
+
 		//Functions used in the phong lab
 		if (app_mode == APPMODE::PHONG) {
 			renderPhongEquation();
@@ -80,6 +83,17 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 }
 
 // ---Volume---
+void Application::loadLight(){
+		Light* light = new Light();
+		light->mesh = Mesh::Get("data/meshes/sphere.obj.mbin");
+		
+		StandardMaterial* l_mat = new StandardMaterial();
+		light->material = l_mat;
+		light->model.scale(0.1, 0.1, 0.1);
+		light->model.translate(-4, 16, 14);
+		node_list.push_back(light);
+}
+
 void Application::loadFoot() {
 	// Foot
 	Volume* foot_volume = new Volume();
@@ -108,6 +122,13 @@ void Application::loadFoot() {
 
 	optional_node_list.push_back(foot_vol_node);
 	node_list.push_back(foot_vol_node);
+
+	// Phong
+	VolumetricPhong* foot_phong_material = new VolumetricPhong(sh, foot_tex3d);
+	// HARDCODEADO
+	foot_phong_material->light = node_list[0];
+	material_list.push_back(foot_material);
+	material_list.push_back(foot_phong_material);
 }
 
 void Application::loadTea() {
@@ -137,6 +158,13 @@ void Application::loadTea() {
 	tea_vol_node->typeOfVolume = typeOfVolume;
 
 	optional_node_list.push_back(tea_vol_node);
+
+	// Phong
+	VolumetricPhong* tea_phong_material = new VolumetricPhong(sh, tea_tex3d);
+	// HARDCODEADO
+	tea_phong_material->light = node_list[0];
+	material_list.push_back(tea_material);
+	material_list.push_back(tea_phong_material);
 
 }
 
@@ -168,6 +196,12 @@ void Application::loadAbdomen() {
 
 	optional_node_list.push_back(abd_vol_node);
 
+	// Phong
+	VolumetricPhong* abd_phong_material = new VolumetricPhong(sh, abd_tex3d);
+	// HARDCODEADO
+	abd_phong_material->light = node_list[0];
+	material_list.push_back(abd_material);
+	material_list.push_back(abd_phong_material);
 }
 
 void Application::loadBonsai() {
@@ -196,6 +230,13 @@ void Application::loadBonsai() {
 	bonsai_vol_node->typeOfVolume = typeOfVolume;
 
 	optional_node_list.push_back(bonsai_vol_node);
+
+	// Phong
+	VolumetricPhong* bonsai_phong_material = new VolumetricPhong(sh, bonsai_tex3d);
+	// HARDCODEADO
+	bonsai_phong_material->light = node_list[0];
+	material_list.push_back(bonsai_material);
+	material_list.push_back(bonsai_phong_material);
 }
 
 void Application::loadOrange() {
@@ -225,6 +266,13 @@ void Application::loadOrange() {
 	orange_vol_node->typeOfVolume = typeOfVolume;
 
 	optional_node_list.push_back(orange_vol_node);
+
+	// Phong
+	VolumetricPhong* orange_phong_material = new VolumetricPhong(sh, orange_tex3d);
+	// HARDCODEADO
+	orange_phong_material->light = node_list[0];
+	material_list.push_back(orange_material);
+	material_list.push_back(orange_phong_material);
 }
 
 // ---PBR---
@@ -594,7 +642,7 @@ void Application::update(double seconds_elapsed)
 				node_list[i] = volume_node;
 
 				// Update volume according to the imgui
-				// 0 POR QUE EN ESTA PRÁCTICA SOLO HAY UN NODO
+				// 0 POR QUE EN ESTA PRÃCTICA SOLO HAY UN NODO
 				// CREO QUE SE PUEDE CAMBIAR POR LE VOLUME_NODE
 				if (typeOfVolume_ImGUI != node_list[0]->typeOfVolume) {
 					//SceneNode* principal_node = node_list[2];
@@ -662,30 +710,27 @@ void Application::update(double seconds_elapsed)
 				if (change_imgui)
 					volume_material->shader->setMacros(final_macro.c_str());
 
-				// Comprobamos que las densidades no se solapen
-				//VolumeMaterial* curr_material = (VolumeMaterial*)volume_node->material;
-				//vec4* curr_density_lim = &curr_material->density_limits;
-				//if (curr_density_lim->x > curr_density_lim->y) {
-				//	// Si se pasa del limite lo ponemos un poco por debajo
-				//	curr_density_lim->x = curr_density_lim->x - 0.01f;
-				//}
-				//if (curr_density_lim->y > curr_density_lim->z) {
-				//	// Si se pasa del limite lo ponemos un poco por debajo
-				//	curr_density_lim->y = curr_density_lim->y - 0.01f;
-				//}
-				//if (curr_density_lim->z > curr_density_lim->w) {
-				//	// Si se pasa del limite lo ponemos un poco por debajo
-				//	curr_density_lim->z = curr_density_lim->w - 0.01f;
-				//}
+
+				VolumeMaterial* vm = (VolumeMaterial*)node_list[i]->material;
+				// no se si lo de arriba provoca pb para phong material
+				if (typeOfMaterial_ImGUI != vm->typeOfMaterial) {
+					// EXPLICAR AQUÃ Y EN EL REPORT
+					node_list[i]->material = material_list[(typeOfVolume_ImGUI*2)+typeOfMaterial_ImGUI];
+					// la primera de la lista es volumenMaterial, y el siguiente es Phong material
+				}
 			}
 		}
+		/*for (int i = 0; i < material_list.size(); i++)
+		{
+			if(material_list[i])
+		}*/
 	}
 
 	else if (app_mode == APPMODE::PBR) {
 		 //Update the model according to the imGUI
-		 //Node_list[2] corresponds to the principal node IGUAL SE PODRÍA PONER MEJOR
+		 //Node_list[2] corresponds to the principal node IGUAL SE PODRï¿½A PONER MEJOR
 
-		// Same with skybox
+		// Same with skyboxS
 		if (typeOfSkybox_ImGUI != skybox_node->typeOfSkybox) {
 			// Look for the new skybox to be rendered
 			for (int i = 0; i < optional_skybox_list.size(); i++) {
@@ -701,6 +746,10 @@ void Application::update(double seconds_elapsed)
 	// Update skybox center position according to the camera position
 	if(node_list[SceneNode::TYPEOFNODE::SKYBOX]->typeOfNode == (int)SceneNode::TYPEOFNODE::SKYBOX )
 		node_list[SceneNode::TYPEOFNODE::SKYBOX]->model.setTranslation(camera->eye.x, camera->eye.y, camera->eye.z);
+
+
+
+
 }
 
 //Keyboard event handler (sync input)

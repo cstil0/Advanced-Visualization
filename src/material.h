@@ -107,28 +107,28 @@ public:
 
 class VolumeMaterial : public StandardMaterial {
 public:
-	//Vector3 first_sample;
+	enum TYPEOFMATERIAL{
+		BASIC,
+		PHONG
+	}
+
 	float length_step;
 	float brightness;
-	float threshold_plane;
-
+	int typeOfMaterial;
+	
 	// Flags for different visualization
-	bool jittering_flag;
-	bool TF_flag;
-	bool TF_debug_flag;
-	bool clipping_flag;
-	bool illumination_flag;
+	//flags
+	bool jittering_flag, clipping_flag, TF_flag, TF_debug_flag;
+	bool jittering_flag_imgui, clipping_flag_imgui, TF_flag_imgui, TF_debug_flag_imgui;
 
-	bool jittering_flag_imgui;
-	bool TF_flag_imgui;
-	bool TF_debug_flag_imgui;
-	bool illumination_flag_imgui;
-	bool clipping_flag_imgui;
+	// Threshold
+	vec4 plane_abcd;
+	float iso_threshold;
+	float h_threshold;
 
 	// Textures
 	Texture* noise_texture;
 	Texture* tf_mapping_texture;
-	//Vector3 direction_vector; // no se si es buena idea guardarlo aquí
 
 	// Variables for TF generator
 	float density_threshold_max;
@@ -147,7 +147,6 @@ public:
 	~VolumeMaterial();
 
 	void resetMaterialColor(int typeOfVolume);
-
 	void setUniforms(Camera* camera, Matrix44 model, Matrix44 inverse_model);
 	void render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, Camera* camera);
 	void saveTexture();
@@ -155,4 +154,26 @@ public:
 	void renderInMenu_TF();
 	void renderInMenu_highlight();
 };
+
+class VolumetricPhong :public VolumeMaterial {
+public:
+
+	vec3 specular;
+	vec3 diffuse;
+	float shininess;
+
+	Light* light = NULL;
+
+	//flags
+	bool shade_flag, gradient_flag, phong_flag;
+
+	VolumetricPhong();
+	VolumetricPhong(Shader* sh, Texture* tex);
+	~VolumetricPhong();
+
+	void setUniforms(Camera* camera, Matrix44 model, Matrix44 inverse_model);
+	void render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, Camera* camera);
+	void renderInMenu();
+};
+
 #endif

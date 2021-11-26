@@ -1,4 +1,4 @@
-#define MAX_ITERATIONS 1000
+#define MAX_ITERATIONS 1000000000
 
 varying vec3 v_position; //position in local coords
 varying vec3 v_world_position; //position in world coord
@@ -30,17 +30,78 @@ uniform vec4 u_tf_trd_color;
 uniform vec4 u_tf_frth_color;
 
 uniform vec4 u_highlight;
+// clipping variables
+uniform vec4 u_plane_abcd;
+uniform float u_iso_threshold;
+uniform float u_h_threshold;
 
-// uniform float u_plane_a;
-// uniform float u_plane_b;
-// uniform float u_plane_c;
-// uniform float u_plane_d;
+//boolean flags
+uniform bool u_jittering_flag;
+uniform bool u_clipping_flag;
+uniform bool u_TF_flag;
+uniform bool u_shade_flag;
+uniform bool u_gradient_flag;
+uniform bool u_phong_flag;
+
+//light parameters:
+uniform vec3 u_light_pos;
+uniform vec3 u_Ia, u_Id, u_Is; //Ambient, diffuse, specular
+uniform float u_light_intensity;
+
+//Material uniforms parameters
+uniform vec3 u_diffuse;
+uniform vec3 u_specular;
+uniform float u_shininess;
+
+
+vec3 compute_lightPhong(vec3 gradient, vec4 final_color){
+    
+    // Compute the light equation vectors
+    vec3 L = normalize(u_light_pos - v_world_position);// local or world?
+    vec3 N = (u_model * vec4( gradient , 0.0) ).xyz;  
+    vec3 V = normalize(u_camera_position - v_world_position); 
+    vec3 R = reflect(-L,N);
+
+    //We initialize the variables to store differents parts of lights
+    vec3 ambient_light = final_color.xyz * u_Ia;
+    vec3 diffuse_light = u_diffuse * max(dot(L,N), 0.0f) * u_Id;
+    vec3 specular_light = u_specular * pow( max(dot(R,V), 0.0f) , u_shininess) * u_Is;
+
+    //Final phong equation
+    // vec3 light_intensity = vec3(0.0);
+    vec3 light_intensity = ambient_light + diffuse_light + specular_light;
+    return light_intensity * u_light_intensity;
+}
+
+float sampling_volume(in float x, in float y, in float z ){
+    vec3 sample_pos = vec3(x,y,z);
+    vec3 uv_3D = (sample_pos + 1.0f)*0.5f;
+    float d = texture3D(u_texture, uv_3D).x;
+    return d;
+}
+
+vec3 compute_gradient(const in vec3 sample_pos, const in float h){
+    
+    float f1 = sampling_volume(sample_pos.x + h,  sample_pos.y,  sample_pos.z );
+    float f2 = sampling_volume(sample_pos.x,  sample_pos.y + h,  sample_pos.z );
+    float f3 = sampling_volume(sample_pos.x,  sample_pos.y ,  sample_pos.z + h );
+    float f4 = sampling_volume(sample_pos.x - h,  sample_pos.y ,  sample_pos.z );
+    float f5 = sampling_volume(sample_pos.x,  sample_pos.y - h,  sample_pos.z );
+    float f6 = sampling_volume(sample_pos.x,  sample_pos.y,  sample_pos.z - h);
+
+    f1 = f1-f4;
+    f2 = f2-f5;
+    f3 = f3-f6;
+    
+    vec3 gradient = normalize(- 0.5*1/h*vec3(f1,f2,f3));
+    // gradient = max(gradient,v);
+	return gradient;
+}
 
 void main(){
     
     float texture_width = 128.0f;
     vec2 uv_screen =  gl_FragCoord.xy / texture_width; 
-    float offset = texture2D(u_noise_texture, uv_screen).x ;
 
     // 1. Ray setup
     vec4 camera_l_pos_temp = (u_inverse_model * vec4(u_camera_position, 1.0));
@@ -53,25 +114,22 @@ void main(){
         step_offset = offset*step_vector;
     #endif
     
-	vec3 sample_pos = v_position+step_offset; //initialized as entry point to the volume
-	vec4 final_color = vec4(0.0f);
-
+    vec3 sample_pos = v_position + step_offset; //initialiced as entry point to the volume
 
     // Initialize values that are computed in the loop
-    float d = 0.0f;
-    vec3 uv_3D = vec3(0.0f);
+	vec4 final_color = vec4(0.0f);
     vec4 sample_color = vec4(0.0f);
-    float plane_value = 0.0f;
-    vec4 plane_abcd = (0.0f, 1.0f, 0.0f, 1.0f);
-
+    vec3 uv_3D = vec3(0.0f);
+    float d = 0.0f;
+    
+    float plane = 0.0f;
+    float h = u_h_threshold;
+    vec3 gradient = vec3(0.0f);
+    vec3 light_intensity = vec3(0.0f);
+    
     // Ray loop
     for(int i=0; i<MAX_ITERATIONS; i++){
-        // plane_value = plane_abcd.x*sample_pos.x + plane_abcd.y*sample_pos.y + plane_abcd.z*sample_pos.z + plane_abcd.w;
-        // plane_value += plane_abcd.y*sample_pos.y;
-
-        // if (plane_value < u_threshold_plane)
-        //     discard;
-
+       
         // 2. Volume sampling
         uv_3D = (sample_pos + 1.0f)*0.5f;
         d = texture3D(u_texture, uv_3D).x;
@@ -95,14 +153,13 @@ void main(){
                 discard;
             }
 
-            // ELSE??
             if(d<u_density_limits.x)
                 sample_color = vec4(u_tf_fst_color.r,u_tf_fst_color.g,u_tf_fst_color.b,d);
-            if(d>u_density_limits.x && d<u_density_limits.y)
+            else if(d>u_density_limits.x && d<u_density_limits.y)
                 sample_color = vec4(u_tf_snd_color.r,u_tf_snd_color.g,u_tf_snd_color.b,d);
-            if(d>u_density_limits.y && d<u_density_limits.z)
+            else if(d>u_density_limits.y && d<u_density_limits.z)
                 sample_color = vec4(u_tf_trd_color.r,u_tf_trd_color.g,u_tf_trd_color.b,d);
-            if(d>u_density_limits.z && d<u_density_limits.w)
+            else if(d>u_density_limits.z && d<u_density_limits.w)
                 sample_color = vec4(u_tf_frth_color.r,u_tf_frth_color.g,u_tf_frth_color.b,d);
 
         #endif
@@ -116,22 +173,44 @@ void main(){
             sample_color = sample_color*u_highlight.z;
         else if (d>u_density_limits.z && d<u_density_limits.w)
             sample_color = sample_color*u_highlight.w;
-        // if(d>u_density_limits.x && d<u_density_limits.y)
-        //     sample_color = vec4(u_tf_snd_color.r,u_tf_snd_color.g,u_tf_snd_color.b,d);
-        // if(d>u_density_limits.y && d<u_density_limits.z)
-        //     sample_color = vec4(u_tf_trd_color.r,u_tf_trd_color.g,u_tf_trd_color.b,d);
-        // if(d>u_density_limits.z && d<u_density_limits.w)
-        //     sample_color = vec4(u_tf_frth_color.r,u_tf_frth_color.g,u_tf_frth_color.b,d);
 
+        sample_color = vec4(u_color.r,u_color.g,u_color.b,d);//important that the d, 4ºcomponent. Para que funcione la volumetric
+      
         // 4. Composition
-		sample_color.rgb *= sample_color.a; //CREO Q PONIENDO ESTO SE VE PEOR
-        final_color += u_length_step * (1.0 - final_color.a) * sample_color;
+        // aqui esta bn, pq el primer sample, tendra el plane a 0.0
+        // si el flag de clipping esta activado q salte esta linea, si no hay clipping entre al if
+        // usamos or por q cuando no hay clipiing tamb pueda hacer esta contribucion de final color!!
+        if (!u_clipping_flag || plane <= 0.0f){ // que haga la suma total de las contribuciones, si no esto, pues no hay sumas...
+            
+            if(!u_phong_flag){
+                // otro flag paara phong
+                sample_color.rgb *= sample_color.a; //atenuendo el color dependiendo de alpha
+              
+                final_color += u_length_step * (1.0 - final_color.a) * sample_color;     
+            }
+            else if( sample_color.a > u_iso_threshold ) { // por algun motivo los flags estos enviados no se actualizan siempre son 0...
+                if(u_shade_flag){
+                    final_color = sample_color;
+                    break;
+                }
+                gradient = compute_gradient(sample_pos, h);
+                if(u_gradient_flag){
+                    final_color = vec4(gradient,1.0)/u_brightness; 
+                    break;
+                }
+                light_intensity = compute_lightPhong(gradient, sample_color); //no final_color creo este ultimo
+                final_color = sample_color * vec4(light_intensity, 1.0) ; //le damos la iluminacion
+                break;
+            }
+        }
 
         // 5. Next sample
-        // if (i==1)
-        //     sample_pos += offset;
         sample_pos += step_vector;
+        
+        //  (computing the next step always). entonces hay que ponerlo abajo ?¿??????
+		plane = u_plane_abcd.x*sample_pos.x + u_plane_abcd.y*sample_pos.y + u_plane_abcd.z*sample_pos.z + u_plane_abcd.w;
 
+        
         // 6. Early termination
         //If is outside the auxiliar mesh
         if( sample_pos.x > 1.0f || sample_pos.y > 1.0f || sample_pos.z > 1.0f ) {

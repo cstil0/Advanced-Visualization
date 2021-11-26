@@ -63,14 +63,20 @@ public:
 		VOLUME
 	};
 
-	int typeOfVolume_ImGUI;
+	int output;
+
+	//integers to manage IMGUI options
 	int typeOfModel_ImGUI;
 	int typeOfSkybox_ImGUI;
+	int typeOfMaterial_ImGUI; // for diff op of material for VolumetricMaterial(Basic or Phong)
+	int typeOfVolume_ImGUI;
 	int app_mode;
 
 	std::vector< SceneNode* > node_list;
 	// List with the nodes that can be selected in the imGUI
 	std::vector< SceneNode* > optional_node_list;
+
+	std::vector< StandardMaterial* > material_list;
 	Skybox* skybox_node = NULL;
 	// List with the types of skybox that can be selected in the imGUI
 	std::vector< Skybox* > optional_skybox_list;
@@ -89,7 +95,6 @@ public:
 	bool render_debug;
 	float scene_exposure;
 	
-	int output;
 	vec3 ambient_light;
 	
 	//some vars

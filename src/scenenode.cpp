@@ -220,6 +220,14 @@ void VolumeNode::renderInMenu()
 		volume_mat->renderInMenu_TF();
 	}
 
+	// Highlight
+	if (this->typeOfNode == TYPEOFNODE::VOLUME && mesh && ImGui::TreeNode("Highlight"))
+	{
+		// Downcast
+		VolumeMaterial* volume_mat = dynamic_cast<VolumeMaterial*>(material);
+		volume_mat->renderInMenu_highlight();
+	}
+
 	//Model edit
 	if (ImGui::TreeNode("Model"))
 	{

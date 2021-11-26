@@ -20,15 +20,16 @@ uniform vec4 u_color;
 uniform float u_length_step; //ray step
 uniform float u_brightness;
 uniform float u_threshold_plane;
-uniform float u_threshold_d_min;
-uniform float u_threshold_d_max;
 
 // TF generator variables
+uniform float u_max_density;
 uniform vec4 u_density_limits;
 uniform vec4 u_tf_fst_color;
 uniform vec4 u_tf_snd_color;
 uniform vec4 u_tf_trd_color;
 uniform vec4 u_tf_frth_color;
+
+uniform vec4 u_highlight;
 
 // uniform float u_plane_a;
 // uniform float u_plane_b;
@@ -65,7 +66,7 @@ void main(){
 
     // Ray loop
     for(int i=0; i<MAX_ITERATIONS; i++){
-        plane_value = plane_abcd.x*sample_pos.x + plane_abcd.y*sample_pos.y + plane_abcd.z*sample_pos.z + plane_abcd.w;
+        // plane_value = plane_abcd.x*sample_pos.x + plane_abcd.y*sample_pos.y + plane_abcd.z*sample_pos.z + plane_abcd.w;
         // plane_value += plane_abcd.y*sample_pos.y;
 
         // if (plane_value < u_threshold_plane)
@@ -80,6 +81,7 @@ void main(){
         // SEGURO QUE ESTO SE PUEDE HACER MÁS EFICIENTE PARA QUE NO SE HAGA SI EL TF ESTÁ ACTIVADO
         sample_color = vec4(d,d,d,d);//important that the d, 4ºcomponent. Para que funcione la volumetric
 
+
         // Con tf
         #ifdef USE_TF
             vec3 tf_color = texture2D(u_tf_mapping_texture, vec2(d,1)).xyz;
@@ -88,9 +90,10 @@ void main(){
         #endif
 
         #ifdef USE_TF_DEBUG
-            //Si estamos en el modo debug de la TF, queremos visualizar solo aquellos puntos que tengan una densidad menor a la marcada en el imgui
-            if(d>u_threshold_d_max)
+            //Si estamos en el modo debug de la TF, queremos visualizar solo aquellos puntos que tengan una densidad menor a la marcada en el imgu
+            if (d>u_max_density){
                 discard;
+            }
 
             // ELSE??
             if(d<u_density_limits.x)
@@ -104,7 +107,21 @@ void main(){
 
         #endif
 
-
+        // Highlight some parts according to the imgui
+        if(d<u_density_limits.x)
+            sample_color = sample_color*u_highlight.x;
+        else if (d>u_density_limits.x && d<u_density_limits.y)
+            sample_color = sample_color*u_highlight.y;
+        else if (d>u_density_limits.y && d<u_density_limits.z)
+            sample_color = sample_color*u_highlight.z;
+        else if (d>u_density_limits.z && d<u_density_limits.w)
+            sample_color = sample_color*u_highlight.w;
+        // if(d>u_density_limits.x && d<u_density_limits.y)
+        //     sample_color = vec4(u_tf_snd_color.r,u_tf_snd_color.g,u_tf_snd_color.b,d);
+        // if(d>u_density_limits.y && d<u_density_limits.z)
+        //     sample_color = vec4(u_tf_trd_color.r,u_tf_trd_color.g,u_tf_trd_color.b,d);
+        // if(d>u_density_limits.z && d<u_density_limits.w)
+        //     sample_color = vec4(u_tf_frth_color.r,u_tf_frth_color.g,u_tf_frth_color.b,d);
 
         // 4. Composition
 		sample_color.rgb *= sample_color.a; //CREO Q PONIENDO ESTO SE VE PEOR
@@ -136,7 +153,7 @@ void main(){
         discard;
     }
 
-    //7. Final color
+    // 7. Final color
     gl_FragColor = final_color * u_brightness;
-    // gl_FragColor = u_tf_fst_color;
+    // gl_FragColor = u_highlight;
 }

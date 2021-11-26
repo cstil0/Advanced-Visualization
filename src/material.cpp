@@ -344,12 +344,12 @@ VolumeMaterial::VolumeMaterial()
 {
 }
 
-VolumeMaterial::VolumeMaterial(Shader* sh, Texture* tex, vec4 d_lim, vec4 TF_fst_col, vec4 TF_snd_col, vec4 TF_trd_col, vec4 TF_frth_col)
+VolumeMaterial::VolumeMaterial(Shader* sh, Texture* tex)
 {
 	this->shader = sh;
 	this->texture = tex;
 	this->length_step = 0.06f;// cambiando a un valor mas pequeño
-	this->density_threshold_min = 0.0f;
+	//this->density_threshold_min = 0.0f;
 	this->density_threshold_max = 1.0f;
 	this->brightness = 5.0f;
 	
@@ -368,14 +368,8 @@ VolumeMaterial::VolumeMaterial(Shader* sh, Texture* tex, vec4 d_lim, vec4 TF_fst
 	this->noise_texture = Texture::Get("data/blueNoise.png");
 	this->threshold_plane = 0.0f;
 
-	density_limits = d_lim;
-	TF_first_color = TF_fst_col;
-	TF_second_color = TF_snd_col;
-	TF_third_color = TF_trd_col;
-	TF_forth_color = TF_frth_col;
-
-	save_texture = false;
-
+	// Start with all parts with the same brightness
+	this->highlight = vec4(1.0f, 1.0f, 1.0f,1.0f);
 	//this->plane_a = 0.0f;
 	//this->plane_b = 0.0f;
 	//this->plane_c = 0.0f;
@@ -395,16 +389,17 @@ void VolumeMaterial::setUniforms(Camera* camera, Matrix44 model, Matrix44 invers
 	shader->setUniform("u_color", color);
 
 	shader->setUniform("u_length_step", length_step);
-	shader->setUniform("u_threshold_d_min", density_threshold_min);
-	shader->setUniform("u_threshold_d_max", density_threshold_max);
 	shader->setUniform("u_brightness", this->brightness);
 	shader->setUniform("u_threshold_plane", this->threshold_plane);
 
+	shader->setUniform("u_max_density", this->density_threshold_max);
 	shader->setUniform("u_density_limits", this->density_limits);
 	shader->setUniform("u_tf_fst_color", this->TF_first_color);
 	shader->setUniform("u_tf_snd_color", this->TF_second_color);
 	shader->setUniform("u_tf_trd_color", this->TF_third_color);
 	shader->setUniform("u_tf_frth_color", this->TF_forth_color);
+
+	shader->setUniform("u_highlight", this->highlight);
 
 	//shader->setUniform("u_plane_a", this->plane_a);
 	//shader->setUniform("u_plane_b", this->plane_b);
@@ -437,46 +432,77 @@ void VolumeMaterial::render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, 
 	}
 }
 
+void VolumeMaterial::resetMaterialColor(int typeOfVolume) {
+	// Set the default colors and limits depending on the type of volume we have
+	if (typeOfVolume == SceneNode::TYPEOFVOLUME::FOOT) {
+		this->density_limits = vec4(0.3f, 0.8f, 0.9f, 1.0f);
+		this->TF_first_color = vec4(0.62f, 0.29f, 0.29f, 1.0f);
+		this->TF_second_color = vec4(0.52f, 0.72f, 0.38f, 1.0f);
+		this->TF_third_color = vec4(1.0f, 1.0f, 0.0f, 1.0f);
+		this->TF_forth_color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+	else if (typeOfVolume == SceneNode::TYPEOFVOLUME::TEA) {
+		this->density_limits = vec4(0.2f, 0.5f, 0.9f, 1.0f);
+		this->TF_first_color = vec4(0.41f, 0.36f, 0.20f, 1.0f);
+		this->TF_second_color = vec4(0.47f, 0.24f, 0.55f, 1.0f);
+		this->TF_third_color = vec4(0.91f, 0.54f, 0.14f, 1.0f);
+		this->TF_forth_color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+	else if (typeOfVolume == SceneNode::TYPEOFVOLUME::ABDOMEN) {
+		this->density_limits = vec4(0.2f, 0.3f, 0.8f, 1.0f);
+		this->TF_first_color = vec4(0.62f, 0.29f, 0.29f, 1.0f);
+		this->TF_second_color = vec4(0.52f, 0.72f, 0.38f, 1.0f);
+		this->TF_third_color = vec4(1.0f, 1.0f, 0.0f, 1.0f);
+		this->TF_forth_color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+	else if (typeOfVolume == SceneNode::TYPEOFVOLUME::BONSAI) {
+		this->density_limits = vec4(0.15f, 0.2f, 0.55f, 1.0f);
+		this->TF_first_color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+		this->TF_second_color = vec4(0.0f, 1.0f, 0.0f, 1.0f);
+		this->TF_third_color = vec4(0.47f, 0.37f, 0.02f, 1.0f);
+		this->TF_forth_color = vec4(0.0f, 0.0f, 1.0f, 1.0f);
+	}
+	else if (typeOfVolume == SceneNode::TYPEOFVOLUME::ORANGE) {
+		this->density_limits = vec4(0.15f, 0.25f, 0.9f, 1.0f);
+		this->TF_first_color = vec4(0.62f, 0.29f, 0.29f, 1.0f);
+		this->TF_second_color = vec4(1.0f, 1.0f, 0.0f, 1.0f);
+		this->TF_third_color = vec4(0.92f, 0.54f, 0.14f, 1.0f);
+		this->TF_forth_color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+	// Reload texture
+	saveTexture();
+}
+
 void VolumeMaterial::saveTexture()
 {
 	int TF_width = 20;
 	int TF_height = 1;
 
-	Image* TF_texture = new Image(TF_width, TF_height);
-	// POR ALGUN MOTIVO NO ME FUNCIONA LA DIVISIÓN
+	Image* TF_image = new Image(TF_width, TF_height);
 	float step = 0.05;
 	float position = 0.0f;
-	// Iterate through the image to set the pixels
-	//for (int i = 0; i < TF_width; i++) {
-	//	// Check between which limits the pixel is
-	//	position = (i + 1) * step;
-	//	Color c = Color(255, 0, 0, 100);
-	//	TF_texture->setPixel(i, 0, c);
-	//}
+
 	for (int i = 0; i < TF_width; i++) {
 		// Check between which limits the pixel is
 		position = (i+1) * step;
 		if (position <= density_limits.x) {
 			Color c = Color(TF_first_color.x*255, TF_first_color.y*255, TF_first_color.z*255, TF_first_color.w);
-			TF_texture->setPixel(i, 0, c);
+			TF_image->setPixel(i, 0, c);
 		}
 		else if (position <= density_limits.y) {
-			TF_texture->setPixel(i, 0, Color(TF_second_color.x * 255, TF_second_color.y * 255, TF_second_color.z * 255, TF_second_color.w));
+			TF_image->setPixel(i, 0, Color(TF_second_color.x * 255, TF_second_color.y * 255, TF_second_color.z * 255, TF_second_color.w));
 		}
 		else if (position <= density_limits.z) {
-			TF_texture->setPixel(i, 0, Color(TF_third_color.x * 255, TF_third_color.y * 255, TF_third_color.z * 255, TF_third_color.w));
+			TF_image->setPixel(i, 0, Color(TF_third_color.x * 255, TF_third_color.y * 255, TF_third_color.z * 255, TF_third_color.w));
 		}
 		else if (position <= density_limits.w) {
-			TF_texture->setPixel(i, 0, Color(TF_forth_color.x * 255, TF_forth_color.y * 255, TF_forth_color.z * 255, TF_forth_color.w));
+			TF_image->setPixel(i, 0, Color(TF_forth_color.x * 255, TF_forth_color.y * 255, TF_forth_color.z * 255, TF_forth_color.w));
 		}
-		//TF_texture->setPixel(i,0, Color(255.0f,255.0f,255.0f,1.0f));
 	}
 
-	//TF_texture->saveTGA("data/TF_texture.tga", true);
-	// Load the texture again to show the updated one
-	this->tf_mapping_texture = new Texture(TF_texture);
-	//this->tf_mapping_texture
-	save_texture = false;
+	//TF_image->saveTGA("data/TF_texture.tga", true);
+	// Save the new texture
+	this->tf_mapping_texture = new Texture(TF_image);
 }
 
 void VolumeMaterial::renderInMenu()
@@ -492,6 +518,7 @@ void VolumeMaterial::renderInMenu()
 }
 
 void VolumeMaterial::renderInMenu_TF(){
+	int s = 0;
 	ImGui::Checkbox("Debug TF", &TF_debug_flag_imgui);
 	ImGui::SliderFloat("MAX Density threshold", &this->density_threshold_max, 0.0, 1);
 	ImGui::SliderFloat4("Density limits", &density_limits.x, 0.0f, 1.0f);
@@ -499,5 +526,53 @@ void VolumeMaterial::renderInMenu_TF(){
 	ImGui::ColorEdit3("Second Color", TF_second_color.v);
 	ImGui::ColorEdit3("Third Color", TF_third_color.v);
 	ImGui::ColorEdit3("Forth Color", TF_forth_color.v);
-	ImGui::Checkbox("Save TF texture", &save_texture);
+	if (ImGui::Button("Save TF texture"))
+		this->saveTexture();
+	if (ImGui::Button("Set default values"))	
+		this->resetMaterialColor(Application::instance->typeOfVolume_ImGUI);
+
+	if (density_limits.x > density_limits.y) {
+		// Si se pasa del limite lo ponemos un poco por debajo
+		density_limits.x = density_limits.x - 0.001f;
+	}
+	if (density_limits.y > density_limits.z) {
+		// Si se pasa del limite lo ponemos un poco por debajo
+		density_limits.y = density_limits.y - 0.001f;
+	}
+	if (density_limits.z > density_limits.w) {
+		// Si se pasa del limite lo ponemos un poco por debajo
+		density_limits.z = density_limits.w - 0.001f;
+	}
+}
+
+void VolumeMaterial::renderInMenu_highlight() {
+	int typeOfVolume = Application::instance->typeOfVolume_ImGUI;
+	// Create the strings for the buttons
+	std::vector<const char*> button_str; 
+	if (typeOfVolume == SceneNode::TYPEOFVOLUME::FOOT)
+		button_str = { "Highlight muscles", "Highlight bones", "Highlight bones mid", "Highlight bones high" };
+	else if (typeOfVolume == SceneNode::TYPEOFVOLUME::TEA)
+		button_str = { "Highlight table", "Highlight tea", "Highlight lobster", "Highlight lobster high" };
+	else if (typeOfVolume == SceneNode::TYPEOFVOLUME::ABDOMEN)
+		button_str = { "Highlight muscles", "Highlight organs", "Highlight bones", "Highlight bones high" };
+	else if (typeOfVolume == SceneNode::TYPEOFVOLUME::BONSAI)
+		button_str = { "Highlight noise", "Highlight leaves", "Highlight trunk", "Highlight water" };
+	if (typeOfVolume == SceneNode::TYPEOFVOLUME::ORANGE)
+		button_str = { "Highlight skin", "Highlight orange", "Highlight orange mid", "Highlight orange high" };
+
+	if (ImGui::Button(button_str[0])) {
+		this->highlight = vec4(1.0f, 0.0f, 0.0f, 0.0f);
+	}
+	else if (ImGui::Button(button_str[1])) {
+		this->highlight = vec4(0.0f, 1.0f, 0.0f, 0.0f);
+	}
+	else if (ImGui::Button(button_str[2])) {
+		this->highlight = vec4(0.0f, 0.0f, 1.0f, 0.0f);
+	}
+	else if (ImGui::Button(button_str[3])) {
+		this->highlight = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	}
+	else if (ImGui::Button("Return to default")) {
+		this->highlight = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	}
 }

@@ -156,7 +156,6 @@ public:
 
 	void setUniforms(Camera* camera, Matrix44 model, Matrix44 inverse_model);
 	void render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, Camera* camera);
-
 	void renderInMenu();
 };
 

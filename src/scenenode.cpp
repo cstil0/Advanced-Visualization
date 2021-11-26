@@ -74,7 +74,7 @@ void SceneNode::renderInMenu()
 	
 	
 	//Textures
-	if (!(this->typeOfNode == TYPEOFNODE::LIGHT)&& (*(&Application::instance->app_mode) == APPMODE::PBR) && ImGui::TreeNode("Textures"))
+	if (!(this->typeOfNode == TYPEOFNODE::LIGHT)&& ImGui::TreeNode("Textures"))
 	{
 		int& output = Application::instance->output;
 		ImGui::Combo("Textures", &output, "COMPLETE\0\ALBEDO\0\ROUGHNESS\0\METALNESS\0\NORMAL\0\EMMISIVE\0A_OCC\0LUT");
@@ -83,7 +83,7 @@ void SceneNode::renderInMenu()
 	}
 
 	//Geometry
-	if (!(this->typeOfNode == TYPEOFNODE::LIGHT) && (*(&Application::instance->app_mode) == APPMODE::PBR) && mesh && ImGui::TreeNode("Geometry"))
+	if (!(this->typeOfNode == TYPEOFNODE::LIGHT) &&  mesh && ImGui::TreeNode("Geometry"))
 	{
 		ImGui::Combo("Mesh", &Application::instance->typeOfModel_ImGUI, "BALL\0HELMET\0LANTERN\0");
 		ImGui::TreePop();
@@ -131,7 +131,9 @@ void Light::renderInMenu()
 	{
 		ImGui::SliderFloat("Intensity", &this->light_intensity, 0.0f, 10.0f);
 		//If is not the mode of PBR, we can anable the following
-		if ( !( *(&Application::instance->app_mode) == APPMODE::PBR) ) {
+		//Application::instance-> es un puntero
+		if (!( Application::instance->app_mode == Application::APPMODE::PBR)) {
+
 			ImGui::ColorEdit3("Specular_intensity", (float*)&this->specular_intensity);
 			ImGui::ColorEdit3("Diffuse_intensity", (float*)&this->diffuse_intensity);
 		}
@@ -195,13 +197,13 @@ void VolumeNode::render(Camera* camera)
 			//LAS TRES LINEAS DE COMPROBACIONES DE ESTE TIPO HAY QUE BORRAR-> EN EL IMGUI!
 			VolumeMaterial* volume_mat = dynamic_cast<VolumeMaterial*>(material);
 			volume_mat->render(mesh, model, inverse_model, camera);
-			return;
+			
 		}
 		else { //Phong
 
 			VolumetricPhong* volume_mat = dynamic_cast<VolumetricPhong*>(material);
 			volume_mat->render(mesh, model, inverse_model, camera);
-			return;
+			
 		}
 		//VolumetricPhong* volume_mat = dynamic_cast<VolumetricPhong*>(material);
 

@@ -59,7 +59,7 @@ public:
 	int output;
 	int typeOfModel_ImGUI;
 	int typeOfSkybox_ImGUI;
-	int typeOfMaterial_ImGUI; // for diff op of material for VolumetricMaterial
+	int typeOfMaterial_ImGUI; // for diff op of material for VolumetricMaterial(Basic or Phong)
 	int app_mode;
 
 	std::vector< SceneNode* > node_list;

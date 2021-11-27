@@ -123,13 +123,11 @@ public:
 
 	// Threshold
 	vec4 plane_abcd;
-	float iso_threshold;
-	float h_threshold;
 
 	// Textures
 	Texture* noise_texture;
 	Texture* tf_mapping_texture;
-
+	float discard_threshold;
 	// Variables for TF generator
 	float density_threshold_max;
 	Vector4 density_limits;
@@ -162,10 +160,13 @@ public:
 	vec3 diffuse;
 	float shininess;
 
+	float iso_threshold;
+	float h_threshold;
+
 	Light* light = NULL;
 
 	//flags
-	bool shade_flag, gradient_flag, phong_flag;
+	bool shade_flag, gradient_flag;
 
 	VolumetricPhong();
 	VolumetricPhong(Shader* sh, Texture* tex);

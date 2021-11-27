@@ -19,7 +19,6 @@ uniform vec4 u_color;
 
 uniform float u_length_step; //ray step
 uniform float u_brightness;
-uniform float u_threshold_plane;
 
 // TF generator variables
 uniform float u_max_density;
@@ -30,17 +29,22 @@ uniform vec4 u_tf_trd_color;
 uniform vec4 u_tf_frth_color;
 
 uniform vec4 u_highlight;
-// clipping variables
 uniform vec4 u_plane_abcd;
+
+// Threshold
 uniform float u_iso_threshold;
 uniform float u_h_threshold;
+uniform float u_threshold_plane;
+uniform float u_discard_threshold;
 
 //boolean flags
-uniform bool u_jittering_flag;
-uniform bool u_clipping_flag;
-uniform bool u_TF_flag;
+// uniform bool u_jittering_flag;
+// uniform bool u_clipping_flag;
+// uniform bool u_TF_flag;
 uniform bool u_shade_flag;
 uniform bool u_gradient_flag;
+
+// Phong flag: 0-->BASIC, 1-->PHONG
 uniform bool u_phong_flag;
 
 //light parameters:
@@ -125,10 +129,7 @@ void main(){
     float d = 0.0f;
     
     float plane = 0.0f;
-    float h = u_h_threshold;
-    vec3 gradient = vec3(0.0f);
-    vec3 light_intensity = vec3(0.0f);
-    
+
     // Ray loop
     for(int i=0; i<MAX_ITERATIONS; i++){
        
@@ -139,7 +140,7 @@ void main(){
         // 3. Classification
         // Classification basica
         // SEGURO QUE ESTO SE PUEDE HACER MÁS EFICIENTE PARA QUE NO SE HAGA SI EL TF ESTÁ ACTIVADO
-        sample_color = vec4(d,d,d,d);//important that the d, 4ºcomponent. Para que funcione la volumetric
+        sample_color = vec4(u_color.r,u_color.g,u_color.b,d);//important that the d, 4ºcomponent. Para que funcione la volumetric
 
 
         // Con tf
@@ -163,7 +164,7 @@ void main(){
                 sample_color = vec4(u_tf_trd_color.r,u_tf_trd_color.g,u_tf_trd_color.b,d);
             else if(d>u_density_limits.z && d<u_density_limits.w)
                 sample_color = vec4(u_tf_frth_color.r,u_tf_frth_color.g,u_tf_frth_color.b,d);
-
+            
         #endif
 
         // Highlight some parts according to the imgui
@@ -176,18 +177,30 @@ void main(){
         else if (d>u_density_limits.z && d<u_density_limits.w)
             sample_color = sample_color*u_highlight.w;
 
-        sample_color = vec4(u_color.r,u_color.g,u_color.b,d);//important that the d, 4ºcomponent. Para que funcione la volumetric
+        // sample_color = vec4(u_color.r,u_color.g,u_color.b,d);//important that the d, 4ºcomponent. Para que funcione la volumetric
       
         // 4. Composition
         // aqui esta bn, pq el primer sample, tendra el plane a 0.0
         // si el flag de clipping esta activado q salte esta linea, si no hay clipping entre al if
         // usamos or por q cuando no hay clipiing tamb pueda hacer esta contribucion de final color!!
-        if (!u_clipping_flag || plane <= 0.0f){ // que haga la suma total de las contribuciones, si no esto, pues no hay sumas...
-            
+        //  (computing the next step always). entonces hay que ponerlo abajo ?¿??????
+
+        // Normalize the vector perpendicular to the plane to avoid artifacts
+        // vec4 normalized_plane = vec4(normalize(u_plane_abcd.xyz),u_plane_abcd.w);
+		plane = u_plane_abcd.x*sample_pos.x + u_plane_abcd.y*sample_pos.y + u_plane_abcd.z*sample_pos.z + u_plane_abcd.w;
+        // if (plane<=0.0f)
+        //     #define PLANE_VAL = plane;
+
+        bool clipping_or_plane = plane<=0;
+        #ifndef USE_CLIPPING
+            clipping_or_plane = true;
+        #endif
+        
+        if (clipping_or_plane) //|| defined(PLANE_VAL)
             if(!u_phong_flag){
                 // otro flag paara phong
                 sample_color.rgb *= sample_color.a; //atenuendo el color dependiendo de alpha
-              
+                
                 final_color += u_length_step * (1.0 - final_color.a) * sample_color;     
             }
             else if( sample_color.a > u_iso_threshold ) { // por algun motivo los flags estos enviados no se actualizan siempre son 0...
@@ -195,22 +208,19 @@ void main(){
                     final_color = sample_color;
                     break;
                 }
-                gradient = compute_gradient(sample_pos, h);
+                vec3 gradient = compute_gradient(sample_pos, u_h_threshold);
                 if(u_gradient_flag){
                     final_color = vec4(gradient,1.0)/u_brightness; 
                     break;
                 }
-                light_intensity = compute_lightPhong(gradient, sample_color); //no final_color creo este ultimo
+                vec3 light_intensity = compute_lightPhong(gradient, sample_color); //no final_color creo este ultimo
                 final_color = sample_color * vec4(light_intensity, 1.0) ; //le damos la iluminacion
                 break;
-            }
-        }
+            }        
 
         // 5. Next sample
         sample_pos += step_vector;
         
-        //  (computing the next step always). entonces hay que ponerlo abajo ?¿??????
-		plane = u_plane_abcd.x*sample_pos.x + u_plane_abcd.y*sample_pos.y + u_plane_abcd.z*sample_pos.z + u_plane_abcd.w;
 
         
         // 6. Early termination
@@ -229,8 +239,7 @@ void main(){
        
     }
 
-    float threshold = 0.01f;
-    if (final_color.w <= threshold){ // solo con w
+    if (final_color.w <= u_discard_threshold){ // solo con w
         discard;
     }
 

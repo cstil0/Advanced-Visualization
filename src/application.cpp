@@ -128,6 +128,7 @@ void Application::loadFoot() {
 
 	// Phong
 	VolumetricPhong* foot_phong_material = new VolumetricPhong(sh, foot_tex3d);
+	foot_phong_material->iso_threshold = 0.1f;
 	// HARDCODEADO
 	foot_phong_material->light = dynamic_cast<Light*>(node_list[0]);
 	material_list.push_back(foot_material);
@@ -164,6 +165,7 @@ void Application::loadTea() {
 
 	// Phong
 	VolumetricPhong* tea_phong_material = new VolumetricPhong(sh, tea_tex3d);
+	tea_phong_material->iso_threshold = 0.057f;
 	// HARDCODEADO
 	tea_phong_material->light = dynamic_cast<Light*>(node_list[0]);
 	material_list.push_back(tea_material);
@@ -201,6 +203,7 @@ void Application::loadAbdomen() {
 
 	// Phong
 	VolumetricPhong* abd_phong_material = new VolumetricPhong(sh, abd_tex3d);
+	abd_phong_material->iso_threshold = 0.054f;
 	// HARDCODEADO
 	abd_phong_material->light = dynamic_cast<Light*>(node_list[0]);
 	material_list.push_back(abd_material);
@@ -236,6 +239,8 @@ void Application::loadBonsai() {
 
 	// Phong
 	VolumetricPhong* bonsai_phong_material = new VolumetricPhong(sh, bonsai_tex3d);
+	bonsai_phong_material->iso_threshold = 0.147f;
+
 	// HARDCODEADO
 	bonsai_phong_material->light = dynamic_cast<Light*>(node_list[0]);
 	material_list.push_back(bonsai_material);
@@ -272,6 +277,7 @@ void Application::loadOrange() {
 
 	// Phong
 	VolumetricPhong* orange_phong_material = new VolumetricPhong(sh, orange_tex3d);
+	orange_phong_material->iso_threshold = 0.067f;
 	// HARDCODEADO
 	orange_phong_material->light = dynamic_cast<Light*>(node_list[0]);
 	material_list.push_back(orange_material);
@@ -648,7 +654,7 @@ void Application::update(double seconds_elapsed)
 				// Update volume according to the imgui
 				// 0 POR QUE EN ESTA PRÁCTICA SOLO HAY UN NODO
 				// CREO QUE SE PUEDE CAMBIAR POR LE VOLUME_NODE
-				if (typeOfVolume_ImGUI != node_list[0]->typeOfVolume) {
+				if (typeOfVolume_ImGUI != node_list[i]->typeOfVolume) {
 					//SceneNode* principal_node = node_list[2];
 					// Look for the new node to be rendered
 					for (int i = 0; i < optional_node_list.size(); i++) {
@@ -663,7 +669,6 @@ void Application::update(double seconds_elapsed)
 				std::string TF_macro = "#define USE_TF true\n ";
 				std::string TF_debug_macro = "#define USE_TF_DEBUG true\n ";
 				std::string clipping_macro = "#define USE_CLIPPING true\n ";
-				std::string illumination_macro = "#define USE_illumination true\n ";
 
 				std::string final_macro = "\n";
 
@@ -671,6 +676,8 @@ void Application::update(double seconds_elapsed)
 				// Update the visualization flags according to imgui and pass the corresponding macros to the shader
 				// Miramos si alguno de los flags ha cambiado, para evitar enviar macros a no ser que haya cambiado el flag en el imgui
 				// If the flag corresponding to the imgui is not equal to the one of the material - update
+
+				// ESTOY PENSANDO EN PONER ESTO DENTRO DE UN FOR QUE RECORRA UNA LISTA CON TODAS LAS MACROS??
 				if (volume_material->jittering_flag_imgui != volume_material->jittering_flag) {
 					// Update
 					volume_material->jittering_flag = volume_material->jittering_flag_imgui;
@@ -693,10 +700,10 @@ void Application::update(double seconds_elapsed)
 					change_imgui = true;
 				}
 
-				//if (volume_material->illumination_flag_imgui != volume_material->illumination_flag) {
-				//	volume_material->illumination_flag = volume_material->illumination_flag_imgui;
-				//	change_imgui = true;
-				//}
+				if (volume_material->clipping_flag_imgui != volume_material->clipping_flag) {
+					volume_material->clipping_flag = volume_material->clipping_flag_imgui;
+					change_imgui = true;
+				}
 
 				// Concatenamos strings finales
 				if (volume_material->jittering_flag_imgui)
@@ -705,7 +712,7 @@ void Application::update(double seconds_elapsed)
 					final_macro = final_macro + TF_macro;
 				if (volume_material->TF_debug_flag_imgui)
 					final_macro = final_macro + TF_debug_macro;
-				if (!volume_material->clipping_flag_imgui)
+				if (volume_material->clipping_flag_imgui)
 					final_macro = final_macro + clipping_macro;
 				//if (volume_material->illumination_flag_imgui)
 				//	final_macro = final_macro + illumination_macro;
@@ -718,6 +725,7 @@ void Application::update(double seconds_elapsed)
 				VolumeMaterial* vm = (VolumeMaterial*)node_list[i]->material;
 				// no se si lo de arriba provoca pb para phong material
 				if (typeOfMaterial_ImGUI != vm->typeOfMaterial) {
+					//if(typeOfMaterial_ImGUI == VolumeMaterial::TYPEOFMATERIAL::BASIC) {
 					// EXPLICAR AQUÍ Y EN EL REPORT
 					node_list[i]->material = material_list[(typeOfVolume_ImGUI*2)+typeOfMaterial_ImGUI];
 					// la primera de la lista es volumenMaterial, y el siguiente es Phong material

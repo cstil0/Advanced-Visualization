@@ -341,12 +341,10 @@ void PBRMaterial::renderInMenu()
 
 VolumeMaterial::VolumeMaterial()
 {
-	this->length_step = 0.06f;// cambiando a un valor mas pequeño
+	this->length_step = 0.01f;// cambiando a un valor mas pequeño
 	//this->density_threshold_min = 0.0f;
 	this->density_threshold_max = 1.0f;
 	this->brightness = 5.0f;
-	this->iso_threshold = 0.015;
-	this->h_threshold = 0.015;
 	
 	// Flags
 	this->jittering_flag = false;
@@ -374,12 +372,10 @@ VolumeMaterial::VolumeMaterial(Shader* sh, Texture* tex)
 {
 	this->shader = sh;
 	this->texture = tex;
-	this->length_step = 0.06f;// cambiando a un valor mas pequeño
+	this->length_step = 0.01f;// cambiando a un valor mas pequeño
 	//this->density_threshold_min = 0.0f;
 	this->density_threshold_max = 1.0f;
 	this->brightness = 5.0f;
-	this->iso_threshold = 0.015;
-	this->h_threshold = 0.015;
 	
 	// Flags
 	this->jittering_flag = false;
@@ -417,6 +413,7 @@ void VolumeMaterial::setUniforms(Camera* camera, Matrix44 model, Matrix44 invers
 
 	shader->setUniform("u_length_step", length_step);
 	shader->setUniform("u_brightness", this->brightness);
+	shader->setUniform("u_discard_threshold", this->discard_threshold);
 
 	shader->setUniform("u_max_density", this->density_threshold_max);
 	shader->setUniform("u_density_limits", this->density_limits);
@@ -428,20 +425,21 @@ void VolumeMaterial::setUniforms(Camera* camera, Matrix44 model, Matrix44 invers
 	shader->setUniform("u_highlight", this->highlight);
 
 	shader->setUniform("u_plane_abcd", this->plane_abcd);
-	shader->setUniform("u_iso_threshold", this->iso_threshold);
-	shader->setUniform("u_h_threshold", this->h_threshold);
 
-	// USO DE MACROS
-	shader->setUniform("u_jittering_flag", this->jittering_flag);
-	shader->setUniform("u_clipping_flag", this->clipping_flag);
-	shader->setUniform("u_TF_flag", this->TF_flag);
+	//// USO DE MACROS
+	//shader->setUniform("u_jittering_flag", this->jittering_flag);
+	//shader->setUniform("u_clipping_flag", this->clipping_flag);
+	//shader->setUniform("u_TF_flag", this->TF_flag);
+	// Phong flag
+	// If the material is a basic type, we send 0
+	shader->setUniform("u_phong_flag", this->typeOfMaterial);
 
 
 	if (texture)
 		shader->setTexture("u_texture", texture, 0); // poner offset para numerar las texturas
 	if(noise_texture)
 		shader->setTexture("u_noise_texture", noise_texture, 1);
-	if (tf_mapping_texture)
+	if (tf_mapping_texture && typeOfMaterial == TYPEOFMATERIAL::BASIC)
 		shader->setTexture("u_tf_mapping_texture", tf_mapping_texture, 2);
 }
 
@@ -467,11 +465,12 @@ void VolumeMaterial::render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, 
 void VolumeMaterial::resetMaterialColor(int typeOfVolume) {
 	// Set the default colors and limits depending on the type of volume we have
 	if (typeOfVolume == SceneNode::TYPEOFVOLUME::FOOT) {
-		this->density_limits = vec4(0.3f, 0.8f, 0.9f, 1.0f);
+		this->density_limits = vec4(0.25f, 0.8f, 0.9f, 1.0f);
 		this->TF_first_color = vec4(0.62f, 0.29f, 0.29f, 1.0f);
 		this->TF_second_color = vec4(0.52f, 0.72f, 0.38f, 1.0f);
 		this->TF_third_color = vec4(1.0f, 1.0f, 0.0f, 1.0f);
 		this->TF_forth_color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		discard_threshold = 0.01;
 	}
 	else if (typeOfVolume == SceneNode::TYPEOFVOLUME::TEA) {
 		this->density_limits = vec4(0.2f, 0.45f, 0.9f, 1.0f);
@@ -479,6 +478,7 @@ void VolumeMaterial::resetMaterialColor(int typeOfVolume) {
 		this->TF_second_color = vec4(0.47f, 0.24f, 0.55f, 1.0f);
 		this->TF_third_color = vec4(0.91f, 0.54f, 0.14f, 1.0f);
 		this->TF_forth_color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		discard_threshold = 0.035; // 0.4
 	}
 	else if (typeOfVolume == SceneNode::TYPEOFVOLUME::ABDOMEN) {
 		this->density_limits = vec4(0.2f, 0.3f, 0.8f, 1.0f);
@@ -486,20 +486,23 @@ void VolumeMaterial::resetMaterialColor(int typeOfVolume) {
 		this->TF_second_color = vec4(0.52f, 0.72f, 0.38f, 1.0f);
 		this->TF_third_color = vec4(1.0f, 1.0f, 0.0f, 1.0f);
 		this->TF_forth_color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		discard_threshold = 0.0125;
 	}
 	else if (typeOfVolume == SceneNode::TYPEOFVOLUME::BONSAI) {
-		this->density_limits = vec4(0.15f, 0.2f, 0.55f, 1.0f);
+		this->density_limits = vec4(0.15f, 0.25f, 0.6f, 1.0f);
 		this->TF_first_color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 		this->TF_second_color = vec4(0.0f, 1.0f, 0.0f, 1.0f);
 		this->TF_third_color = vec4(0.47f, 0.37f, 0.02f, 1.0f);
 		this->TF_forth_color = vec4(0.0f, 0.0f, 1.0f, 1.0f);
+		discard_threshold = 0.04; // 0.4
 	}
 	else if (typeOfVolume == SceneNode::TYPEOFVOLUME::ORANGE) {
-		this->density_limits = vec4(0.15f, 0.25f, 0.9f, 1.0f);
+		this->density_limits = vec4(0.25f, 0.5f, 0.9f, 1.0f);
 		this->TF_first_color = vec4(0.62f, 0.29f, 0.29f, 1.0f);
 		this->TF_second_color = vec4(1.0f, 1.0f, 0.0f, 1.0f);
 		this->TF_third_color = vec4(0.92f, 0.54f, 0.14f, 1.0f);
 		this->TF_forth_color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		discard_threshold = 0.05;
 	}
 	// Reload texture
 	saveTexture();
@@ -540,14 +543,14 @@ void VolumeMaterial::saveTexture()
 void VolumeMaterial::renderInMenu()
 {
 	ImGui::Combo("Material", &Application::instance->typeOfMaterial_ImGUI , "BASIC\0\PHONG\0");
-	ImGui::SliderFloat("Length Step", &this->length_step, 0.001, 1);
+	ImGui::SliderFloat("Length Step", &this->length_step, 0.0001, 0.5);
 	ImGui::SliderFloat("Brightness", &this->brightness, 1.0f, 50.0f);
 	ImGui::SliderFloat4("Clipping Plane", plane_abcd.v, -5.0f, 5.0f);
-	ImGui::SliderFloat("Isosurface threshold", &this->iso_threshold, 0.0f, 1.0f);
-	ImGui::SliderFloat("H threshold", &this->h_threshold, 0.0f, 1.0f);
+
 	ImGui::ColorEdit3("Color", color.v); 
 	ImGui::Checkbox("Jittering", &jittering_flag_imgui);
-	ImGui::Checkbox("Transfer function", &TF_flag_imgui);
+	if (typeOfMaterial == BASIC)
+		ImGui::Checkbox("Transfer function", &TF_flag_imgui);
 	ImGui::Checkbox("Clipping", &clipping_flag_imgui);
 }
 
@@ -566,11 +569,11 @@ void VolumeMaterial::renderInMenu_TF(){
 
 	if (density_limits.x > density_limits.y) {
 		// Si se pasa del limite lo ponemos un poco por debajo
-		density_limits.x = density_limits.x;
+		density_limits.x = density_limits.y;
 	}
 	if (density_limits.y > density_limits.z) {
 		// Si se pasa del limite lo ponemos un poco por debajo
-		density_limits.y = density_limits.y;
+		density_limits.y = density_limits.z;
 	}
 	if (density_limits.z > density_limits.w) {
 		// Si se pasa del limite lo ponemos un poco por debajo
@@ -652,14 +655,16 @@ void VolumeMaterial::renderInMenu_highlight() {
 }
 
 VolumetricPhong::VolumetricPhong(){
-	this->color.set(0.7f, 0.7f, 0.7f, 0.f); //ambient material color
+	this->color.set(0.7f, 0.7f, 0.7f, 0.0f); //ambient material color
 	this->specular.set(1.0f, 1.0f, 0.0f);
 	this->diffuse.set(0.0f, 0.0f, 1.0f);
 	this->shininess = 20;
 
 	this->gradient_flag = false;
-	this->phong_flag = true;
 	this->shade_flag = false;
+
+	this->iso_threshold = 0.015;
+	this->h_threshold = 0.015;
 
 	this->typeOfMaterial = TYPEOFMATERIAL::PHONG;
 }
@@ -674,8 +679,10 @@ VolumetricPhong::VolumetricPhong(Shader* sh, Texture* tex) {
 	this->shininess = 20;
 
 	this->gradient_flag = false;
-	this->phong_flag = true;
 	this->shade_flag = false;
+
+	this->iso_threshold = 0.015;
+	this->h_threshold = 0.015;
 
 	this->typeOfMaterial = TYPEOFMATERIAL::PHONG;
 }
@@ -686,6 +693,8 @@ void VolumetricPhong::setUniforms(Camera* camera, Matrix44 model, Matrix44 inver
 	VolumeMaterial::setUniforms(camera, model, inverse_model);
 	
 	//PHONG
+	shader->setUniform("u_iso_threshold", this->iso_threshold);
+	shader->setUniform("u_h_threshold", this->h_threshold);
 	shader->setUniform("u_light_pos", light->model.getTranslation());
 	shader->setUniform("u_Ia", Application::instance->ambient_light); //just one time
 	shader->setUniform("u_Id", light->diffuse_intensity);
@@ -701,7 +710,10 @@ void VolumetricPhong::setUniforms(Camera* camera, Matrix44 model, Matrix44 inver
 	//Flags
 	shader->setUniform("u_shade_flag", this->shade_flag);
 	shader->setUniform("u_gradient_flag", this->gradient_flag);
-	shader->setUniform("u_phong_flag", this->phong_flag);
+
+	// Phong flag
+	// If the material is a phong type, we send 1
+	shader->setUniform("u_phong_flag", this->typeOfMaterial);
 
 }
 
@@ -724,17 +736,20 @@ void VolumetricPhong::render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model,
 }
 
 void VolumetricPhong::renderInMenu()
-{
-	VolumeMaterial::renderInMenu();
-	
-	//Phong
-	ImGui::ColorEdit3("Color A. Material", (float*)&this->color); // Edit 3 floats representing a color
-	ImGui::ColorEdit3("Specular", (float*)&this->specular);
-	ImGui::ColorEdit3("Diffuse", (float*)&this->diffuse);
-	ImGui::SliderFloat("Shininess", (float*)&this->shininess, 1, 50);
+{	
+	if (ImGui::TreeNode("Phong Parameters")) {
+		ImGui::SliderFloat("Isosurface threshold", &this->iso_threshold, 0.0f, 1.0f);
+		ImGui::SliderFloat("H threshold", &this->h_threshold, 0.0f, 1.0f);
 
-	//Flags
-	ImGui::Checkbox("Shade", &this->shade_flag);
-	ImGui::Checkbox("Show Gradient", &this->gradient_flag);
-	ImGui::Checkbox("Phong", &this->phong_flag);
+		//Phong
+		ImGui::ColorEdit3("Color A. Material", (float*)&this->color); // Edit 3 floats representing a color
+		ImGui::ColorEdit3("Specular", (float*)&this->specular);
+		ImGui::ColorEdit3("Diffuse", (float*)&this->diffuse);
+		ImGui::SliderFloat("Shininess", (float*)&this->shininess, 1, 50);
+
+		//Flags
+		ImGui::Checkbox("Shade", &this->shade_flag);
+		ImGui::Checkbox("Show Gradient", &this->gradient_flag);
+	}
+	VolumeMaterial::renderInMenu();
 }

@@ -118,7 +118,7 @@ void main(){
     float h = u_h_threshold;
     vec3 gradient = vec3(0.0f);
     vec3 light_intensity = vec3(0.0f);
-    
+    vec3 plane_vec = vec3(0.0f);
     // Ray loop
     for(int i=0; i<MAX_ITERATIONS; i++){
        
@@ -171,7 +171,12 @@ void main(){
         sample_pos += step_vector;
         
         //  (computing the next step always). entonces hay que ponerlo abajo ?¿??????
-		plane = u_plane_abcd.x*sample_pos.x + u_plane_abcd.y*sample_pos.y + u_plane_abcd.z*sample_pos.z + u_plane_abcd.w;
+        //FALTA NORMALIZAR ESTE VECTOR
+        // vec3 plane_vec = normalize(u_plane_abcd.xyz);
+        plane_vec = normalize(vec3(u_plane_abcd.x*sample_pos.x,  u_plane_abcd.y*sample_pos.y, u_plane_abcd.z*sample_pos.z));
+		plane = plane_vec.x + plane_vec.y + plane_vec.z + u_plane_abcd.w;
+		
+        //plane = u_plane_abcd.x*sample_pos.x + u_plane_abcd.y*sample_pos.y + u_plane_abcd.z*sample_pos.z + u_plane_abcd.w;
         
         
 

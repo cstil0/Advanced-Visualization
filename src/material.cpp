@@ -346,10 +346,8 @@ VolumeMaterial::VolumeMaterial()
 	this->iso_threshold = 0.015;
 	this->h_threshold = 0.015;
 
-	
-
 	this->noise_texture = Texture::Get("data/blueNoise.png");
-	this->plane_abcd = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+	this->plane_abcd = vec4(0.0f, 0.0f, 1.0f, 0.0f);
 
 	//flags
 	this->jittering_flag = TRUE;
@@ -371,7 +369,7 @@ VolumeMaterial::VolumeMaterial(Shader* sh, Texture* tex)
 	this->h_threshold = 0.015;
 	
 	this->noise_texture = Texture::Get("data/blueNoise.png");
-	this->plane_abcd = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+	this->plane_abcd = vec4(0.0f, 0.0f, 1.0f, 0.0f);
 
 	//flags
 	this->jittering_flag = TRUE;
@@ -556,7 +554,7 @@ void VolumetricPhong::renderInMenu()
 	//Flags
 	ImGui::Checkbox("Shade", &this->shade_flag);
 	ImGui::Checkbox("Show Gradient", &this->gradient_flag);
-	ImGui::Checkbox("Phong", &this->phong_flag);
+	/*ImGui::Checkbox("Phong", &this->phong_flag);*/
 
 
 }

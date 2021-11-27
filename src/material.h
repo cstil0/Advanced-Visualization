@@ -107,10 +107,10 @@ public:
 
 class VolumeMaterial : public StandardMaterial {
 public:
-	enum TYPEOFMATERIAL{
+	enum TYPEOFMATERIAL {
 		BASIC,
 		PHONG
-	}
+	};
 
 	float length_step;
 	float brightness;

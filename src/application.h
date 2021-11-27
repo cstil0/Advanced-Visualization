@@ -118,6 +118,8 @@ public:
 	void onResize(int width, int height);
 	void onFileChanged(const char* filename);
 
+	void loadLight();
+
 	//functions to create nodes in the scene
 	void loadFoot();
 	void loadTea();

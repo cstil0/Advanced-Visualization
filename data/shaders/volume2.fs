@@ -99,7 +99,7 @@ vec3 compute_gradient(const in vec3 sample_pos, const in float h){
 }
 
 void main(){
-    
+    // HARDCODEADO??
     float texture_width = 128.0f;
     vec2 uv_screen =  gl_FragCoord.xy / texture_width; 
 
@@ -109,8 +109,10 @@ void main(){
     vec3 ray_dir = normalize(v_position - camera_l_pos);
     vec3 step_vector = u_length_step*ray_dir;
 
-    vec3 step_offset = 0.0f;
+    float offset = 0.0f;
+    vec3 step_offset = vec3(0.0f);
     #ifdef USE_JITTERING
+        offset = texture2D(u_noise_texture, uv_screen).x ;
         step_offset = offset*step_vector;
     #endif
     

@@ -191,7 +191,7 @@ void VolumeNode::render(Camera* camera)
 {
 	if (material && visible_flag) {
 		// Downcast --> con este dynamic cast podemos recuperar las variables propias del VolumeNode si fue creado asi aunque le hayamos hecho un downcast
-		int typeOfMaterial = Application::instance->typeOfMaterial_ImGUI);
+		int typeOfMaterial = Application::instance->typeOfMaterial_ImGUI;
 		// HAY QUE CREAR ENUM (PHONG Y BASIC)
 		if (typeOfMaterial == 0) { //Basic Material
 			VolumeMaterial* volume_mat = dynamic_cast<VolumeMaterial*>(material);

@@ -352,13 +352,13 @@ VolumeMaterial::VolumeMaterial()
 	this->jittering_flag = false;
 	this->TF_flag = false;
 	this->TF_debug_flag = false;
-	this->illumination_flag = false;
+	//this->illumination_flag = false;
 	this->clipping_flag = false;
 
 	this->jittering_flag_imgui = false;
 	this->TF_flag_imgui = false;
 	this->TF_debug_flag_imgui = false;
-	this->illumination_flag_imgui = false;
+	//this->illumination_flag_imgui = false;
 	this->clipping_flag_imgui = false;
 
 	this->noise_texture = Texture::Get("data/blueNoise.png");
@@ -385,13 +385,13 @@ VolumeMaterial::VolumeMaterial(Shader* sh, Texture* tex)
 	this->jittering_flag = false;
 	this->TF_flag = false;
 	this->TF_debug_flag = false;
-	this->illumination_flag = false;
+	//this->illumination_flag = false;
 	this->clipping_flag = false;
 
 	this->jittering_flag_imgui = false;
 	this->TF_flag_imgui = false;
 	this->TF_debug_flag_imgui = false;
-	this->illumination_flag_imgui = false;
+	//this->illumination_flag_imgui = false;
 	this->clipping_flag_imgui = false;
 
 	this->noise_texture = Texture::Get("data/blueNoise.png");
@@ -657,9 +657,9 @@ VolumetricPhong::VolumetricPhong(){
 	this->diffuse.set(0.0f, 0.0f, 1.0f);
 	this->shininess = 20;
 
-	this->gradient_flag = FALSE;
-	this->phong_flag = TRUE;
-	this->shade_flag = FALSE;
+	this->gradient_flag = false;
+	this->phong_flag = true;
+	this->shade_flag = false;
 
 	this->typeOfMaterial = TYPEOFMATERIAL::PHONG;
 }
@@ -673,9 +673,9 @@ VolumetricPhong::VolumetricPhong(Shader* sh, Texture* tex) {
 	this->diffuse.set(0.0f, 0.0f, 1.0f);
 	this->shininess = 20;
 
-	this->gradient_flag = FALSE;
-	this->phong_flag = TRUE;
-	this->shade_flag = FALSE;
+	this->gradient_flag = false;
+	this->phong_flag = true;
+	this->shade_flag = false;
 
 	this->typeOfMaterial = TYPEOFMATERIAL::PHONG;
 }

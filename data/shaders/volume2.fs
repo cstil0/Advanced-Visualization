@@ -1,4 +1,6 @@
-#define MAX_ITERATIONS 1000000000
+#define MAX_ITERATIONS 1000000000 //We define a large number of Iterations, since we have early termination
+
+//---------------------UNIFORMS------------------------
 
 varying vec3 v_position; //position in local coords
 varying vec3 v_world_position; //position in world coord
@@ -6,19 +8,21 @@ varying vec3 v_normal; //normal in the pixel
 // varying vec2 v_uv; // texture coordinates
 varying vec4 v_color;
 
-
+// Basics uniforms
 uniform mat4 u_model;
 uniform mat4 u_inverse_model;
 uniform vec3 u_camera_position;
+uniform vec4 u_color;
 
-//Textures uniforms
+// Textures uniforms
 uniform sampler3D u_texture;
 uniform sampler2D u_noise_texture;
 uniform sampler2D u_tf_mapping_texture;
-uniform vec4 u_color;
 
+// Utils uniforms
 uniform float u_length_step; //ray step
 uniform float u_brightness;
+uniform vec4 u_plane_abcd;
 
 // TF generator variables
 uniform float u_max_density;
@@ -27,36 +31,30 @@ uniform vec4 u_tf_fst_color;
 uniform vec4 u_tf_snd_color;
 uniform vec4 u_tf_trd_color;
 uniform vec4 u_tf_frth_color;
-
 uniform vec4 u_highlight;
-uniform vec4 u_plane_abcd;
 
-// Threshold
+// Thresholds
 uniform float u_iso_threshold;
 uniform float u_h_threshold;
 uniform float u_threshold_plane;
 uniform float u_discard_threshold;
 
-//boolean flags
-// uniform bool u_jittering_flag;
-// uniform bool u_clipping_flag;
-// uniform bool u_TF_flag;
+// Boolean flags
 uniform bool u_shade_flag;
 uniform bool u_gradient_flag;
+uniform bool u_phong_flag; 
 
-// Phong flag: 0-->BASIC, 1-->PHONG
-uniform bool u_phong_flag;
-
-//light parameters:
+// Light parameters
 uniform vec3 u_light_pos;
 uniform vec3 u_Ia, u_Id, u_Is; //Ambient, diffuse, specular
 uniform float u_light_intensity;
 
-//Material uniforms parameters
+// Material uniforms parameters
 uniform vec3 u_diffuse;
 uniform vec3 u_specular;
 uniform float u_shininess;
 
+//---------------------FUNCTIONS------------------------
 
 vec3 compute_lightPhong(vec3 gradient, vec4 final_color){
     
@@ -72,7 +70,6 @@ vec3 compute_lightPhong(vec3 gradient, vec4 final_color){
     vec3 specular_light = u_specular * pow( max(dot(R,V), 0.0f) , u_shininess) * u_Is;
 
     //Final phong equation
-    // vec3 light_intensity = vec3(0.0);
     vec3 light_intensity = ambient_light + diffuse_light + specular_light;
     return light_intensity * u_light_intensity;
 }
@@ -98,12 +95,11 @@ vec3 compute_gradient(const in vec3 sample_pos, const in float h){
     f3 = f3-f6;
     
     vec3 gradient = normalize(- 0.5*1/h*vec3(f1,f2,f3));
-    // gradient = max(gradient,v);
 	return gradient;
 }
 
 void main(){
-    // HARDCODEADO??
+   
     float texture_width = 128.0f;
     vec2 uv_screen =  gl_FragCoord.xy / texture_width; 
 
@@ -113,6 +109,7 @@ void main(){
     vec3 ray_dir = normalize(v_position - camera_l_pos);
     vec3 step_vector = u_length_step*ray_dir;
 
+    //Jiterring
     float offset = 0.0f;
     vec3 step_offset = vec3(0.0f);
     #ifdef USE_JITTERING
@@ -120,42 +117,42 @@ void main(){
         step_offset = offset*step_vector;
     #endif
     
-    vec3 sample_pos = v_position + step_offset; //initialiced as entry point to the volume
+    vec3 sample_pos = v_position + step_offset; //initialized as entry point to the volume
 
     // Initialize values that are computed in the loop
 	vec4 final_color = vec4(0.0f);
     vec4 sample_color = vec4(0.0f);
     vec3 uv_3D = vec3(0.0f);
     float d = 0.0f;
-    
     float plane = 0.0f;
-
+    bool clipping_or_plane = false;
     // Ray loop
     for(int i=0; i<MAX_ITERATIONS; i++){
        
         // 2. Volume sampling
+        //Get the value of the volume in the sample point
         uv_3D = (sample_pos + 1.0f)*0.5f;
         d = texture3D(u_texture, uv_3D).x;
 
-        // 3. Classification
-        // Classification basica
-        // SEGURO QUE ESTO SE PUEDE HACER MÁS EFICIENTE PARA QUE NO SE HAGA SI EL TF ESTÁ ACTIVADO
-        sample_color = vec4(u_color.r,u_color.g,u_color.b,d);//important that the d, 4ºcomponent. Para que funcione la volumetric
+        // 3. Classification:
+        // Basic classification 
+        // We store in the last component the factor density
+        sample_color = vec4(u_color.r,u_color.g,u_color.b,d);
 
 
-        // Con tf
+        // Transfer Function
         #ifdef USE_TF
+            //Map the volume value into a color using LUT textures
             vec3 tf_color = texture2D(u_tf_mapping_texture, vec2(d,1)).xyz;
-            sample_color = vec4(tf_color.r, tf_color.g, tf_color.b,d);//important that the d, 4ºcomponent. Para que funcione la volumetric4
-            // sample_color = vec4(u_color.r*tf_color.r,u_color.g*tf_color.g,u_color.b*tf_color.b,d);//important that the d, 4ºcomponent. Para que funcione la volumetric
+            sample_color = vec4(tf_color.r, tf_color.g, tf_color.b,d);
         #endif
 
         #ifdef USE_TF_DEBUG
-            //Si estamos en el modo debug de la TF, queremos visualizar solo aquellos puntos que tengan una densidad menor a la marcada en el imgu
+            // If we are in TF debug mode, we want to visualize only those points 
+            // that have a density lower than that marked in the ImGui
             if (d>u_max_density){
                 discard;
             }
-
             if(d<u_density_limits.x)
                 sample_color = vec4(u_tf_fst_color.r,u_tf_fst_color.g,u_tf_fst_color.b,d);
             else if(d>u_density_limits.x && d<u_density_limits.y)
@@ -164,7 +161,6 @@ void main(){
                 sample_color = vec4(u_tf_trd_color.r,u_tf_trd_color.g,u_tf_trd_color.b,d);
             else if(d>u_density_limits.z && d<u_density_limits.w)
                 sample_color = vec4(u_tf_frth_color.r,u_tf_frth_color.g,u_tf_frth_color.b,d);
-            
         #endif
 
         // Highlight some parts according to the imgui
@@ -177,33 +173,35 @@ void main(){
         else if (d>u_density_limits.z && d<u_density_limits.w)
             sample_color = sample_color*u_highlight.w;
 
-        // sample_color = vec4(u_color.r,u_color.g,u_color.b,d);//important that the d, 4ºcomponent. Para que funcione la volumetric
-      
+        
         // 4. Composition
-        // aqui esta bn, pq el primer sample, tendra el plane a 0.0
-        // si el flag de clipping esta activado q salte esta linea, si no hay clipping entre al if
-        // usamos or por q cuando no hay clipiing tamb pueda hacer esta contribucion de final color!!
-        //  (computing the next step always). entonces hay que ponerlo abajo ?¿??????
 
-        // Normalize the vector perpendicular to the plane to avoid artifacts
-        // vec4 normalized_plane = vec4(normalize(u_plane_abcd.xyz),u_plane_abcd.w);
+        //Clipping and Isosurface with phong
+        //We compute the plane before the nextsample in case the first sample is also in the side we want to hide
 		plane = u_plane_abcd.x*sample_pos.x + u_plane_abcd.y*sample_pos.y + u_plane_abcd.z*sample_pos.z + u_plane_abcd.w;
-        // if (plane<=0.0f)
-        //     #define PLANE_VAL = plane;
 
-        bool clipping_or_plane = plane<=0;
+        //We check the side that we do not want to hide and treat it condition like a boolean
+        //Since we use the macro like the flag to activate the function
+        //we will use this to update the flag. 
+        //The idea is to add the contribution of the results in case there is NO clipping and NOT in the side that we want to hide
+        //If occur the opposite we will skip these iterations
+        clipping_or_plane = plane<=0;
         #ifndef USE_CLIPPING
             clipping_or_plane = true;
         #endif
         
-        if (clipping_or_plane) //|| defined(PLANE_VAL)
+        if (clipping_or_plane) 
+            //We check if we have to change the composition schemes
+            //Since for phong we use First, and otherwise accumulation
             if(!u_phong_flag){
-                // otro flag paara phong
-                sample_color.rgb *= sample_color.a; //atenuendo el color dependiendo de alpha
-                
+                sample_color.rgb *= sample_color.a; //attenuates the color according to the density
                 final_color += u_length_step * (1.0 - final_color.a) * sample_color;     
             }
-            else if( sample_color.a > u_iso_threshold ) { // por algun motivo los flags estos enviados no se actualizan siempre son 0...
+            //We find first value of density higher than a certain threshold (isosurface)
+            //Once we find it, we break the loop
+            //And then, we compute the gradient and the light
+            //We also add two flags to show the isosurface and gradient
+            else if( sample_color.a > u_iso_threshold ) { 
                 if(u_shade_flag){
                     final_color = sample_color;
                     break;
@@ -213,18 +211,16 @@ void main(){
                     final_color = vec4(gradient,1.0)/u_brightness; 
                     break;
                 }
-                vec3 light_intensity = compute_lightPhong(gradient, sample_color); //no final_color creo este ultimo
-                final_color = sample_color * vec4(light_intensity, 1.0) ; //le damos la iluminacion
+                vec3 light_intensity = compute_lightPhong(gradient, sample_color); 
+                final_color = sample_color * vec4(light_intensity, 1.0) ; //add the ilumination
                 break;
             }        
 
         // 5. Next sample
         sample_pos += step_vector;
         
-
-        
         // 6. Early termination
-        //If is outside the auxiliar mesh
+        //If is outside of the auxiliar mesh
         if( sample_pos.x > 1.0f || sample_pos.y > 1.0f || sample_pos.z > 1.0f ) {
             break;
         }
@@ -236,14 +232,14 @@ void main(){
             final_color.a = 1.0f;
             break;
         }
-       
     }
 
-    if (final_color.w <= u_discard_threshold){ // solo con w
+    //We discard those pixels (noise or surface of the cube) that we are not interested
+    // according with the density component
+    if (final_color.w <= u_discard_threshold){ 
         discard;
     }
 
     // 7. Final color
     gl_FragColor = final_color * u_brightness;
-    // gl_FragColor = u_highlight;
 }

@@ -224,31 +224,28 @@ void VolumeNode::renderInMenu()
 
 		ImGui::TreePop();
 	}
-
+	//Geometry
+	if (mesh && ImGui::TreeNode("Volums"))
+	{
+		ImGui::Combo("Volume", &Application::instance->typeOfVolume_ImGUI, "FOOT\0TEA\0ABDOMEN\0BONSAI\0ORANGE\0");
+		ImGui::TreePop();
+	}
 	// Material
 	if (ImGui::TreeNode("Material")) {
 		material->renderInMenu();
 		ImGui::TreePop();
 	}
-
-	//Geometry
-	if (mesh && ImGui::TreeNode("Geometry"))
+	VolumeMaterial* volume_mat = dynamic_cast<VolumeMaterial*>(this->material);// Downcast
+	// Highlight
+	if (volume_mat->typeOfMaterial == VolumeMaterial::TYPEOFMATERIAL::BASIC && mesh && ImGui::TreeNode("Highlight"))
 	{
-		ImGui::Combo("Volume", &Application::instance->typeOfVolume_ImGUI, "FOOT\0TEA\0ABDOMEN\0BONSAI\0ORANGE\0");
-		ImGui::TreePop();
+		volume_mat->renderInMenu_highlight();
 	}
-
 	// TF generator
-	// Downcast
-	VolumeMaterial* volume_mat = dynamic_cast<VolumeMaterial*>(this->material);
+	
 	if (volume_mat->typeOfMaterial == VolumeMaterial::TYPEOFMATERIAL::BASIC && mesh && ImGui::TreeNode("TF Generator"))
 	{
 		volume_mat->renderInMenu_TF();
 	}
 
-	// Highlight
-	if (volume_mat->typeOfMaterial == VolumeMaterial::TYPEOFMATERIAL::BASIC  && mesh && ImGui::TreeNode("Highlight"))
-	{
-		volume_mat->renderInMenu_highlight();
-	}
 }

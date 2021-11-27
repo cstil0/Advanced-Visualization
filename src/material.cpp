@@ -478,7 +478,7 @@ void VolumeMaterial::resetMaterialColor(int typeOfVolume) {
 		this->TF_second_color = vec4(0.47f, 0.24f, 0.55f, 1.0f);
 		this->TF_third_color = vec4(0.91f, 0.54f, 0.14f, 1.0f);
 		this->TF_forth_color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-		discard_threshold = 0.035; // 0.4
+		discard_threshold = 0.01; // 0.4
 	}
 	else if (typeOfVolume == SceneNode::TYPEOFVOLUME::ABDOMEN) {
 		this->density_limits = vec4(0.2f, 0.3f, 0.8f, 1.0f);
@@ -545,6 +545,7 @@ void VolumeMaterial::renderInMenu()
 	ImGui::Combo("Material", &Application::instance->typeOfMaterial_ImGUI , "BASIC\0\PHONG\0");
 	ImGui::SliderFloat("Length Step", &this->length_step, 0.0001, 0.5);
 	ImGui::SliderFloat("Brightness", &this->brightness, 1.0f, 50.0f);
+	ImGui::SliderFloat("Threshold", &this->discard_threshold, 0.0f, 1.0f);
 	ImGui::SliderFloat4("Clipping Plane", plane_abcd.v, -5.0f, 5.0f);
 
 	ImGui::ColorEdit3("Color", color.v); 

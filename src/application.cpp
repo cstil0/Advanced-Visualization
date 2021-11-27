@@ -165,7 +165,7 @@ void Application::loadTea() {
 
 	// Phong
 	VolumetricPhong* tea_phong_material = new VolumetricPhong(sh, tea_tex3d);
-	tea_phong_material->iso_threshold = 0.057f;
+	tea_phong_material->iso_threshold = 0.128f;
 	// HARDCODEADO
 	tea_phong_material->light = dynamic_cast<Light*>(node_list[0]);
 	material_list.push_back(tea_material);

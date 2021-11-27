@@ -144,11 +144,13 @@ public:
 	VolumeMaterial(Shader* sh, Texture* tex);
 	~VolumeMaterial();
 
-	void resetMaterialColor(int typeOfVolume);
+	
 	void setUniforms(Camera* camera, Matrix44 model, Matrix44 inverse_model);
 	void render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, Camera* camera);
-	void saveTexture();
 	void renderInMenu();
+
+	void resetMaterialColor(int typeOfVolume);
+	void saveTexture();
 	void renderInMenu_TF();
 	void renderInMenu_highlight();
 };

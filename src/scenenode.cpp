@@ -191,10 +191,9 @@ void VolumeNode::render(Camera* camera)
 {
 	if (material && visible_flag) {
 		// Downcast --> con este dynamic cast podemos recuperar las variables propias del VolumeNode si fue creado asi aunque le hayamos hecho un downcast
-		int typeOfMaterial = Application::instance->typeOfMaterial_ImGUI;
+		VolumeMaterial* volume_mat = dynamic_cast<VolumeMaterial*>(material);
 		// HAY QUE CREAR ENUM (PHONG Y BASIC)
-		if (typeOfMaterial == 0) { //Basic Material
-			VolumeMaterial* volume_mat = dynamic_cast<VolumeMaterial*>(material);
+		if (volume_mat->typeOfMaterial == VolumeMaterial::TYPEOFMATERIAL::BASIC) { //Basic Material
 			volume_mat->render(mesh, model, inverse_model, camera);
 			
 		}
@@ -216,7 +215,6 @@ void VolumeNode::renderInMenu()
 	//Model edit
 	if (ImGui::TreeNode("Model"))
 	{
-		// 	COMPROBAR QUE ESTO HACE ALGO
 		float matrixTranslation[3], matrixRotation[3], matrixScale[3];
 		ImGuizmo::DecomposeMatrixToComponents(model.m, matrixTranslation, matrixRotation, matrixScale);
 		ImGui::DragFloat3("Position", matrixTranslation, 0.1f);

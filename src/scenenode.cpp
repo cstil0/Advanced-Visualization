@@ -130,8 +130,7 @@ void Light::renderInMenu()
 	if (ImGui::TreeNode("Light intensity") ) 
 	{
 		ImGui::SliderFloat("Intensity", &this->light_intensity, 0.0f, 10.0f);
-		//If is not the mode of PBR, we can anable the following
-		//Application::instance-> es un puntero
+		//If is not the mode of PBR, we can anable the following parameters in the ImGui
 		if (!( Application::instance->app_mode == Application::APPMODE::PBR)) {
 
 			ImGui::ColorEdit3("Specular_intensity", (float*)&this->specular_intensity);
@@ -190,27 +189,23 @@ VolumeNode::~VolumeNode()
 void VolumeNode::render(Camera* camera)
 {
 	if (material && visible_flag) {
-		// Downcast --> con este dynamic cast podemos recuperar las variables propias del VolumeNode si fue creado asi aunque le hayamos hecho un downcast
+		// Do a dynamic cast to ensure that the downcast can be done properly
+		// We need the downcast since the other types of material do not take the inverse_model
 		VolumeMaterial* volume_mat = dynamic_cast<VolumeMaterial*>(material);
-		// HAY QUE CREAR ENUM (PHONG Y BASIC)
-		if (volume_mat->typeOfMaterial == VolumeMaterial::TYPEOFMATERIAL::BASIC) { //Basic Material
+		// Check if it is basic or phong material
+		if (volume_mat->typeOfMaterial == VolumeMaterial::TYPEOFMATERIAL::BASIC) {
 			volume_mat->render(mesh, model, inverse_model, camera);
-			
 		}
-		else { //Phong
+		else {
 			VolumetricPhong* volume_mat = dynamic_cast<VolumetricPhong*>(material);
 			volume_mat->render(mesh, model, inverse_model, camera);
-			
 		}
 	}
 }
 
-
-// ESTAMOS REPITIENDO
 void VolumeNode::renderInMenu()
 {
 	ImGui::Checkbox("Visible", &visible_flag);
-
 
 	//Model edit
 	if (ImGui::TreeNode("Model"))
@@ -224,8 +219,8 @@ void VolumeNode::renderInMenu()
 
 		ImGui::TreePop();
 	}
-	//Geometry
-	if (mesh && ImGui::TreeNode("Volums"))
+	//Type of volume
+	if (mesh && ImGui::TreeNode("Volume"))
 	{
 		ImGui::Combo("Volume", &Application::instance->typeOfVolume_ImGUI, "FOOT\0TEA\0ABDOMEN\0BONSAI\0ORANGE\0");
 		ImGui::TreePop();
@@ -235,14 +230,15 @@ void VolumeNode::renderInMenu()
 		material->renderInMenu();
 		ImGui::TreePop();
 	}
+
 	VolumeMaterial* volume_mat = dynamic_cast<VolumeMaterial*>(this->material);// Downcast
 	// Highlight
 	if (volume_mat->typeOfMaterial == VolumeMaterial::TYPEOFMATERIAL::BASIC && mesh && ImGui::TreeNode("Highlight"))
 	{
 		volume_mat->renderInMenu_highlight();
 	}
+
 	// TF generator
-	
 	if (volume_mat->typeOfMaterial == VolumeMaterial::TYPEOFMATERIAL::BASIC && mesh && ImGui::TreeNode("TF Generator"))
 	{
 		volume_mat->renderInMenu_TF();

@@ -39,7 +39,6 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	output = 0.0;
 
 	app_mode = APPMODE::VOLUME;
-	typeOfMaterial_ImGUI = 0;
 
 	//define the color of the ambient as a global variable since it is a property of the scene
 	ambient_light.set(0.1, 0.2, 0.3);
@@ -54,9 +53,11 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	camera->setPerspective(45.f,window_width/(float)window_height,0.1f,10000.f); //set the projection, we want to be perspective
 
 	{
+		// Functions used in the volume rendering lab
 		if (app_mode == APPMODE::VOLUME) {
 			sh = Shader::Get("data/shaders/basic.vs", "data/shaders/volume2.fs");
 			
+			// Load all the necessary nodes
 			loadLight();
 			loadFoot();
 			loadTea();
@@ -76,7 +77,6 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 			renderPBR();
 		}
 	}
-
 	
 	//hide the cursor
 	SDL_ShowCursor(!mouse_locked); //hide or show the mouse
@@ -99,44 +99,52 @@ void Application::loadFoot() {
 	Volume* foot_volume = new Volume();
 	foot_volume->loadPNG("data/volumes/foot_16_16.png", 16, 16);
 
+	// Load the 3D texture
 	Texture* foot_tex3d = new Texture();
 	foot_tex3d->create3DFromVolume(foot_volume, GL_CLAMP_TO_EDGE);
 
+	// Create the material and load the TF texture
 	VolumeMaterial* foot_material = new VolumeMaterial(sh, foot_tex3d);
 	Texture* tf_foot = Texture::Get("data/TF_texture_foot.png");
 	foot_material->tf_mapping_texture = tf_foot;
-	VolumeNode* foot_vol_node = new VolumeNode("Foot Node");
 
+	VolumeNode* foot_vol_node = new VolumeNode("Foot Node");
 	foot_vol_node->volume = foot_volume;
 
-	int typeOfVolume = SceneNode::TYPEOFVOLUME::FOOT;
 	// Set colors of the texture
+	int typeOfVolume = SceneNode::TYPEOFVOLUME::FOOT;
 	foot_material->resetMaterialColor(typeOfVolume);
-
+	// All the nodes are initialized with the basic material, and change it if the ImGui change its mode
 	foot_vol_node->material = foot_material;
 
+	// Load the auxiliary mesh
 	foot_vol_node->mesh = Mesh::getCube();
+	// Identify the volume
 	foot_vol_node->typeOfNode = SceneNode::TYPEOFNODE::VOLUME;
 	foot_vol_node->typeOfVolume = typeOfVolume;
 	typeOfVolume_ImGUI = TYPEOFVOLUMEIMGUI::FOOT;
 
-	// Add foot to the list of nodes that can be selected in the imGUi
+	// Add foot to the list of nodes that can be selected in the ImGui
 	optional_node_list.push_back(foot_vol_node);
-	// Add foot to the list of nodes that will be rendered
-	// Then, it will be the first node to be shown in the screen
+	// Add foot to the list of nodes that will be rendered. Then, it will be the first node to be shown in the screen
 	node_list.push_back(foot_vol_node);
+	// Start with basic mode
+	this->typeOfMaterial_ImGUI = VolumeMaterial::TYPEOFMATERIAL::BASIC;
 
-	// Phong
+	// Create Phong material
 	VolumetricPhong* foot_phong_material = new VolumetricPhong(sh, foot_tex3d);
 	foot_phong_material->iso_threshold = 0.1f;
-	// HARDCODEADO
+	// Node 0 is where the light is in the volume mode
 	foot_phong_material->light = dynamic_cast<Light*>(node_list[0]);
+
+	// Add both materials to the list containing all of the materials for each volume to assign them once the mode is changed in the ImGui
 	material_list.push_back(foot_material);
 	material_list.push_back(foot_phong_material);
 }
 
 void Application::loadTea() {
 	// Tea
+	// Follow same procedure as in the previous case
 	Volume* tea_volume = new Volume();
 	tea_volume->loadPNG("data/volumes/teapot_16_16.png", 16, 16);
 
@@ -146,15 +154,13 @@ void Application::loadTea() {
 	VolumeMaterial* tea_material = new VolumeMaterial(sh, tea_tex3d);
 	Texture* tf_tea = Texture::Get("data/TF_texture_tea.png");
 	tea_material->tf_mapping_texture = tf_tea;
+
 	VolumeNode* tea_vol_node = new VolumeNode("Tea Node");
-
 	tea_vol_node->volume = tea_volume;
-
 	int typeOfVolume = SceneNode::TYPEOFVOLUME::TEA;
-	// Set colors of the texture
+
 	tea_material->resetMaterialColor(typeOfVolume);
 
-	//vol_node->volume_material = vol_material;
 	tea_vol_node->material = tea_material;
 
 	tea_vol_node->mesh = Mesh::getCube();
@@ -163,10 +169,9 @@ void Application::loadTea() {
 
 	optional_node_list.push_back(tea_vol_node);
 
-	// Phong
+	// Create Phong material
 	VolumetricPhong* tea_phong_material = new VolumetricPhong(sh, tea_tex3d);
 	tea_phong_material->iso_threshold = 0.128f;
-	// HARDCODEADO
 	tea_phong_material->light = dynamic_cast<Light*>(node_list[0]);
 	material_list.push_back(tea_material);
 	material_list.push_back(tea_phong_material);
@@ -175,6 +180,7 @@ void Application::loadTea() {
 
 void Application::loadAbdomen() {
 	// Abdomen
+	// Follow same procedure as in the previous case
 	Volume* abd_volume = new Volume();
 	abd_volume->loadPVM("data/volumes/CT-Abdomen.pvm");
 
@@ -184,15 +190,13 @@ void Application::loadAbdomen() {
 	VolumeMaterial* abd_material = new VolumeMaterial(sh, abd_tex3d);
 	Texture* tf_abd = Texture::Get("data/TF_texture_abdomen.png");
 	abd_material->tf_mapping_texture = tf_abd;
+
 	VolumeNode* abd_vol_node = new VolumeNode("Abdomen Node");
-
 	abd_vol_node->volume = abd_volume;
-
 	int typeOfVolume = SceneNode::TYPEOFVOLUME::ABDOMEN;
-	// Set colors of the texture
+
 	abd_material->resetMaterialColor(typeOfVolume);
 
-	//vol_node->volume_material = vol_material;
 	abd_vol_node->material = abd_material;
 
 	abd_vol_node->mesh = Mesh::getCube();
@@ -201,10 +205,9 @@ void Application::loadAbdomen() {
 
 	optional_node_list.push_back(abd_vol_node);
 
-	// Phong
+	// Create Phong material
 	VolumetricPhong* abd_phong_material = new VolumetricPhong(sh, abd_tex3d);
 	abd_phong_material->iso_threshold = 0.054f;
-	// HARDCODEADO
 	abd_phong_material->light = dynamic_cast<Light*>(node_list[0]);
 	material_list.push_back(abd_material);
 	material_list.push_back(abd_phong_material);
@@ -212,6 +215,7 @@ void Application::loadAbdomen() {
 
 void Application::loadBonsai() {
 	// Bonsai
+	// Follow same procedure as in the previous case
 	Volume* bonsai_volume = new Volume();
 	bonsai_volume->loadPNG("data/volumes/bonsai_16_16.png", 16, 16);
 
@@ -225,10 +229,8 @@ void Application::loadBonsai() {
 
 	bonsai_vol_node->volume = bonsai_volume;
 	int typeOfVolume = SceneNode::TYPEOFVOLUME::BONSAI;
-	// Set colors of the texture
 	bonsai_material->resetMaterialColor(typeOfVolume);
 
-	//vol_node->volume_material = vol_material;
 	bonsai_vol_node->material = bonsai_material;
 
 	bonsai_vol_node->mesh = Mesh::getCube();
@@ -237,11 +239,9 @@ void Application::loadBonsai() {
 
 	optional_node_list.push_back(bonsai_vol_node);
 
-	// Phong
+	// Create Phong material
 	VolumetricPhong* bonsai_phong_material = new VolumetricPhong(sh, bonsai_tex3d);
 	bonsai_phong_material->iso_threshold = 0.147f;
-
-	// HARDCODEADO
 	bonsai_phong_material->light = dynamic_cast<Light*>(node_list[0]);
 	material_list.push_back(bonsai_material);
 	material_list.push_back(bonsai_phong_material);
@@ -249,6 +249,7 @@ void Application::loadBonsai() {
 
 void Application::loadOrange() {
 	// Orange
+	// Follow same procedure as in the previous case
 	Volume* orange_volume = new Volume();
 	orange_volume->loadPVM("data/volumes/Orange.pvm");
 
@@ -258,15 +259,12 @@ void Application::loadOrange() {
 	VolumeMaterial* orange_material = new VolumeMaterial(sh, orange_tex3d);
 	Texture* tf_orange = Texture::Get("data/TF_texture_orange.png");
 	orange_material->tf_mapping_texture = tf_orange;
+
 	VolumeNode* orange_vol_node = new VolumeNode("Orange Node");
-
 	orange_vol_node->volume = orange_volume;
-
 	int typeOfVolume = SceneNode::TYPEOFVOLUME::ORANGE;
-	// Set colors of the texture
 	orange_material->resetMaterialColor(typeOfVolume);
 
-	//vol_node->volume_material = vol_material;
 	orange_vol_node->material = orange_material;
 
 	orange_vol_node->mesh = Mesh::getCube();
@@ -275,10 +273,9 @@ void Application::loadOrange() {
 
 	optional_node_list.push_back(orange_vol_node);
 
-	// Phong
+	// Create Phong material
 	VolumetricPhong* orange_phong_material = new VolumetricPhong(sh, orange_tex3d);
 	orange_phong_material->iso_threshold = 0.067f;
-	// HARDCODEADO
 	orange_phong_material->light = dynamic_cast<Light*>(node_list[0]);
 	material_list.push_back(orange_material);
 	material_list.push_back(orange_phong_material);
@@ -600,7 +597,9 @@ void Application::render(void)
 
 
 	for (size_t i = 0; i < node_list.size(); i++) {
-		node_list[i]->render(camera);
+		// We do not want to render the light node if we are in Basic mode
+		if (!(typeOfMaterial_ImGUI == VolumeMaterial::TYPEOFMATERIAL::BASIC && node_list[i]->typeOfNode == SceneNode::TYPEOFNODE::LIGHT))
+			node_list[i]->render(camera);
 
 		if(render_wireframe)
 			node_list[i]->renderWireframe(camera);
@@ -639,6 +638,7 @@ void Application::update(double seconds_elapsed)
 	if (mouse_locked)
 		Input::centerMouse();
 
+	// Check that we are in volume mode
 	if (app_mode == APPMODE::VOLUME) {
 		int volume_position = 1; // Define the position of the volume node that is being rendered
 		for (int i = 0; i < node_list.size(); i++)
@@ -651,11 +651,9 @@ void Application::update(double seconds_elapsed)
 				volume_node->inverse_model = inv_m_aux;
 				node_list[i] = volume_node;
 
-				// Update volume according to the imgui
-				// 0 POR QUE EN ESTA PRÁCTICA SOLO HAY UN NODO
-				// CREO QUE SE PUEDE CAMBIAR POR LE VOLUME_NODE
+				// Update the volume that is being rendered according to the imgui
+				// If the node that is in node_list do not correspond with the type selected in the ImGui we change it
 				if (typeOfVolume_ImGUI != node_list[i]->typeOfVolume) {
-					//SceneNode* principal_node = node_list[2];
 					// Look for the new node to be rendered
 					for (int i = 0; i < optional_node_list.size(); i++) {
 						if (optional_node_list[i]->typeOfVolume == typeOfVolume_ImGUI)
@@ -663,26 +661,26 @@ void Application::update(double seconds_elapsed)
 					}
 				}
 
+				// Send macros to the shader only if the ImGui has changed
+				// Downcast
 				VolumeMaterial* volume_material = (VolumeMaterial*)volume_node->material;
-				// Definimos primero todas las posibles macros
+				// Define first the possible macros we can have
 				std::string jittering_macro = "#define USE_JITTERING true\n ";
 				std::string TF_macro = "#define USE_TF true\n ";
 				std::string TF_debug_macro = "#define USE_TF_DEBUG true\n ";
 				std::string clipping_macro = "#define USE_CLIPPING true\n ";
 
+				// Here we will concatenate all the active flags
 				std::string final_macro = "\n";
 
+				// To know if there was a change in the ImGui
 				bool change_imgui = false;
-				// Update the visualization flags according to imgui and pass the corresponding macros to the shader
-				// Miramos si alguno de los flags ha cambiado, para evitar enviar macros a no ser que haya cambiado el flag en el imgui
-				// If the flag corresponding to the imgui is not equal to the one of the material - update
 
-				// ESTOY PENSANDO EN PONER ESTO DENTRO DE UN FOR QUE RECORRA UNA LISTA CON TODAS LAS MACROS??
+				// Check if some of the flags has changed in the ImGui and update them
 				if (volume_material->jittering_flag_imgui != volume_material->jittering_flag) {
 					// Update
 					volume_material->jittering_flag = volume_material->jittering_flag_imgui;
 					change_imgui = true;
-					// Send macro
 				}
 
 				if (volume_material->TF_flag_imgui != volume_material->TF_flag) {
@@ -705,7 +703,7 @@ void Application::update(double seconds_elapsed)
 					change_imgui = true;
 				}
 
-				// Concatenamos strings finales
+				// Concatenate final string with the macros if they are active
 				if (volume_material->jittering_flag_imgui)
 					final_macro = final_macro + jittering_macro;
 				if (volume_material->TF_flag_imgui)
@@ -714,28 +712,23 @@ void Application::update(double seconds_elapsed)
 					final_macro = final_macro + TF_debug_macro;
 				if (volume_material->clipping_flag_imgui)
 					final_macro = final_macro + clipping_macro;
-				//if (volume_material->illumination_flag_imgui)
-				//	final_macro = final_macro + illumination_macro;
 
-				// Enviamos la macro resultante de concatenar todos los strings activos si ha habido un cambio en el imgui
+				// Send the final macro to the shader
 				if (change_imgui)
 					volume_material->shader->setMacros(final_macro.c_str());
 
-
+				// Update the material of the node being rendered if the mode of the ImGui has changed
+				// Downcast
 				VolumeMaterial* vm = (VolumeMaterial*)node_list[i]->material;
-				// no se si lo de arriba provoca pb para phong material
+				// Check if ImGui changed
 				if (typeOfMaterial_ImGUI != vm->typeOfMaterial) {
-					//if(typeOfMaterial_ImGUI == VolumeMaterial::TYPEOFMATERIAL::BASIC) {
-					// EXPLICAR AQUÍ Y EN EL REPORT
+					// We get the even or odd materials of the material_list depending on whether we are in basic or phong mode respectively
+					// Since typeOfMaterial_ImGUI takes 0 or 1, by multiplying by 2 we can get the even or odd positions, knowing that
+					// the materials are stored in a consecutive way, and knowing that we have one volume type (typeOfVolume_ImGUI) for each volume
 					node_list[i]->material = material_list[(typeOfVolume_ImGUI*2)+typeOfMaterial_ImGUI];
-					// la primera de la lista es volumenMaterial, y el siguiente es Phong material
 				}
 			}
 		}
-		/*for (int i = 0; i < material_list.size(); i++)
-		{
-			if(material_list[i])
-		}*/
 	}
 
 	else if (app_mode == APPMODE::PBR) {

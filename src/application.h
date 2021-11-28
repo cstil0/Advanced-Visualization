@@ -43,6 +43,7 @@ public:
 		BONSAI,
 		ORANGE
 	};
+
 	// Selected model in the imGUI
 	enum TYPEOFMODELIMGUI {
 		BASIC,
@@ -68,7 +69,7 @@ public:
 	//integers to manage IMGUI options
 	int typeOfModel_ImGUI;
 	int typeOfSkybox_ImGUI;
-	int typeOfMaterial_ImGUI; // for diff op of material for VolumetricMaterial(Basic or Phong)
+	int typeOfMaterial_ImGUI; // for diff options of material (Basic or Phong modes)
 	int typeOfVolume_ImGUI;
 	int app_mode;
 
@@ -76,6 +77,7 @@ public:
 	// List with the nodes that can be selected in the imGUI
 	std::vector< SceneNode* > optional_node_list;
 
+	// List for the basic or phong materials for each volume
 	std::vector< StandardMaterial* > material_list;
 	Skybox* skybox_node = NULL;
 	// List with the types of skybox that can be selected in the imGUI

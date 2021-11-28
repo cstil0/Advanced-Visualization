@@ -351,20 +351,19 @@ VolumeMaterial::VolumeMaterial()
 	this->TF_debug_flag = false;
 	this->clipping_flag = false;
 
-	//Flags to check if the user have changed the checkbox on the ImGui
+	//Flags to check if the user has changed the checkbox on the ImGui
 	this->jittering_flag_imgui = false;
 	this->TF_flag_imgui = false;
 	this->TF_debug_flag_imgui = false;
 	this->clipping_flag_imgui = false;
 
-	//Texture
+	//Texture to apply jittering noise
 	this->noise_texture = Texture::Get("data/blueNoise.png");
 
-	
-	this->highlight = vec4(1.0f, 1.0f, 1.0f,1.0f); // Start with all parts with the same brightness
+	this->highlight = vec4(1.0f, 1.0f, 1.0f,1.0f); // Start with all parts having the same brightness
 	this->plane_abcd = vec4(0.0f, 0.0f, 1.0f, 0.0f); 
 	
-	//We define the defauld mode as the Basic 
+	//Define Basic material by defalut 
 	this->typeOfMaterial = TYPEOFMATERIAL::BASIC;
 }
 
@@ -388,15 +387,14 @@ VolumeMaterial::VolumeMaterial(Shader* sh, Texture* tex)
 	this->TF_flag_imgui = false;
 	this->TF_debug_flag_imgui = false;
 	this->clipping_flag_imgui = false;
-
-	//Texture
+	
+	//Texture to apply jittering noise
 	this->noise_texture = Texture::Get("data/blueNoise.png");
 
-
-	this->highlight = vec4(1.0f, 1.0f, 1.0f, 1.0f); // Start with all parts with the same brightness
+	this->highlight = vec4(1.0f, 1.0f, 1.0f, 1.0f); // Start not highlighting any part
 	this->plane_abcd = vec4(0.0f, 0.0f, 1.0f, 0.0f);
 
-	//We define the defauld mode as the Basic 
+	//Define Basic material by defalut 
 	this->typeOfMaterial = TYPEOFMATERIAL::BASIC;
 }
 
@@ -425,14 +423,15 @@ void VolumeMaterial::setUniforms(Camera* camera, Matrix44 model, Matrix44 invers
 
 	shader->setUniform("u_highlight", this->highlight);
 	shader->setUniform("u_plane_abcd", this->plane_abcd);
-	//flag of the mode of the material either Basic or Phong
+	// flag to know if the material mode is either Basic or Phong
+	// In the shader it is a boolean, but it works because typeOfMaterial takes 0 or 1 respectively
 	shader->setUniform("u_phong_flag", this->typeOfMaterial);
 
 	if (texture)
 		shader->setTexture("u_texture", texture, 0); 
 	if(noise_texture)
 		shader->setTexture("u_noise_texture", noise_texture, 1);
-	//We do not pass the texture in case of mode Phong
+	// We do not pass the texture in case of Phong mode
 	if (tf_mapping_texture && typeOfMaterial == TYPEOFMATERIAL::BASIC)
 		shader->setTexture("u_tf_mapping_texture", tf_mapping_texture, 2);
 }
@@ -457,9 +456,8 @@ void VolumeMaterial::render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, 
 }
 
 void VolumeMaterial::resetMaterialColor(int typeOfVolume) {
-
 	// Set the default colors and limits depending on the type of volume we have
-	// Set also the default value of threshold using in the discard process
+	// Set also the default value of threshold using in the discard process (for the shader)
 	if (typeOfVolume == SceneNode::TYPEOFVOLUME::FOOT) {
 		this->density_limits = vec4(0.25f, 0.8f, 0.9f, 1.0f);
 		this->TF_first_color = vec4(0.62f, 0.29f, 0.29f, 1.0f);
@@ -500,19 +498,20 @@ void VolumeMaterial::resetMaterialColor(int typeOfVolume) {
 		this->TF_forth_color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 		discard_threshold = 0.05;
 	}
+
 	// Reload texture
 	saveTexture();
 }
 
 void VolumeMaterial::saveTexture()
 {
-	//We define the size of the LUT texture and create the image with respect to the values of range of the density
-	//that the user want. And then we convert the image as a texture to use later
+	//We define the size of the TF texture and create the image according to the range values of the density
+	//that are selected in the ImGui. Then we convert the image as a texture and update the TF texture of the material
 	int TF_width = 20;
 	int TF_height = 1;
 
 	Image* TF_image = new Image(TF_width, TF_height);
-	float step = 0.05;
+	float step = 1.0f/TF_width;
 	float position = 0.0f;
 
 	for (int i = 0; i < TF_width; i++) {
@@ -565,7 +564,7 @@ void VolumeMaterial::renderInMenu_TF(){
 	if (ImGui::Button("Set default values"))	
 		this->resetMaterialColor(Application::instance->typeOfVolume_ImGUI);
 
-	// If the limit is exceeded we put it a little below
+	// If the next limit is exceeded we equal them so that they do not overlap
 	if (density_limits.x > density_limits.y) {
 		density_limits.x = density_limits.y;
 	}
@@ -580,10 +579,10 @@ void VolumeMaterial::renderInMenu_TF(){
 void VolumeMaterial::renderInMenu_highlight() {
 	
 	int typeOfVolume = Application::instance->typeOfVolume_ImGUI;
-	// Create the strings for the buttons to highlight according to each volums
+	// Create the strings for the buttons to highlight according to each volume
 	std::vector<const char*> button_str; 
 	if (typeOfVolume == SceneNode::TYPEOFVOLUME::FOOT) {
-		button_str = { "Highlight muscles", "Highlight bones"};
+		button_str = { "Highlight flesh", "Highlight bones"};
 		if (ImGui::Button(button_str[0])) {
 			this->highlight = vec4(1.0f, 0.0f, 0.0f, 0.0f);
 		}
@@ -606,7 +605,7 @@ void VolumeMaterial::renderInMenu_highlight() {
 		}
 	}
 	else if (typeOfVolume == SceneNode::TYPEOFVOLUME::ABDOMEN) {
-		button_str = { "Highlight muscles", "Highlight organs", "Highlight bones" };
+		button_str = { "Highlight flesh", "Highlight organs", "Highlight bones" };
 
 		if (ImGui::Button(button_str[0])) {
 			this->highlight = vec4(1.0f, 0.0f, 0.0f, 0.0f);
@@ -652,8 +651,7 @@ void VolumeMaterial::renderInMenu_highlight() {
 }
 
 VolumetricPhong::VolumetricPhong(){
-	
-	//Parameters of the phong
+	//Parameters of Phong mode
 	this->color.set(0.7f, 0.7f, 0.7f, 0.0f); 
 	this->specular.set(1.0f, 1.0f, 0.0f);
 	this->diffuse.set(0.0f, 0.0f, 1.0f);
@@ -663,7 +661,7 @@ VolumetricPhong::VolumetricPhong(){
 	this->gradient_flag = false;
 	this->shade_flag = false;
 
-	//Thresholds
+	//Thresholds needed for phong
 	this->iso_threshold = 0.015;
 	this->h_threshold = 0.015;
 
@@ -684,7 +682,7 @@ VolumetricPhong::VolumetricPhong(Shader* sh, Texture* tex) {
 	this->gradient_flag = false;
 	this->shade_flag = false;
 
-	//Thresholds
+	//Thresholds needed for phong
 	this->iso_threshold = 0.015;
 	this->h_threshold = 0.015;
 
@@ -720,7 +718,7 @@ void VolumetricPhong::setUniforms(Camera* camera, Matrix44 model, Matrix44 inver
 }
 
 //We add this funcion although it does the same as VolumeMaterial class
-//Since we in some cases do the downcast and upcast process, is better have it in case it can not find it
+//Since in some cases we do the downcast and upcast process, it is better to define it in case it is not found
 void VolumetricPhong::render(Mesh* mesh, Matrix44 model, Matrix44 inverse_model, Camera* camera)
 {
 	if (mesh && shader)

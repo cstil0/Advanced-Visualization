@@ -55,7 +55,7 @@ Application::Application(int window_width, int window_height, SDL_Window* window
 	{
 		// Functions used in the volume rendering lab
 		if (app_mode == APPMODE::VOLUME) {
-			sh = Shader::Get("data/shaders/basic.vs", "data/shaders/volume2.fs");
+			sh = Shader::Get("data/shaders/basic.vs", "data/shaders/volume.fs");
 			
 			// Load all the necessary nodes
 			loadLight();
